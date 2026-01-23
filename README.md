@@ -1,185 +1,269 @@
-# Aura Protocol: Iron Core (Sandbox Minimal)
-Deterministic Proof-of-Consistent-Agency (PoCA) for the 2026 AI Regulatory Sandbox.
+# AURA PROTOCOL — IRON CORE v3.3
+
+## FROZEN REGULATORY MEASUREMENT INSTRUMENT
+
+**Status:** FROZEN / CANONICAL  
+**Version:** v3.3 (Iron Core Correct)  
+**Internal Consistency:** 1.0  
+**Jurisdiction:** EU AI Act / Polish Regulatory Sandbox (MC-READY 2026)  
+**Role:** Deterministic Measurement & Audit Instrument for AI Agents  
+**License:** Business Source License 1.1 (see LICENSE)
 
 ---
 
-## Overview
+## 1. WHAT THIS REPOSITORY IS
 
-**aura-poc-a-core** is a minimal, deterministic core for evaluating and proving
-the consistency of autonomous AI agents (MACHINE_ACCOUNT entities only) against 
-their declared intent and hard constraints.
+This repository contains the **Frozen Iron Core** of the Aura Protocol:  
+a deterministic, bit-identical, regulation-grade measurement instrument for evaluating AI agent behavior.
 
-**SCOPE:** Strictly limited to MACHINE_ACCOUNT entities.
-**PROHIBITION:** Absolute prohibition of human profiling or biometric data processing (AI Act Art. 5).
+**Aura is not an AI model.**  
+**Aura is not a recommender.**  
+**Aura is not a decision engine.**
 
-This repository implements the *foundational execution layer* only.
+Aura is a **computational measuring device**, equivalent in role to a:
 
-No UX.  
-No tokens.  
-No narratives.
+- flight data recorder (black box)
+- metrological instrument
+- cryptographic audit primitive
+- regulatory evidence generator
 
-Only verifiable logic.
-
----
-
-## What This Is
-
-A **Proof-of-Consistent-Agency (PoCA)** engine that:
-
-- deterministically evaluates agent actions
-- detects semantic drift from declared intent
-- produces cryptographically verifiable audit artifacts
-- generates compliance-ready outputs (AI Act–oriented)
+Every output produced by this system can be recomputed **bit-for-bit** on any architecture (x86 / ARM / WASM) and verified independently by a regulator without access to the original model.
 
 ---
 
-## What This Is NOT
+## 2. WHAT THIS REPOSITORY IS NOT
 
-Out of scope by design:
+To prevent misinterpretation, this repository **explicitly does not contain**:
 
-- ❌ UI / dashboards
-- ❌ wallets / tokens / blockchain protocols
-- ❌ monetization logic
-- ❌ identity issuance
-- ❌ orchestration layers
-- ❌ hype abstractions
+- ❌ decision thresholds (Layer 2 only)
+- ❌ machine learning models
+- ❌ cosine similarity or floating-point math in runtime
+- ❌ GPU execution
+- ❌ network calls
+- ❌ persistent reputation or identity aggregation
+- ❌ user / owner / wallet tracking
+- ❌ heuristics or probabilistic logic
+- ❌ automatic policy decisions
 
-This repo is a **core primitive**, not a product.
+If you are looking for a product, SDK, or API service – **this is not it**.
 
----
-
-## Core Components
-
-### `/core`
-Deterministic execution layer.
-
-Responsibilities:
-- Structural integrity validation
-- Semantic alignment scoring (cosine similarity in ℝ¹⁵³⁶ space)
-- Policy enforcement
-- Agent Reliability Index (ARI) calculation
-
-Output:
-- Agent Reliability Index (ARI) ∈ [0.0 – 1.0]
-- Drift signal
-- Deterministic metadata
-
-**Formula:** ARI = 0.3 × StructuralIntegrity + 0.7 × SemanticAlignment - Penalties
-
-**Note:** Uses "Agent Reliability Index" (ARI), NOT "Trust Score" to avoid Social Scoring classification.
+This is the instrument core that other systems may legally build upon.
 
 ---
 
-### `/compliance`
-Cryptographic audit layer.
+## 3. CORE DESIGN PRINCIPLES (v3.3)
 
-Responsibilities:
-- Merkle tree construction
-- Immutable event anchoring
-- Proof-of-existence generation
-- Non-repudiation support
+### 3.1 Zero-Float Runtime (HARD RULE)
 
-Output:
-- Merkle root
-- Per-event Merkle proofs
-- Verifiable audit artifacts
+All runtime computation is performed using **integer arithmetic only**.  
+Floating point operations are permitted **only offline** during preprocessing.
 
----
+**Reason:**  
+IEEE-754 floating point is not associative and breaks cross-architecture reproducibility (AVX vs NEON).  
+A system that cannot reproduce its own numbers cannot be audited.
 
-### `/docs`
-Specification & intent layer.
+### 3.2 Fixed-Point Arithmetic (10⁻⁵)
 
-Responsibilities:
-- System assumptions
-- Threat model
-- Determinism constraints
-- Regulatory mapping (e.g. AI Act transparency)
+All vectors are scaled and stored as integers:
 
----
-
-## Determinism Guarantee
-
-This system is designed to be:
-
-- deterministic by construction
-- reproducible across environments
-- auditable without privileged access
-- explainable via cryptographic proofs, not narratives
-
-Same input → same output.  
-No hidden state.  
-No stochastic execution paths.
-
----
-
-## Compliance Orientation
-
-Designed with:
-- AI Act (Art. 13 – transparency & traceability)
-- audit-first architecture
-- privacy-preserving verification (Merkle proofs)
-- regulator-facing evidence generation
-
-This is **Law-as-Code**, not post-hoc reporting.
-
----
-
-## Project Status
-
-**Status:** Research-backed prototype  
-**Phase:** Core implementation  
-**Stability:** Interfaces subject to refinement, logic is fixed
-
----
-
-## License
-
-MIT  
-(New codebase. No code continuity with archived repositories.)
-
----
-
-## Guiding Principles
-
-### Krasinski Principle
-> **T ∝ 1/S**  
-> Transparency (T) is inversely proportional to Secrecy/Entropy (S).  
-> Trust is modeled as behavioral consistency, not moral virtue.
-
-### Core Axiom
-> Trust is not asserted.  
-> Trust is computed — and proven.
-
-### Regulatory Compliance
-- **Agent-Only Scope:** MACHINE_ACCOUNT entities exclusively
-- **AI Act Art. 5:** Absolute prohibition of human profiling or biometric data
-- **Nomenclature:** "Agent Reliability Index" (ARI) - NOT "Trust Score"
-- **Determinism:** Same input → Same ARI (Proof of Consistent Agency)
-
----
-
-## Execution Checks
-
-All changes MUST pass mandatory execution checks before merge.
-
-### Running the Checks
-
-```bash
-./scripts/run_all_checks.sh
+```python
+v_int = round(v_float * 100_000)
 ```
 
-### The 5 Mandatory Checks
+This eliminates hardware drift and enables bit-exact hashing.
 
-1. **Bit Identity** - Tests produce identical hashes on x86 and ARM
-2. **Integer Only** - No float/sqrt/numpy in runtime core
-3. **Layer Separation** - core/ measures only, doesn't decide
-4. **Audit Path** - Every metric traceable to integer math → Merkle leaf
-5. **Entropy** - No changes that increase system entropy/nondeterminism
+### 3.3 Deterministic Semantic Alignment (SA)
 
-**If any check fails: DO NOT MERGE**
+Semantic alignment is computed using:
 
-For details, see:
-- `.github/copilot-checks.md` - Check definitions
-- `scripts/checks/README.md` - Check documentation
+```python
+fixed_point_dot_product(int32_vector, int32_constitution)
+```
+
+- No sqrt.
+- No cosine similarity.
+- No floating-point normalization at runtime.
+
+### 3.4 Schema Integrity as Circuit Breaker (SI)
+
+Structural validity is a **binary gate**, not a weighted factor.
+
+If schema validation fails:
+
+```python
+ARI = 0.0000
+```
+
+Computation stops immediately.
+
+This prevents side-channels and invalid data amplification.
+
+### 3.5 Layer Separation (Regulatory Requirement)
+
+| Layer   | Responsibility                      |
+|---------|-------------------------------------|
+| Layer 0 | Measure only (this repo)            |
+| Layer 1 | Cryptographic proof (Merkle / ZK)   |
+| Layer 2 | Policy decisions (outside this repo)|
+
+**Layer 0 never decides.**  
+It only measures and certifies.
 
 ---
+
+## 4. REGULATORY COMPLIANCE (EU AI ACT)
+
+This repository enforces:
+
+### Article 5 - Prohibition of Social Scoring
+✔ MACHINE_ACCOUNT only  
+✔ Identity Firewall (session-bound reputation)  
+✔ No owner aggregation  
+✔ No historical profiling
+
+### Article 13 - Transparency
+✔ White-box math  
+✔ Deterministic replay  
+✔ Publicly verifiable hashes  
+✔ Event Trust Certificates (ETC)
+
+### Article 14 - Human Oversight
+✔ Manual Kill-Switch  
+✔ Circuit breaker  
+✔ Emergency halt capability (policy.py)
+
+---
+
+## 5. REPOSITORY STRUCTURE
+
+```
+/core
+  evaluator.py               # Deterministic ARI measurement engine (int-only)
+  offline_normalizer.py      # Offline float → int32 normalization
+  merkle.py                  # Audit & proof layer
+  policy.py                  # Regulatory enforcement (Art. 5 / 14)
+  consistency.py             # Consistency validation
+  embedding.py               # Vector embedding utilities
+  test_bitwise_replay.py     # Cross-platform determinism test (CRITICAL)
+  test_ari.py                # ARI calculation tests
+  test_integration.py        # Integration tests
+  test_offline_normalizer.py # Offline normalization tests
+
+/packages
+  /database-client           # pgvector SDK (bit-identity)
+  /zk-passport               # ZK circuits for reputation proof
+
+/docs
+  ADR_005_NO_FLOAT_RUNTIME.md    # Zero-float architecture decision
+  architecture.md                 # System architecture
+  mathematical_foundation.md      # Mathematical specifications
+  regulatory_compliance.md        # AI Act mapping
+  threat_model.md                 # Security threat model
+
+/infra
+  docker-compose.yml         # Sovereign stack (CPU-only)
+
+/scripts
+  run_all_checks.sh          # Mandatory execution checks
+  /checks                    # Individual check scripts
+
+LICENSE                      # Business Source License 1.1
+```
+
+---
+
+## 6. HOW TO USE (AS AN INSTRUMENT)
+
+### 6.1 Offline Preparation
+
+Normalize vectors using:
+
+```bash
+python core/offline_normalizer.py input.json output.json
+```
+
+This is the **only place floats are allowed**.
+
+### 6.2 Runtime Measurement
+
+```python
+from core.evaluator import evaluate
+
+result = evaluate(action_vector_int32, constitution_vector_int32)
+```
+
+Output is deterministic and audit-ready.
+
+### 6.3 Verification (Golden Test)
+
+Run bit-identity test on two architectures:
+
+```bash
+pytest core/test_bitwise_replay.py
+```
+
+If any bit differs, the build is **invalid**.
+
+---
+
+## 7. SEALING & ARCHIVAL
+
+This repository is intended to be **physically sealed**.
+
+Final artifacts must be:
+
+1. zipped
+2. checksummed (SHA-256)
+3. written to M-DISC
+4. verified bit-by-bit
+
+After sealing, **no changes are permitted**.
+
+Any modification creates a **new instrument**, not a new version.
+
+---
+
+## 8. VERSIONING POLICY
+
+| Version | Meaning                      |
+|---------|------------------------------|
+| v3.2    | Audit artifact (float era)   |
+| v3.3    | Frozen Iron Core (integer era)|
+| v4.x    | New instrument (requires new audit)|
+
+---
+
+## 9. GOVERNANCE
+
+This system is maintained by a **Kustosz Protokołu**, not a feature team.
+
+Change requests are evaluated on **entropy risk**, not convenience.
+
+**If a proposed change increases entropy, it is rejected.**
+
+---
+
+## 10. FINAL STATEMENT
+
+This repository represents a **finished instrument**.
+
+It is designed to survive:
+
+- team changes
+- hardware changes
+- political changes
+- model changes
+- time
+
+**Truth is no longer trusted.**  
+**It is calculated.**
+
+---
+
+**Architect / Custodian:**  
+Kamil Krasiński
+
+**Sentinel Constant:** 0.68  
+**Scaling Factor:** 100_000  
+**Runtime Float Count:** 0  
+**Entropy Budget:** Frozen
