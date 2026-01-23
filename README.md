@@ -130,7 +130,7 @@ This repository enforces:
 ### Article 14 – Human Oversight
 ✔ Manual Kill-Switch  
 ✔ Circuit breaker  
-✔ Halt procedures (see operational documentation)
+✔ Emergency halt capability (policy.py)
 
 ---
 
@@ -142,7 +142,8 @@ This repository enforces:
   offline_normalizer.py      # Offline float → int32 normalization
   merkle.py                  # Audit & proof layer
   policy.py                  # Regulatory enforcement (Art. 5 / 14)
-  schema.py                  # Intent & constitution schema
+  consistency.py             # Consistency validation
+  embedding.py               # Vector embedding utilities
   test_bitwise_replay.py     # Cross-platform determinism test
 
 /packages
@@ -150,15 +151,18 @@ This repository enforces:
   /zk-passport               # ZK circuits for reputation proof
 
 /docs
-  /research                  # Frozen specs (math, determinism, law)
-  /ADR_*                     # Architecture decision records
-  /OP_*                      # Operational procedures
+  ADR_005_NO_FLOAT_RUNTIME.md    # Zero-float architecture decision
+  architecture.md                 # System architecture
+  mathematical_foundation.md      # Mathematical specifications
+  regulatory_compliance.md        # AI Act mapping
+  threat_model.md                 # Security threat model
 
 /infra
   docker-compose.yml         # Sovereign stack (CPU-only)
 
 /scripts
-  build_cathedral.sh         # Deterministic build orchestration
+  run_all_checks.sh          # Mandatory execution checks
+  /checks                    # Individual check scripts
 ```
 
 ---
