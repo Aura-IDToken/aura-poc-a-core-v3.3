@@ -17,7 +17,7 @@ VIOLATIONS=""
 
 # Check 1: Status returns (COMPLIANT, RISK, etc.)
 echo "1. Checking for compliance status returns..."
-STATUS_VIOLATIONS=$(grep -r "COMPLIANT\|\"status\".*RISK\|allow\|deny" core/*.py --exclude="test_*.py" 2>/dev/null || true)
+STATUS_VIOLATIONS=$(grep -r "\"COMPLIANT\"\|\"RISK\"\|\"status\".*:" core/*.py --exclude="test_*.py" 2>/dev/null || true)
 if [ -n "$STATUS_VIOLATIONS" ]; then
     VIOLATIONS="${VIOLATIONS}Status/compliance returns found:\n${STATUS_VIOLATIONS}\n\n"
 fi

@@ -14,7 +14,7 @@ echo "Analyzing system entropy indicators..."
 echo ""
 
 # Count source lines of code (excluding comments and blank lines)
-CORE_SLOC=$(find core -name "*.py" -not -name "test_*.py" -exec grep -v "^\s*#" {} \; 2>/dev/null | grep -v "^\s*$" | wc -l || echo 0)
+CORE_SLOC=$(find core -name "*.py" -not -name "test_*.py" -exec grep -v "^\s*#" {} + 2>/dev/null | grep -v "^\s*$" | wc -l || echo 0)
 echo "Core SLOC (excluding tests): $CORE_SLOC"
 
 # Count number of core modules (excluding tests)
@@ -34,7 +34,7 @@ echo "Import statements: $IMPORTS"
 
 # Check for nondeterministic operations
 NONDETERMINISTIC=""
-NONDETERMINISTIC=$(grep -r "random\|time\.time\|datetime\.now\|uuid\|os\.urandom" core/*.py --exclude="test_*.py" 2>/dev/null || true)
+NONDETERMINISTIC=$(grep -r "random\|time\\.time\\(\\)\|datetime\\.now\\(\\)\|uuid\|os\\.urandom" core/*.py --exclude="test_*.py" 2>/dev/null || true)
 
 if [ -n "$NONDETERMINISTIC" ]; then
     echo ""
