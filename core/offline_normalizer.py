@@ -17,7 +17,7 @@ Mathematical Approach:
 Compliance:
 - Zero-Float Policy: All runtime operations use integer arithmetic
 - Determinism: Same input → Same output (required for PoCA)
-- Q16.16 Fixed-Point: 10^5 scaling factor for precision
+- Fixed-Point Arithmetic: 10^5 scaling factor for precision
 
 Author: Aura Protocol Core Team
 Status: v3.3 Implementation (MC-READY 2026)
@@ -30,7 +30,7 @@ from pathlib import Path
 
 
 # Fixed-point scaling factor as per v3.3 spec
-SCALING_FACTOR = 10**5  # 100,000 for Q16.16 fixed-point arithmetic
+SCALING_FACTOR = 10**5  # 100,000 for custom fixed-point arithmetic
 
 # Expected dimension for constitution vectors
 CONSTITUTION_DIM = 1536
