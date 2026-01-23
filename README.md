@@ -144,7 +144,10 @@ This repository enforces:
   policy.py                  # Regulatory enforcement (Art. 5 / 14)
   consistency.py             # Consistency validation
   embedding.py               # Vector embedding utilities
-  test_bitwise_replay.py     # Cross-platform determinism test
+  test_bitwise_replay.py     # Cross-platform determinism test (CRITICAL)
+  test_ari.py                # ARI calculation tests
+  test_integration.py        # Integration tests
+  test_offline_normalizer.py # Offline normalization tests
 
 /packages
   /database-client           # pgvector SDK (bit-identity)
