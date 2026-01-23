@@ -155,3 +155,31 @@ MIT
 - **AI Act Art. 5:** Absolute prohibition of human profiling or biometric data
 - **Nomenclature:** "Agent Reliability Index" (ARI) - NOT "Trust Score"
 - **Determinism:** Same input → Same ARI (Proof of Consistent Agency)
+
+---
+
+## Execution Checks
+
+All changes MUST pass mandatory execution checks before merge.
+
+### Running the Checks
+
+```bash
+./scripts/run_all_checks.sh
+```
+
+### The 5 Mandatory Checks
+
+1. **Bit Identity** - Tests produce identical hashes on x86 and ARM
+2. **Integer Only** - No float/sqrt/numpy in runtime core
+3. **Layer Separation** - core/ measures only, doesn't decide
+4. **Audit Path** - Every metric traceable to integer math → Merkle leaf
+5. **Entropy** - No changes that increase system entropy/nondeterminism
+
+**If any check fails: DO NOT MERGE**
+
+For details, see:
+- `.github/copilot-checks.md` - Check definitions
+- `scripts/checks/README.md` - Check documentation
+
+---

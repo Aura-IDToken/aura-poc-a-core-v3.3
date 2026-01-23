@@ -40,7 +40,7 @@ def normalize_vector(vector: List[float]) -> List[float]:
     """
     Normalize a vector to unit length (L2 norm = 1.0).
     
-    This is the ONLY place where floating-point math is allowed,
+    This is the ONLY place where floating-point math is permitted,
     as this runs offline during pre-processing, not in runtime core.
     
     Args:
