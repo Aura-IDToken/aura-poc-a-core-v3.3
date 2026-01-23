@@ -29,17 +29,28 @@ Floating-point operations (IEEE 754) produce **architecture-dependent results** 
 
 **Example of non-determinism:**
 ```python
-# x86 with FMA:
-result = 0.1 + 0.2  # May give 0.30000000000000004
+# Different platforms may compute floating-point operations differently:
 
-# ARM without FMA:
-result = 0.1 + 0.2  # May give 0.3000000000000000499...
+# Example 1: Binary representation limitations
+# (Same on all platforms, but demonstrates float imprecision)
+result = 0.1 + 0.2  # Typically 0.30000000000000004 due to binary representation
 
-# WASM:
-result = 0.1 + 0.2  # May give yet another result
+# Example 2: FMA (Fused Multiply-Add) differences
+# x86 with FMA enabled:
+a, b, c = 0.5, 0.3, 0.2
+result_fma = a * b + c  # Computed as single FMA operation: one rounding
+
+# ARM without FMA (or FMA disabled):
+result_no_fma = a * b + c  # Computed as multiply + add: two roundings
+# result_fma ≠ result_no_fma (different bit patterns)
+
+# Example 3: Compiler optimizations
+# Depending on optimization flags, compilers may reorder operations:
+x = (a + b) + c  # May be reordered to a + (b + c) with -fassociative-math
+# Different parenthesization = different rounding = different bits
 ```
 
-Even though these are "close enough" for most applications, they produce **different bit patterns** in memory, which means **different SHA256 hashes**.
+Even though these differences are tiny (typically in the last few bits), they produce **different bit patterns** in memory, which means **different SHA256 hashes**.
 
 ### Regulatory Requirement
 
@@ -285,7 +296,7 @@ $ python -m unittest core.test_bitwise_replay -v
 # OK
 ```
 
-**Reference Hash (x86_64):**
+**Reference Hash (x86_64 baseline):**
 ```json
 {
   "platform": {
@@ -299,7 +310,9 @@ $ python -m unittest core.test_bitwise_replay -v
 }
 ```
 
-This hash MUST be identical on ARM and WASM.
+**Note:** The test `test_cross_platform_reference_hash` in `core/test_bitwise_replay.py` 
+uses a hardcoded baseline hash to verify that all platforms produce identical results.
+The baseline was established on x86_64 and serves as the reference for ARM and WASM builds.
 
 ---
 

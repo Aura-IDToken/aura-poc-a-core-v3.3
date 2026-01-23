@@ -204,17 +204,20 @@ class BitwiseReplayTest(unittest.TestCase):
         # Hash it
         result_hash = self._hash_int32(result_sum)
         
-        # Reference hash (computed on x86_64)
-        # This is SHA256 of the byte representation of 45000 as int32
-        reference_hash = hashlib.sha256(result_sum.to_bytes(4, byteorder='little', signed=True)).hexdigest()
+        # Reference hash (pre-computed on x86_64 as baseline)
+        # This is SHA256 of the byte representation of 45000 as int32 (little-endian, signed)
+        # Computed: hashlib.sha256((45000).to_bytes(4, byteorder='little', signed=True)).hexdigest()
+        reference_hash = "7a5f616273ccf1656c4373053a9a82ab2b2bfc8e6c472a1855a951a8cf0edeb0"
         
         self.assertEqual(result_hash, reference_hash,
-                        f"Platform {self.platform_info['machine']} produced different hash!")
+                        f"Platform {self.platform_info['machine']} produced different hash! "
+                        f"Expected: {reference_hash}, Got: {result_hash}")
         
         print(f"\nReference Hash Test:")
         print(f"  Input: [0, 1000, 2000, ..., 9000]")
         print(f"  Sum: {result_sum}")
         print(f"  Hash: {result_hash}")
+        print(f"  ✓ Matches x86_64 baseline: YES")
         print(f"  Platform: {self.platform_info['machine']}")
     
     def test_no_float_contamination(self):
@@ -331,7 +334,7 @@ class BitwiseReplayTest(unittest.TestCase):
         self.assertEqual(record["test_vector_length"], 1000)
 
 
-class WASSMCompatibilityTest(unittest.TestCase):
+class WASMCompatibilityTest(unittest.TestCase):
     """
     Tests for WASM compatibility.
     
@@ -368,22 +371,25 @@ class WASSMCompatibilityTest(unittest.TestCase):
         self.assertIsInstance(value_i32, int)
         self.assertIsInstance(value_i64, int)
         
-        # Range checks (i32: -2^31 to 2^31-1)
-        self.assertGreater(value_i32, -2147483648)
-        self.assertLess(value_i32, 2147483647)
+        # Range checks (i32: -2^31 to 2^31-1, inclusive)
+        self.assertGreaterEqual(value_i32, -2147483648)
+        self.assertLessEqual(value_i32, 2147483647)
 
 
 # Command-line interface
 if __name__ == "__main__":
-    print("\n" + "="*70)
+    # Banner width constant for formatting
+    BANNER_WIDTH = 70
+    
+    print("\n" + "="*BANNER_WIDTH)
     print("AURA Protocol v3.3: Bitwise Replay Test (TASK-03)")
-    print("="*70)
+    print("="*BANNER_WIDTH)
     print("\nThis test verifies cross-platform determinism:")
     print("- x86: Native execution")
     print("- ARM: Native execution")  
     print("- WASM: Requires wasmtime or browser (future implementation)")
     print("\nBIT-IDENTITY IS LAW: Same input → identical bits")
-    print("="*70 + "\n")
+    print("="*BANNER_WIDTH + "\n")
     
     # Run tests with verbose output
     unittest.main(verbosity=2)
