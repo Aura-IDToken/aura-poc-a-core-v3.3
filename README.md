@@ -166,6 +166,8 @@ This repository enforces:
 /scripts
   run_all_checks.sh          # Mandatory execution checks
   /checks                    # Individual check scripts
+
+LICENSE                      # Business Source License 1.1
 ```
 
 ---
