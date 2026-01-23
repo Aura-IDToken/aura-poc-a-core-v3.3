@@ -1,0 +1,31 @@
+# Circom build artifacts
+*.r1cs
+*.wasm
+*.sym
+*.json
+*.wtns
+*.zkey
+*.vkey
+
+# Compiled circuits
+build/
+out/
+dist/
+
+# Proof artifacts
+proof.json
+public.json
+witness.wtns
+
+# Node modules (if using snarkjs)
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
