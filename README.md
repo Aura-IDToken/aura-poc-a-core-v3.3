@@ -130,7 +130,7 @@ This repository enforces:
 ### Article 14 – Human Oversight
 ✔ Manual Kill-Switch  
 ✔ Circuit breaker  
-✔ Halt procedures documented in OP_01_HALT_PROCEDURES.md
+✔ Halt procedures (see operational documentation)
 
 ---
 
@@ -201,9 +201,6 @@ If any bit differs, the build is **invalid**.
 
 This repository is intended to be **physically sealed**.
 
-See:
-📄 **PROTOCOL_OF_SEALING.md**
-
 Final artifacts must be:
 
 1. zipped
@@ -258,6 +255,6 @@ It is designed to survive:
 Kamil Krasiński
 
 **Sentinel Constant:** 0.68  
-**Scaling Factor:** 100 000  
+**Scaling Factor:** 100_000  
 **Runtime Float Count:** 0  
 **Entropy Budget:** Frozen
