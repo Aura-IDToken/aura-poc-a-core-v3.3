@@ -67,7 +67,7 @@ A system that cannot reproduce its own numbers cannot be audited.
 All vectors are scaled and stored as integers:
 
 ```python
-v_int = round(v_float × 100_000)
+v_int = round(v_float * 100_000)
 ```
 
 This eliminates hardware drift and enables bit-exact hashing.
@@ -115,19 +115,19 @@ It only measures and certifies.
 
 This repository enforces:
 
-### Article 5 – Prohibition of Social Scoring
+### Article 5 - Prohibition of Social Scoring
 ✔ MACHINE_ACCOUNT only  
 ✔ Identity Firewall (session-bound reputation)  
 ✔ No owner aggregation  
 ✔ No historical profiling
 
-### Article 13 – Transparency
+### Article 13 - Transparency
 ✔ White-box math  
 ✔ Deterministic replay  
 ✔ Publicly verifiable hashes  
 ✔ Event Trust Certificates (ETC)
 
-### Article 14 – Human Oversight
+### Article 14 - Human Oversight
 ✔ Manual Kill-Switch  
 ✔ Circuit breaker  
 ✔ Emergency halt capability (policy.py)
