@@ -1,0 +1,64 @@
+name: Execution Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  execution-checks:
+    name: Run Mandatory Execution Checks
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        # Future: Add ARM runner for cross-platform validation
+        # os: [ubuntu-latest, ubuntu-latest-arm]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Run Execution Checks
+        run: |
+          chmod +x scripts/run_all_checks.sh
+          ./scripts/run_all_checks.sh
+      
+      - name: Upload check results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: check-results-${{ matrix.os }}
+          path: |
+            core/test_bitwise_replay_*.hash
+          retention-days: 30
+
+  # Future: Cross-platform hash comparison job
+  # compare-hashes:
+  #   name: Compare Cross-Platform Hashes
+  #   needs: execution-checks
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download x86_64 results
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: check-results-ubuntu-latest
+  #         path: ./hashes-x86
+  #     
+  #     - name: Download ARM results
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: check-results-ubuntu-latest-arm
+  #         path: ./hashes-arm
+  #     
+  #     - name: Compare hashes
+  #       run: |
+  #         diff ./hashes-x86/core/test_bitwise_replay_x86_64.hash \
+  #              ./hashes-arm/core/test_bitwise_replay_aarch64.hash
