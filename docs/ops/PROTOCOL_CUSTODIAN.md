@@ -105,7 +105,7 @@ They are **never**:
 - approvers,
 - modifiers of invariants.
 
-Any AI suggestion that violates the constitution **must be rejected via REGULATORY_HALT**.
+Any AI suggestion that violates the constitutional requirements as defined in [CONSTITUTIONAL_DECREE.md](../../CONSTITUTIONAL_DECREE.md) **must be rejected via REGULATORY_HALT**.
 
 ---
 

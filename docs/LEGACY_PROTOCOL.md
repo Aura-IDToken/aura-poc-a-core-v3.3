@@ -75,7 +75,7 @@ The following artifacts must be sealed and accessible via the succession protoco
 
 1. **Source Code Archive**
    - Complete git repository snapshot
-   - SHA-256 checksum: `<to be computed at sealing>`
+   - SHA-256 checksum: `[COMPUTED_AT_SEALING_v3.3]`
 
 2. **Binary Distributions**
    - All compiled artifacts
@@ -159,7 +159,7 @@ The current Custodian must:
 
 Each shareholder must:
 
-- Protect their share with equivalent security to nuclear launch codes.
+- Protect their share with the highest level of cryptographic security, equivalent to classified state secrets.
 - Report compromise of their share within 24 hours.
 - Maintain current contact information.
 - Acknowledge succession notifications within 72 hours.
