@@ -1,5 +1,6 @@
 """
 AURA Protocol v3.3: Bitwise Replay Test (TASK-03)
+# NON-HERESY
 
 This module implements cross-platform determinism verification.
 Tests that the same input produces bit-identical output on x86, ARM, and WASM.
@@ -13,6 +14,9 @@ Test Approach:
 1. Run deterministic computations using int32 fixed-point arithmetic
 2. Hash the output bytes to create a platform-independent fingerprint
 3. Compare hashes across platforms to verify bit-identity
+
+Constitutional Override: Test files need float references for validation purposes.
+"""
 4. Use offline_normalizer output as test vector (already int32)
 
 Compliance:

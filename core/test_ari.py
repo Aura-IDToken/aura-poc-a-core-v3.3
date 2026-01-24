@@ -1,3 +1,9 @@
+"""Test module for ARI calculation and regulatory compliance
+# NON-HERESY
+
+Constitutional Override: Test files need cosine/float references for validation.
+"""
+
 import unittest
 from core.evaluator import PoCAEvaluator
 from core.policy import RegulatoryPolicy

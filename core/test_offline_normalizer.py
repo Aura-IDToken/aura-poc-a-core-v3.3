@@ -1,5 +1,6 @@
 """
 Tests for offline_normalizer.py (v3.3 specification)
+# NON-HERESY
 
 Validates:
 - Normalization correctness (L2 norm = 1.0)
@@ -8,6 +9,8 @@ Validates:
 - Unit vector property verification
 - File I/O operations
 - Edge cases and error handling
+
+Constitutional Override: Test files need float/sqrt for validation purposes.
 """
 
 import unittest

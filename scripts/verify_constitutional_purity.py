@@ -46,6 +46,121 @@ ALLOWED_COMMENT_OVERRIDE = "NON-HERESY"
 
 violations = []
 
+class ConstitutionalChecker(ast.NodeVisitor):
+    """AST visitor that detects constitutional violations while ignoring type annotations"""
+    
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.in_annotation = 0  # Use counter for nested annotations
+    
+    def visit_arg(self, node):
+        """Visit function argument (may have type annotation)"""
+        if node.annotation:
+            self.in_annotation += 1
+            self.visit(node.annotation)
+            self.in_annotation -= 1
+        # Don't call generic_visit to avoid double-visiting annotation
+    
+    def visit_AnnAssign(self, node):
+        """Visit annotated assignment (e.g., x: int = 5)"""
+        if node.annotation:
+            self.in_annotation += 1
+            self.visit(node.annotation)
+            self.in_annotation -= 1
+        if node.value:
+            self.visit(node.value)
+    
+    def visit_FunctionDef(self, node):
+        """Visit function definition (may have return annotation)"""
+        # Check function name for forbidden symbols
+        for forbidden, reason in FORBIDDEN_NAMES.items():
+            if forbidden in node.name:
+                violations.append(
+                    f"{self.filepath}: function '{node.name}' contains forbidden '{forbidden}' -> {reason}"
+                )
+        
+        # Visit return annotation
+        if node.returns:
+            self.in_annotation += 1
+            self.visit(node.returns)
+            self.in_annotation -= 1
+        
+        # Visit decorators
+        for decorator in node.decorator_list:
+            self.visit(decorator)
+        
+        # Visit arguments (each arg will handle its own annotation)
+        for arg in node.args.args:
+            self.visit(arg)
+        for arg in node.args.posonlyargs:
+            self.visit(arg)
+        for arg in node.args.kwonlyargs:
+            self.visit(arg)
+        if node.args.vararg:
+            self.visit(node.args.vararg)
+        if node.args.kwarg:
+            self.visit(node.args.kwarg)
+        
+        # Visit defaults and kw_defaults
+        for default in node.args.defaults:
+            self.visit(default)
+        for default in node.args.kw_defaults:
+            if default:
+                self.visit(default)
+        
+        # Visit body
+        for item in node.body:
+            self.visit(item)
+    
+    def visit_Import(self, node):
+        """Check imports"""
+        for alias in node.names:
+            if alias.name in FORBIDDEN_IMPORTS:
+                violations.append(
+                    f"{self.filepath}: import {alias.name} -> {FORBIDDEN_IMPORTS[alias.name]}"
+                )
+        self.generic_visit(node)
+    
+    def visit_ImportFrom(self, node):
+        """Check from imports"""
+        if node.module in FORBIDDEN_IMPORTS:
+            violations.append(
+                f"{self.filepath}: from {node.module} import ... -> {FORBIDDEN_IMPORTS[node.module]}"
+            )
+        self.generic_visit(node)
+    
+    def visit_Attribute(self, node):
+        """Check attribute access (e.g., math.sqrt)"""
+        if node.attr in FORBIDDEN_NAMES:
+            violations.append(
+                f"{self.filepath}: attribute access '.{node.attr}' -> {FORBIDDEN_NAMES[node.attr]}"
+            )
+        self.generic_visit(node)
+    
+    def visit_Name(self, node):
+        """Check name references"""
+        # Skip if we're in a type annotation
+        if self.in_annotation == 0 and node.id in FORBIDDEN_NAMES:
+            if isinstance(node.ctx, ast.Load):
+                violations.append(
+                    f"{self.filepath}: symbol '{node.id}' -> {FORBIDDEN_NAMES[node.id]}"
+                )
+        self.generic_visit(node)
+    
+    def visit_Call(self, node):
+        """Check function calls"""
+        # Direct call like float()
+        if isinstance(node.func, ast.Name) and node.func.id in FORBIDDEN_NAMES:
+            violations.append(
+                f"{self.filepath}: call '{node.func.id}()' -> {FORBIDDEN_NAMES[node.func.id]}"
+            )
+        # Attribute call like math.sqrt()
+        elif isinstance(node.func, ast.Attribute) and node.func.attr in FORBIDDEN_NAMES:
+            violations.append(
+                f"{self.filepath}: call '.{node.func.attr}()' -> {FORBIDDEN_NAMES[node.func.attr]}"
+            )
+        self.generic_visit(node)
+
 def check_file(filepath: str):
     with open(filepath, "r", encoding="utf-8") as f:
         source = f.read()
@@ -58,62 +173,8 @@ def check_file(filepath: str):
     except SyntaxError:
         return
 
-    for node in ast.walk(tree):
-
-        # --- IMPORTS ---
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.name in FORBIDDEN_IMPORTS:
-                    violations.append(
-                        f"{filepath}: import {alias.name} -> {FORBIDDEN_IMPORTS[alias.name]}"
-                    )
-
-        if isinstance(node, ast.ImportFrom):
-            if node.module in FORBIDDEN_IMPORTS:
-                violations.append(
-                    f"{filepath}: from {node.module} import ... -> {FORBIDDEN_IMPORTS[node.module]}"
-                )
-
-        # --- FUNCTION DEFINITIONS (method names) ---
-        if isinstance(node, ast.FunctionDef):
-            for forbidden, reason in FORBIDDEN_NAMES.items():
-                if forbidden in node.name:
-                    violations.append(
-                        f"{filepath}: function '{node.name}' contains forbidden '{forbidden}' -> {reason}"
-                    )
-
-        # --- ATTRIBUTE ACCESS (e.g., math.sqrt) ---
-        if isinstance(node, ast.Attribute):
-            if node.attr in FORBIDDEN_NAMES:
-                violations.append(
-                    f"{filepath}: attribute access '.{node.attr}' -> {FORBIDDEN_NAMES[node.attr]}"
-                )
-
-        # --- NAMES / CALLS ---
-        if isinstance(node, ast.Name):
-            # Skip if this is part of a type annotation
-            parent = getattr(node, '_parent', None)
-            if isinstance(parent, ast.arg) or isinstance(parent, (ast.FunctionDef, ast.AnnAssign)):
-                continue
-            
-            if node.id in FORBIDDEN_NAMES:
-                # Check if it's in a Load context (actual use, not type hint)
-                if isinstance(node.ctx, ast.Load):
-                    violations.append(
-                        f"{filepath}: symbol '{node.id}' -> {FORBIDDEN_NAMES[node.id]}"
-                    )
-
-        if isinstance(node, ast.Call):
-            # Direct call like float()
-            if isinstance(node.func, ast.Name) and node.func.id in FORBIDDEN_NAMES:
-                violations.append(
-                    f"{filepath}: call '{node.func.id}()' -> {FORBIDDEN_NAMES[node.func.id]}"
-                )
-            # Attribute call like math.sqrt()
-            elif isinstance(node.func, ast.Attribute) and node.func.attr in FORBIDDEN_NAMES:
-                violations.append(
-                    f"{filepath}: call '.{node.func.attr}()' -> {FORBIDDEN_NAMES[node.func.attr]}"
-                )
+    checker = ConstitutionalChecker(filepath)
+    checker.visit(tree)
 
 def scan():
     for path in PROTECTED_PATHS:
