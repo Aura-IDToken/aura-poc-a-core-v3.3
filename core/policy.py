@@ -1,9 +1,13 @@
 class RegulatoryPolicy:
-    """EU AI Act compliance shield (Art. 5, 14)"""
+    """EU AI Act compliance shield (Art. 5, 14)
     
-    # Regulatory constants
-    DRIFT_THRESHOLD = 0.68  # Semantic alignment threshold for drift detection
-    DRIFT_PENALTY = 1.5    # Penalty applied when drift is detected
+    Uses fixed-point int32 arithmetic (scaling factor: 10^5 = 100,000)
+    """
+    
+    # Regulatory constants (fixed-point int32)
+    SCALING_FACTOR = 100000  # 10^5
+    DRIFT_THRESHOLD = 68000  # 0.68 * 10^5 - Semantic alignment threshold for drift detection
+    DRIFT_PENALTY = 150000   # 1.5 * 10^5 - Penalty applied when drift is detected
     
     HALTED_AGENTS = set()
 
@@ -23,9 +27,18 @@ class RegulatoryPolicy:
             raise Exception("POLICY_HALT: Operation stopped by human oversight.")
 
     @staticmethod
-    def calculate_penalties(sa_score: float) -> float:
+    def calculate_penalties(sa_score: int) -> int:
+        """
+        Calculate penalties for behavioral drift.
+        
+        Args:
+            sa_score: Semantic alignment score (int32, scaled by 10^5)
+            
+        Returns:
+            Penalty value (int32, scaled by 10^5)
+        """
         # Penalty for sudden behavioral drift (Sim < DRIFT_THRESHOLD)
-        return RegulatoryPolicy.DRIFT_PENALTY if sa_score < RegulatoryPolicy.DRIFT_THRESHOLD else 0.0
+        return RegulatoryPolicy.DRIFT_PENALTY if sa_score < RegulatoryPolicy.DRIFT_THRESHOLD else 0
 
 
 class PolicyRule:

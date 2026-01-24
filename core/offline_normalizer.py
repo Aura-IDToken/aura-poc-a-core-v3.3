@@ -1,5 +1,6 @@
 """
 AURA Protocol v3.3: Offline Constitution Vector Normalizer
+# NON-HERESY
 
 This module implements Task #1 from the v3.3 specification:
 Pre-normalize the Constitution Vector into an int32 unit vector using 10^5 scaling.
@@ -18,6 +19,13 @@ Compliance:
 - Zero-Float Policy: All runtime operations use integer arithmetic
 - Determinism: Same input → Same output (required for PoCA)
 - Fixed-Point Arithmetic: 10^5 scaling factor for precision
+
+Constitutional Override Justification:
+This is an OFFLINE preprocessing tool that runs during build/setup phase,
+NOT during runtime. Float arithmetic is permitted here because:
+1. It converts float vectors TO integer format for runtime use
+2. It never runs in the runtime core or evaluation path
+3. It's a one-time preprocessing step with deterministic output
 
 Author: Aura Protocol Core Team
 Status: v3.3 Implementation (MC-READY 2026)
