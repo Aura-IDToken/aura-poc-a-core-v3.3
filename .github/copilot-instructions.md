@@ -1,8 +1,14 @@
 # COPILOT DIRECTIVE — AURA PROTOCOL v3.3 (FROZEN)
 
+⚠️ **CONSTITUTIONAL AUTHORITY:** This repository is governed by [CONSTITUTIONAL_DECREE.md](/CONSTITUTIONAL_DECREE.md)
+
+**READ THE CONSTITUTIONAL DECREE BEFORE MAKING ANY CHANGES.**
+
 You are operating inside a frozen regulatory measurement instrument.
 This repository is NOT a software product.
 It is a metrological system.
+
+The directives below summarize the Constitutional Decree. In case of conflict, the full decree prevails.
 
 ## ABSOLUTE RULES (NON-NEGOTIABLE)
 

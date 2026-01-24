@@ -1,5 +1,7 @@
 # FORBIDDEN ACTIONS — HARD FAIL
 
+⚠️ **See [CONSTITUTIONAL_DECREE.md](/CONSTITUTIONAL_DECREE.md) for complete rules.**
+
 Copilot must STOP if any of the following occurs:
 
 ❌ Adding thresholds to core (Layer 0)
