@@ -1,6 +1,6 @@
 #!/bin/bash
 # MASTER CHECK SCRIPT
-# Runs all 5 mandatory execution checks
+# Runs all mandatory execution checks
 # If ANY check fails: DO NOT MERGE
 
 set -e
@@ -21,9 +21,22 @@ echo ""
 
 # Make check scripts executable
 chmod +x "$CHECKS_DIR"/*.sh
+chmod +x "$SCRIPT_DIR/check_constitutional_compliance.sh"
 
 # Track overall status
 OVERALL_STATUS=0
+
+# Run CHECK 0 - Constitutional Compliance (New)
+echo ""
+echo "=========================================="
+echo "CHECK 0 - Constitutional Compliance"
+echo "=========================================="
+if bash "$SCRIPT_DIR/check_constitutional_compliance.sh"; then
+    CHECK_0_STATUS="✅ PASS"
+else
+    CHECK_0_STATUS="❌ FAIL"
+    OVERALL_STATUS=1
+fi
 
 # Run CHECK 1 - Bit Identity
 echo ""
@@ -76,11 +89,12 @@ echo "=========================================="
 echo "CHECK SUMMARY"
 echo "=========================================="
 echo ""
-echo "CHECK 1 - Bit Identity:      $CHECK_1_STATUS"
-echo "CHECK 2 - Integer Only:      $CHECK_2_STATUS"
-echo "CHECK 3 - Layer Separation:  $CHECK_3_STATUS"
-echo "CHECK 4 - Audit Path:        $CHECK_4_STATUS"
-echo "CHECK 5 - Entropy:           $CHECK_5_STATUS"
+echo "CHECK 0 - Constitutional Compliance: $CHECK_0_STATUS"
+echo "CHECK 1 - Bit Identity:              $CHECK_1_STATUS"
+echo "CHECK 2 - Integer Only:              $CHECK_2_STATUS"
+echo "CHECK 3 - Layer Separation:          $CHECK_3_STATUS"
+echo "CHECK 4 - Audit Path:                $CHECK_4_STATUS"
+echo "CHECK 5 - Entropy:                   $CHECK_5_STATUS"
 echo ""
 
 if [ $OVERALL_STATUS -eq 0 ]; then
