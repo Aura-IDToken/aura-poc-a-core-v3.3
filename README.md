@@ -1,5 +1,13 @@
 # AURA PROTOCOL — IRON CORE v3.3
 
+## ⚠️ CONSTITUTIONAL GOVERNANCE
+
+**This repository is governed by the [CONSTITUTIONAL DECREE FOR AI COPILOT](/CONSTITUTIONAL_DECREE.md).**
+
+All contributors, AI assistants, and code reviewers MUST read and comply with the Constitutional Decree before making any changes.
+
+---
+
 ## FROZEN REGULATORY MEASUREMENT INSTRUMENT
 
 **Status:** FROZEN / CANONICAL  

@@ -3,6 +3,12 @@ COPILOT SYSTEM DIRECTIVES: AURA ARI CORE v3.3
 > CONTEXT: IRON CORE CORRECT (FROZEN STATE)
 > NOMENCLATURE: AGENT RELIABILITY INDEX (ARI) ONLY. 
 > 
+
+⚠️ **CONSTITUTIONAL AUTHORITY:** [CONSTITUTIONAL_DECREE.md](/CONSTITUTIONAL_DECREE.md)
+
+ALL directives below are subordinate to the Constitutional Decree.
+In case of conflict, the Constitution prevails.
+
 0. THE PRIME DIRECTIVE
 You are a co-processor in building a Regulatory Measurement Instrument. This is NOT a standard software project. All logic must be deterministic, bit-identical, and comply with the physical constraints of the v3.3 specification.
 I. MATHEMATICAL CONSTRAINTS (THE "MEAT")

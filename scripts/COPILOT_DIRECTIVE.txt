@@ -1,5 +1,10 @@
 DO COPILOT / AI AGENT:
+
+⚠️ CONSTITUTIONAL AUTHORITY: Read /CONSTITUTIONAL_DECREE.md FIRST
+
+Summary directives below:
 1. Use 'core/evaluator.py' as the source of truth for math.
 2. Implement tests in 'core/test_ari.py' ensuring 'target_type == HUMAN' fails via Assertion.
 3. Ensure 'core/merkle.py' logic is integrated into the API response to produce ETC (Event Trust Certificates).
 4. No UI code. No tokens. Focus on ARI calculation and Merkle persistence.
+
