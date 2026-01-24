@@ -245,18 +245,22 @@ Any change creates a new instrument, not an update.
 
 ## 9. OPERATIONAL GOVERNANCE
 
-See [docs/ops/OPS_PROTOCOL_CANONICAL.md](docs/ops/OPS_PROTOCOL_CANONICAL.md) for complete operational procedures including:
+See operational governance documentation:
 
-- Sealing & archival (M-DISC)
-- Versioning policy
-- Custodianship principles
-- Succession planning
+- [ROLE_OF_THE_PROTOCOL_CUSTODIAN.md](/ROLE_OF_THE_PROTOCOL_CUSTODIAN.md) - Complete role definition for the Protocol Custodian
+- [docs/ops/OPS_PROTOCOL_CANONICAL.md](docs/ops/OPS_PROTOCOL_CANONICAL.md) - Operational procedures including:
+  - Sealing & archival (M-DISC)
+  - Versioning policy
+  - Custodianship principles
+  - Succession planning
 
 ---
 
 ## 10. GOVERNANCE
 
-This system is maintained by a **Kustosz Protokołu**, not a feature team.
+This system is maintained by a **Kustosz Protokołu** (Protocol Custodian), not a feature team.
+
+See [ROLE_OF_THE_PROTOCOL_CUSTODIAN.md](/ROLE_OF_THE_PROTOCOL_CUSTODIAN.md) for complete role definition and responsibilities.
 
 Change requests are evaluated on **entropy risk**, not convenience.
 
