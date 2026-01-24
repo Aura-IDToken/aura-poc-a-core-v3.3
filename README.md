@@ -231,9 +231,22 @@ Any modification creates a **new instrument**, not a new version.
 | v3.3    | Frozen Iron Core (integer era)|
 | v4.x    | New instrument (requires new audit)|
 
+Any change creates a new instrument, not an update.
+
 ---
 
-## 9. GOVERNANCE
+## 9. OPERATIONAL GOVERNANCE
+
+See [docs/ops/OPS_PROTOCOL_CANONICAL.md](docs/ops/OPS_PROTOCOL_CANONICAL.md) for complete operational procedures including:
+
+- Sealing & archival (M-DISC)
+- Versioning policy
+- Custodianship principles
+- Succession planning
+
+---
+
+## 10. GOVERNANCE
 
 This system is maintained by a **Kustosz Protokołu**, not a feature team.
 
@@ -243,7 +256,7 @@ Change requests are evaluated on **entropy risk**, not convenience.
 
 ---
 
-## 10. FINAL STATEMENT
+## 11. FINAL STATEMENT
 
 This repository represents a **finished instrument**.
 
