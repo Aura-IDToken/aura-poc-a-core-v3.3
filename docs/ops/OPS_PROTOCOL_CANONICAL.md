@@ -77,6 +77,8 @@ The role of **Kustosz Protokołu** (Protocol Custodian) is defined to ensure con
 
 Custodianship is transferred based on **entropy risk assessment**, not organizational hierarchy.
 
+See [PROTOCOL_CUSTODIAN.md](PROTOCOL_CUSTODIAN.md) for the complete definition of the custodian role and [../LEGACY_PROTOCOL.md](../LEGACY_PROTOCOL.md) for succession procedures.
+
 ---
 
 ## 5. FINAL STATEMENT

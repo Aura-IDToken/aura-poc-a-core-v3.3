@@ -252,6 +252,10 @@ See [docs/ops/OPS_PROTOCOL_CANONICAL.md](docs/ops/OPS_PROTOCOL_CANONICAL.md) for
 - Custodianship principles
 - Succession planning
 
+See [docs/ops/PROTOCOL_CUSTODIAN.md](docs/ops/PROTOCOL_CUSTODIAN.md) for the complete definition of the Protocol Custodian role.
+
+See [docs/LEGACY_PROTOCOL.md](docs/LEGACY_PROTOCOL.md) for succession protocol and disaster recovery procedures.
+
 ---
 
 ## 10. GOVERNANCE
