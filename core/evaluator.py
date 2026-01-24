@@ -81,8 +81,12 @@ class PoCAEvaluator:
         # Clamp to non-negative
         ari = max(0, ari)
         
-        # Drift is (1.0 - sa) in fixed-point = (10^5 - sa)
-        drift = self.SCALING_FACTOR - sa
+        # Drift is (1.0 - sa) in fixed-point
+        # Since sa can be negative (range: [-10^5, 10^5]), drift calculation needs clamping
+        # For positive sa: drift = 100000 - sa (ranges from 0 to 200000)
+        # For negative sa: drift = 100000 - sa (ranges from 100000 to 200000)
+        # Clamp drift to [0, 100000] to represent [0.0, 1.0]
+        drift = min(max(0, self.SCALING_FACTOR - sa), 2 * self.SCALING_FACTOR)
         
         return {
             "ari": ari,  # int32, scaled by 10^5

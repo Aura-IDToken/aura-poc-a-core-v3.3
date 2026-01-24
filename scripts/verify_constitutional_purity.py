@@ -49,9 +49,10 @@ violations = []
 class ConstitutionalChecker(ast.NodeVisitor):
     """AST visitor that detects constitutional violations while ignoring type annotations"""
     
-    def __init__(self, filepath):
+    def __init__(self, filepath, violations_list):
         self.filepath = filepath
         self.in_annotation = 0  # Use counter for nested annotations
+        self.violations = violations_list
     
     def visit_arg(self, node):
         """Visit function argument (may have type annotation)"""
@@ -75,7 +76,7 @@ class ConstitutionalChecker(ast.NodeVisitor):
         # Check function name for forbidden symbols
         for forbidden, reason in FORBIDDEN_NAMES.items():
             if forbidden in node.name:
-                violations.append(
+                self.violations.append(
                     f"{self.filepath}: function '{node.name}' contains forbidden '{forbidden}' -> {reason}"
                 )
         
@@ -116,7 +117,7 @@ class ConstitutionalChecker(ast.NodeVisitor):
         """Check imports"""
         for alias in node.names:
             if alias.name in FORBIDDEN_IMPORTS:
-                violations.append(
+                self.violations.append(
                     f"{self.filepath}: import {alias.name} -> {FORBIDDEN_IMPORTS[alias.name]}"
                 )
         self.generic_visit(node)
@@ -124,7 +125,7 @@ class ConstitutionalChecker(ast.NodeVisitor):
     def visit_ImportFrom(self, node):
         """Check from imports"""
         if node.module in FORBIDDEN_IMPORTS:
-            violations.append(
+            self.violations.append(
                 f"{self.filepath}: from {node.module} import ... -> {FORBIDDEN_IMPORTS[node.module]}"
             )
         self.generic_visit(node)
@@ -132,7 +133,7 @@ class ConstitutionalChecker(ast.NodeVisitor):
     def visit_Attribute(self, node):
         """Check attribute access (e.g., math.sqrt)"""
         if node.attr in FORBIDDEN_NAMES:
-            violations.append(
+            self.violations.append(
                 f"{self.filepath}: attribute access '.{node.attr}' -> {FORBIDDEN_NAMES[node.attr]}"
             )
         self.generic_visit(node)
@@ -142,7 +143,7 @@ class ConstitutionalChecker(ast.NodeVisitor):
         # Skip if we're in a type annotation
         if self.in_annotation == 0 and node.id in FORBIDDEN_NAMES:
             if isinstance(node.ctx, ast.Load):
-                violations.append(
+                self.violations.append(
                     f"{self.filepath}: symbol '{node.id}' -> {FORBIDDEN_NAMES[node.id]}"
                 )
         self.generic_visit(node)
@@ -151,21 +152,25 @@ class ConstitutionalChecker(ast.NodeVisitor):
         """Check function calls"""
         # Direct call like float()
         if isinstance(node.func, ast.Name) and node.func.id in FORBIDDEN_NAMES:
-            violations.append(
+            self.violations.append(
                 f"{self.filepath}: call '{node.func.id}()' -> {FORBIDDEN_NAMES[node.func.id]}"
             )
         # Attribute call like math.sqrt()
         elif isinstance(node.func, ast.Attribute) and node.func.attr in FORBIDDEN_NAMES:
-            violations.append(
+            self.violations.append(
                 f"{self.filepath}: call '.{node.func.attr}()' -> {FORBIDDEN_NAMES[node.func.attr]}"
             )
         self.generic_visit(node)
 
-def check_file(filepath: str):
+def check_file(filepath: str, violations_list):
     with open(filepath, "r", encoding="utf-8") as f:
         source = f.read()
 
     if ALLOWED_COMMENT_OVERRIDE in source:
+        return
+
+    # Only check Python files (TypeScript checking not yet implemented)
+    if not filepath.endswith(".py"):
         return
 
     try:
@@ -173,7 +178,7 @@ def check_file(filepath: str):
     except SyntaxError:
         return
 
-    checker = ConstitutionalChecker(filepath)
+    checker = ConstitutionalChecker(filepath, violations_list)
     checker.visit(tree)
 
 def scan():
@@ -183,8 +188,9 @@ def scan():
 
         for root, _, files in os.walk(path):
             for file in files:
-                if file.endswith(".py") or file.endswith(".ts"):
-                    check_file(os.path.join(root, file))
+                # Only check Python files for now (TypeScript support TODO)
+                if file.endswith(".py"):
+                    check_file(os.path.join(root, file), violations)
 
 def main():
     scan()
