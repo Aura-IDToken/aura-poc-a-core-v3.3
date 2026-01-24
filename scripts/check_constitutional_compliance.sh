@@ -144,7 +144,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "CHECK 6: No GPU Dependencies"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-GPU_VIOLATIONS=$(grep -r "cuda\|CUDA\|\.to\(.*device.*\)\|\.gpu\(\)" core/ \
+GPU_VIOLATIONS=$(grep -r "cuda\|CUDA\|\.to(.*device.*)\|\.gpu()" core/ \
     --include="*.py" \
     2>/dev/null || true)
 
@@ -211,7 +211,7 @@ echo "CHECK 9: Layer Separation - No Thresholds in Core"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # This is a heuristic check - look for common threshold patterns
-THRESHOLD_VIOLATIONS=$(grep -r "if.*>.*threshold\|if.*<.*threshold\|THRESHOLD\s*=" core/ \
+THRESHOLD_VIOLATIONS=$(grep -r "if.*>.*threshold\|if.*<.*threshold\|THRESHOLD *=" core/ \
     --include="*.py" \
     --exclude="test_*.py" \
     --exclude="policy.py" \
