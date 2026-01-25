@@ -167,6 +167,7 @@ This repository enforces:
   mathematical_foundation.md      # Mathematical specifications
   regulatory_compliance.md        # AI Act mapping
   threat_model.md                 # Security threat model
+  KNOWN_LIMITATIONS.md            # Known anomalies and architectural debt
 
 /infra
   docker-compose.yml         # Sovereign stack (CPU-only)
