@@ -80,5 +80,10 @@ immutability, and availability of the frozen protocol.
 ---
 
 ## Instrument Lineage
-The cryptographic identity of a frozen protocol version defined by
+A succession of measurement instruments, not software versions.
+Each lineage is legally and cryptographically independent.
+
+The cryptographic identity of a frozen protocol version is defined by
 hashes and archival artifacts (e.g., M-DISC).
+
+If these distinctions cannot be maintained, request clarification before generating text.
