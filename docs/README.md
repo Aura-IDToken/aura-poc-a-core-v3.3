@@ -11,6 +11,7 @@ This directory contains formal specifications, design documents, and compliance 
 
 ### Compliance Materials  
 - **[regulatory_compliance.md](regulatory_compliance.md)**: EU AI Act compliance, nomenclature, audit readiness
+- **[KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)**: Known anomalies and architectural debt in v3.3
 
 ## Directory Structure
 
