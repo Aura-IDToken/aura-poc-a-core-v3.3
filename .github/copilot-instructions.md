@@ -86,7 +86,19 @@ You MUST follow these rules:
 ## Escalation Rule (Human-in-the-Loop)
 
 If a naming or positioning conflict cannot be resolved deterministically,
-the assistant must escalate to a human maintainer or Protocol Custodian
-before producing output.
+the assistant must escalate before producing output.
+
+**Escalation does NOT grant authority to reinterpret canonical definitions.**
+
+**Authority Hierarchy:**
+- **Protocol Custodian:** Final authority on all canonical definitions, constitutional constants, and regulatory interpretations
+- **Human Maintainer:** May provide implementation guidance, but CANNOT reinterpret canonical definitions
+
+**When escalating:**
+- For implementation questions → human maintainer or Protocol Custodian
+- For canonical definition conflicts → Protocol Custodian ONLY
+- For constitutional matters → Protocol Custodian ONLY
+
+**Final authority always resides with the Protocol Custodian.**
 
 This is a governance safeguard, not a creative limitation.
