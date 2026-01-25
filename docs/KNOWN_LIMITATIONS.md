@@ -68,7 +68,7 @@ This violates **Constitutional Decree Article I, Section 6 (Layer Separation)**:
 **For Auditors:**
 - Interpretation logic is **non-normative**
 - Use raw `ari` and `drift` values only
-- Ignore `status` field in compliance decisions
+- Ignore the `status` field in compliance decisions
 
 **For Integrators:**
 - Do NOT rely on `status` field for production decisions
@@ -80,11 +80,11 @@ This violates **Constitutional Decree Article I, Section 6 (Layer Separation)**:
 **Target Version:** v4.x (next instrument lineage)
 
 **Remediation:**
-1. Remove `status` field from `core/evaluator.py`
-2. Remove `COMPLIANCE_THRESHOLD` constant from Layer 0
-3. Move threshold interpretation to `compliance/` layer
+1. Remove the `status` field from `core/evaluator.py`
+2. Remove the `COMPLIANCE_THRESHOLD` constant from Layer 0
+3. Move threshold interpretation to the `compliance/` layer
 4. Update all tests to check raw metrics only
-5. Update integration contracts to remove `status` dependency
+5. Update integration contracts to remove the `status` dependency
 
 **Blocked By:**
 - Requires backward-incompatible API change
