@@ -293,6 +293,9 @@ The following naming rules are mandatory for all documentation, communication, a
 
 Incorrect naming can result in legal misclassification of the system under the EU AI Act and is considered a documentation defect.
 
+**Important for AI Assistants:**  
+If these distinctions cannot be maintained, request clarification before generating text.
+
 ---
 
 ## 12. FINAL STATEMENT

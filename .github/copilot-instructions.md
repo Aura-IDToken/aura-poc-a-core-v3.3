@@ -80,3 +80,13 @@ You MUST follow these rules:
    - ✅ "Compliance decisions are external"
 
 8. If you cannot maintain this distinction, DO NOT write text.
+
+---
+
+## Escalation Rule (Human-in-the-Loop)
+
+If a naming or positioning conflict cannot be resolved deterministically,
+the assistant must escalate to a human maintainer or Protocol Custodian
+before producing output.
+
+This is a governance safeguard, not a creative limitation.
