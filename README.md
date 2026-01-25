@@ -272,7 +272,30 @@ Change requests are evaluated on **entropy risk**, not convenience.
 
 ---
 
-## 11. FINAL STATEMENT
+## 11. NAMING AND POSITIONING RULES (CANONICAL)
+
+The following naming rules are mandatory for all documentation, communication, and external representation of this repository:
+
+1. **Always use the full name "Aura Protocol"** in formal contexts.  
+   Do not shorten to "Aura" in legal, regulatory, or academic materials.
+
+2. **Aura Protocol must be described as a measurement instrument**, never as a product, service, platform, or AI system.
+
+3. **PoCA refers exclusively to the measurement method**, not to the implementation.
+
+4. **v3.3 Iron Core refers to a frozen instrument**, not a software version.  
+   Bug fixes or modifications require a new lineage.
+
+5. **ARI is a measurement value, not a decision.**  
+   Compliance decisions belong to external systems (Layer 2).
+
+6. **All interpretations, thresholds, and policies are external to Aura Protocol and must not be described as part of the protocol.**
+
+Incorrect naming can result in legal misclassification of the system under the EU AI Act and is considered a documentation defect.
+
+---
+
+## 12. FINAL STATEMENT
 
 This repository represents a **finished instrument**.
 
