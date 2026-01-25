@@ -61,6 +61,12 @@ Layer 0 must never contain decision logic, thresholds, or policy.
 
 ---
 
+## Layer 1 (Cryptographic Proof Layer)
+The audit and verification layer that provides cryptographic non-repudiation
+through Merkle trees, hash verification, and zero-knowledge proofs.
+
+---
+
 ## Layer 2 (Policy Layer)
 An external system that consumes measurement outputs and applies
 context-dependent interpretation or decisions.
