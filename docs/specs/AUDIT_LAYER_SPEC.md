@@ -417,7 +417,7 @@ Any of the following causes FAIL:
 
 All operations defined in this specification are deterministic:
 
-- SHA-256 is a pure function with no platform-dependent behaviour.
+- SHA-256 is a pure function with no platform-dependent behavior.
 - JSON serialization with `sort_keys=True` and fixed separators is deterministic.
 - HMAC-SHA256 with a fixed key and payload is deterministic.
 - Integer arithmetic (ARI, drift) uses Python's arbitrary-precision integers;

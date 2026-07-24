@@ -124,7 +124,8 @@ class FutureEd25519Signer(Signer):
 
     def sign(self, payload: bytes) -> str:
         raise NotImplementedError(
-            "Ed25519 signing is reserved for a future instrument version. "
+            "Ed25519 signing is reserved for a future instrument version requiring "
+            "Protocol Custodian approval and a new instrument lineage. "
             "Current Audit Layer uses HMAC-SHA256 (HMACSigner)."
         )
 
@@ -141,7 +142,8 @@ class FutureEd25519Verifier(Verifier):
 
     def verify(self, payload: bytes, signature: str) -> bool:
         raise NotImplementedError(
-            "Ed25519 verification is reserved for a future instrument version. "
+            "Ed25519 verification is reserved for a future instrument version requiring "
+            "Protocol Custodian approval and a new instrument lineage. "
             "Current Audit Layer uses HMAC-SHA256 (HMACVerifier)."
         )
 
