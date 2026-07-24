@@ -10,7 +10,8 @@
 
 ## Open limitations
 
-No open limitations are currently tracked in this document for the CORE-005 synchronization scope.
+This document tracks repository limitations at the current v3.3 state.
+No open limitations are currently recorded here after the CORE-005 documentation synchronization.
 
 ---
 

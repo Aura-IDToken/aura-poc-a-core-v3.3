@@ -38,6 +38,6 @@ All values are integer-scaled.
 
 ## Notes
 
-- The repository does not expose a Python `calculate_ari()` helper.
-- The repository does not expose a `generateProof()` or `verifyProof()` helper in this package.
-- Proof-generation tooling is external to this repository.
+- The repository exposes `PoCAEvaluator` as the Layer 0 measurement interface.
+- Policy-aware flows are intentionally routed through `compliance.evaluator_wrapper` and `compliance.policy`.
+- Proof-generation tooling remains intentionally external to this repository boundary.

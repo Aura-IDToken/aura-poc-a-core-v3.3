@@ -45,4 +45,4 @@ from compliance.evaluator_wrapper import evaluate_with_policy
 from compliance.policy import RegulatoryPolicy
 ```
 
-Use only current repository APIs; do not rely on nonexistent helpers such as `calculate_ari()`.
+Use the current repository measurement interface (`PoCAEvaluator`) and Layer 2 orchestration interface (`evaluate_with_policy`) when preparing ARI inputs for this circuit.

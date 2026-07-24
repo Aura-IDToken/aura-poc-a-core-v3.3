@@ -30,4 +30,4 @@ from compliance.policy import RegulatoryPolicy
 from compliance.consistency import ConsistencyCalculator
 ```
 
-Do not use `from core.evaluator import evaluate` or `from core.evaluator import calculate_ari`; those APIs do not exist in the current implementation.
+Use `PoCAEvaluator` as the Layer 0 measurement interface and the `compliance.*` modules as the current Layer 2 interfaces.

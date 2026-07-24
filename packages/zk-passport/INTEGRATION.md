@@ -70,4 +70,4 @@ This example uses only APIs that exist in the current repository.
 ## Import guidance
 
 Use `PoCAEvaluator`, `evaluate_with_policy`, and `RegulatoryPolicy` from the current modules shown above.
-Do not document or rely on a `calculate_ari()` helper; that function does not exist in the current implementation.
+These modules define the current repository-supported measurement and orchestration surface.
