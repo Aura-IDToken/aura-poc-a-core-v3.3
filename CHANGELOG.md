@@ -46,7 +46,7 @@ independent security audit, and regulatory assessment.
   `verify_signature()`, `_signing_payload()`, and `to_dict()` signature serialisation.
   `MerkleTree.create_etc()` updated to accept `Signer`.
 - `audit/verify.py` — `verify_etc()` added.
-- `audit/test_audit.py` — 49-test normative test suite covering signing abstraction,
+- `audit/test_audit.py` — 53-test normative test suite covering signing abstraction,
   canonical serialisation, Merkle construction, proof verification, ETC lifecycle,
   combined verification, and cross-platform determinism vectors.
 - `scripts/generate_determinism_report.py` — generates `determinism-report-<arch>.json`
