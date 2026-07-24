@@ -11,16 +11,30 @@ from compliance.policy import RegulatoryPolicy
 from compliance.evaluator_wrapper import evaluate_with_policy
 from core.merkle import MerkleAttestor
 
+# Scaling factor for int32 fixed-point arithmetic (10^5).
+# This mirrors PoCAEvaluator.SCALING_FACTOR and ADR-005 DET_02.
+_SCALING_FACTOR = 100000  # 10^5
+
+# Minimum int32 drift (scaled by 10^5) considered "high drift" for demo display.
+# 30000 = 0.3 × 10^5 — demonstration threshold only; not a protocol threshold.
+_DEMO_DRIFT_HIGH = 30000  # 0.3 in int32 scale
+
 
 def _normalize_int32(vector):
     """
     Convert a float demo vector to a normalized int32 vector (10^5 scaling).
-    Demo-only helper — mirrors offline_normalizer logic for short demo vectors.
+
+    DEMO-ONLY: Float arithmetic (math.sqrt) is used here because this function
+    runs as a standalone demo script, NOT in the runtime measurement core.
+    In production, use core/offline_normalizer.normalize_constitution_vector()
+    instead, which also handles the required 1536-dimensional constitution vectors.
+
+    Constitutional reference: CONSTITUTIONAL_DECREE.md Article VII (Offline Normalization)
     """
     mag = math.sqrt(sum(x * x for x in vector))
     if mag == 0:
         return [0] * len(vector)
-    return [round(x / mag * 100000) for x in vector]
+    return [round(x / mag * _SCALING_FACTOR) for x in vector]
 
 
 def demo_compliant_agent():
@@ -52,8 +66,9 @@ def demo_compliant_agent():
     # Step 2: ARI calculation (with policy orchestration)
     print(f"\n2. Calculating ARI for agent: {agent_id}")
     ari_result = evaluate_with_policy(evaluator, agent_id, agent_vector, valid_schema)
-    print(f"   ARI Score: {ari_result['ari']} (int32, ~{ari_result['ari'] / 100000:.3f} normalized)")
-    print(f"   Drift:     {ari_result['drift']} (int32, ~{ari_result['drift'] / 100000:.3f} normalized)")
+    # Display raw int32 values and their normalized float equivalents for readability
+    print(f"   ARI Score: {ari_result['ari']} (int32, ~{ari_result['ari'] / _SCALING_FACTOR:.3f} normalized)")
+    print(f"   Drift:     {ari_result['drift']} (int32, ~{ari_result['drift'] / _SCALING_FACTOR:.3f} normalized)")
 
     # Step 3: Generate Event Trust Certificate
     print("\n3. Generating Event Trust Certificate (ETC)")
@@ -131,11 +146,10 @@ def demo_drift_detection():
     result = evaluator.evaluate(agent_id, drifted_vector, True)
 
     print(f"\n2. Results:")
-    print(f"   ARI Score: {result['ari']} (int32, ~{result['ari'] / 100000:.3f} normalized)")
-    print(f"   Drift:     {result['drift']} (int32, ~{result['drift'] / 100000:.3f} normalized)")
+    print(f"   ARI Score: {result['ari']} (int32, ~{result['ari'] / _SCALING_FACTOR:.3f} normalized)")
+    print(f"   Drift:     {result['drift']} (int32, ~{result['drift'] / _SCALING_FACTOR:.3f} normalized)")
 
-    # Threshold 30000 = 0.3 in int32 scale (10^5)
-    if result['drift'] > 30000:
+    if result['drift'] > _DEMO_DRIFT_HIGH:
         print("\n   ⚠ High drift detected - penalty applied")
 
     print("\n✓ Drift detection working\n")
