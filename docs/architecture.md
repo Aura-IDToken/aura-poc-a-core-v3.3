@@ -1,28 +1,78 @@
-# Aura PoCA Core Architecture
+# Aura Protocol Architecture
+
+## Current flow
 
 ```
-MACHINE_ACCOUNT Agent → Event → PoCA Core → Audit Layer → Compliance Output
-                                     ↓
-                            Agent Reliability Index (ARI)
-                         0.3×SI + 0.7×SA - Penalties
-                              in ℝ¹⁵³⁶ space
+Normalized int32 vectors
+        |
+        v
+compliance.policy.RegulatoryPolicy
+        |
+        v
+compliance.evaluator_wrapper.evaluate_with_policy()
+        |
+        v
+core.evaluator.PoCAEvaluator.evaluate()
+        |
+        +--> core.merkle.MerkleAttestor (minimal ETC helper)
+        |
+        +--> audit.merkle.MerkleTree / audit.verify (Merkle proof layer)
+        |
+        v
+compliance.certificate / compliance.renderer
 ```
 
-This system enforces:
-- **Deterministic evaluation**: Same input → Same ARI
-- **Cryptographic non-repudiation**: Merkle proofs + SHA-256
-- **Regulator-readable outputs**: AI Act Article 13 compliance
-- **Agent-only scope**: MACHINE_ACCOUNT entities (Art. 5 compliant)
+## Layer responsibilities
 
-## Krasinski Principle
+| Layer | Modules | Responsibility |
+|------|---------|----------------|
+| Layer 0 | `core.evaluator`, `core.merkle`, `core.offline_normalizer` | Deterministic measurement primitives |
+| Layer 1 | `audit.merkle`, `audit.verify` | Merkle proof construction and verification |
+| Layer 2 | `compliance.policy`, `compliance.evaluator_wrapper`, `compliance.consistency`, `compliance.certificate`, `compliance.renderer` | Policy enforcement, orchestration, reporting |
+| Layer 3 | `docs/` | Canonical documentation |
 
-**T ∝ 1/S**
+## CORE-005 synchronization
 
-Transparency (T) inversely proportional to Secrecy/Entropy (S).
+CORE-005 moved policy-aware orchestration out of Layer 0.
 
-## Key Components
+- `core.evaluator.PoCAEvaluator.evaluate()` returns raw integer-scaled measurement fields only.
+- `compliance.evaluator_wrapper.evaluate_with_policy()` is the current policy-aware entry point.
+- `compliance.policy.RegulatoryPolicy` owns halt checks and penalty logic.
+- `core.policy` and `core.consistency` are deprecated wrappers retained for compatibility in v3.3.
 
-1. **Core Engine** (`/core`): ARI calculation (frozen formula)
-2. **Audit Layer** (`/audit`): Merkle trees + verification
-3. **Compliance Layer** (`/compliance`): Certificate generation + rendering
-4. **Documentation** (`/docs`): Mathematical foundation + regulatory mapping
+## Repository structure
+
+```
+aura-poc-a-core-v3.3/
+├── audit/
+│   ├── merkle.py
+│   └── verify.py
+├── compliance/
+│   ├── __init__.py
+│   ├── certificate.py
+│   ├── consistency.py
+│   ├── evaluator_wrapper.py
+│   ├── policy.py
+│   └── renderer.py
+├── core/
+│   ├── consistency.py      # deprecated wrapper
+│   ├── embedding.py
+│   ├── evaluator.py
+│   ├── merkle.py
+│   ├── offline_normalizer.py
+│   └── policy.py           # deprecated wrapper
+├── docs/
+├── packages/
+│   ├── database-client/
+│   └── zk-passport/
+└── scripts/
+```
+
+## Preferred imports
+
+```python
+from core.evaluator import PoCAEvaluator
+from compliance.evaluator_wrapper import evaluate_with_policy
+from compliance.policy import RegulatoryPolicy, PolicyRule, get_kill_switch
+from compliance.consistency import ConsistencyCalculator
+```
