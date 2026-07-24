@@ -2,6 +2,19 @@
 """
 AURA-IDTOKEN: Demonstration Script
 Shows the complete flow from policy validation to ETC generation
+
+NOTE — FLOAT EXEMPTION:
+This file is a standalone demo script, NOT part of the runtime measurement
+core (core/) or the protected package paths (packages/).
+
+The Constitutional Decree's zero-float rule (Article I §1) and the purity
+checker (scripts/verify_constitutional_purity.py) apply only to:
+  - core/
+  - packages/
+
+Float operations in THIS file (math.sqrt for normalization, integer display
+formatting) are explicitly outside that scope. In production pipelines, use
+core/offline_normalizer.normalize_constitution_vector() instead of _normalize_int32().
 """
 
 import math
@@ -66,7 +79,7 @@ def demo_compliant_agent():
     # Step 2: ARI calculation (with policy orchestration)
     print(f"\n2. Calculating ARI for agent: {agent_id}")
     ari_result = evaluate_with_policy(evaluator, agent_id, agent_vector, valid_schema)
-    # Display raw int32 values and their normalized float equivalents for readability
+    # Display: raw int32 first, then human-readable ratio (display-only division, not runtime core)
     print(f"   ARI Score: {ari_result['ari']} (int32, ~{ari_result['ari'] / _SCALING_FACTOR:.3f} normalized)")
     print(f"   Drift:     {ari_result['drift']} (int32, ~{ari_result['drift'] / _SCALING_FACTOR:.3f} normalized)")
 
@@ -146,6 +159,7 @@ def demo_drift_detection():
     result = evaluator.evaluate(agent_id, drifted_vector, True)
 
     print(f"\n2. Results:")
+    # Display: raw int32 first, then human-readable ratio (display-only division, not runtime core)
     print(f"   ARI Score: {result['ari']} (int32, ~{result['ari'] / _SCALING_FACTOR:.3f} normalized)")
     print(f"   Drift:     {result['drift']} (int32, ~{result['drift'] / _SCALING_FACTOR:.3f} normalized)")
 
