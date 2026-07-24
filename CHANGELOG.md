@@ -1,87 +1,97 @@
-# CHANGELOG
-## Aura Protocol — Iron Core v3.3
+# CHANGELOG — Aura Protocol v3.3 Iron Core
 
-**Format:** This changelog tracks implementation tasks (CORE-NNN) resolved in the Iron Core v3.3 lineage.  
-**Policy:** Changes to core logic create a new instrument, not a new version. This changelog records the path to the frozen v3.3 instrument.  
-**Instrument Version:** v3.3 (Iron Core — Integer Era)  
-**Status:** FROZEN — MC-READY 2026
+**Instrument:** Aura Protocol v3.3 Iron Core  
+**Status:** FROZEN — MC-READY 2026  
+**License:** Business Source License 1.1
 
 ---
 
-## [v3.3] — 2026-07-24 — Iron Core Freeze
+> **Policy:** This repository is a frozen regulatory measurement instrument.
+> Each entry in this log documents a completed task that was authorized before
+> execution. No entry represents a new feature or a change to the
+> constitutional constants.
+
+---
+
+## v3.3 Iron Core — 2026-07-24
 
 ### CORE-007 — Release Closure (2026-07-24)
 
-**Type:** Documentation synchronization / Release engineering  
-**Status:** COMPLETE
+**Type:** Release Engineering / Documentation  
+**Purpose:** Verify, synchronize, and freeze the repository for external technical review,
+independent security audit, and regulatory assessment.
 
-- Synchronized GAP-001.md with post-CORE-006 state: updated directory structure (section 2.1), test coverage table (section 2.4), CI/CD status (section 2.5), implementation maturity (section 2.7), and resolved gap entries (GAP-M5, GAP-M6, GAP-L1)
-- Created CHANGELOG.md (this file)
-- Created RELEASE_CLOSURE_REPORT.md with full release readiness assessment, readiness score, and release recommendation
-- No code changes
+**Documentation corrections:**
+- `docs/GAP-001.md` — updated change log, directory structure, test coverage table, CI/CD
+  section, and implementation maturity table to reflect CORE-006 completion.
+- `docs/architecture.md` — added `Document Version` and `Status: FROZEN` footer to match
+  other normative documents.
+- `CHANGELOG.md` — created (this file); standard release artifact.
 
----
-
-### CORE-006 — Audit Layer Implementation (2026-07-24)
-
-**Type:** Implementation  
-**Status:** COMPLETE
-
-- Implemented `audit/signing.py`: `Signer`/`Verifier` abstract interfaces; `HMACSigner`/`HMACVerifier` (HMAC-SHA256)
-- Implemented `audit/merkle.py`: `MerkleTree`, `EventTrustCertificate`, `sha256`, `verify_proof`; deterministic odd-leaf duplication; ETC creation, signing, verification
-- Implemented `audit/verify.py`: `verify_proof`, `verify_etc`
-- Added `audit/test_audit.py`: 41 tests covering signing abstraction, canonical serialisation, Merkle construction, proof verification, ETC lifecycle, combined verification, cross-platform determinism
-- Added `scripts/generate_determinism_report.py`: generates `determinism-report-<arch>.json` with 5 hash vectors
-- Added `scripts/compare_determinism_reports.py`: exits 0 on PASS, 1 on FAIL
-- Updated `.github/workflows/execution-checks.yml`: enabled ARM64 runner; added `compare-determinism` job
-- Added `docs/specs/AUDIT_LAYER_SPEC.md`: normative, frozen specification for the Audit Layer (v1.0.0)
-- Updated `docs/LEGACY_PROTOCOL.md`: full succession and disaster recovery protocol
-- Updated `docs/KNOWN_LIMITATIONS.md`: KL-001 resolved, KL-002 documented
+**No code changes. No new functionality. No constitutional constants modified.**
 
 ---
 
-### CORE-005 — Layer Separation (2026-07-24)
+### CORE-006 — Audit Layer Hardening (2026-07-24)
 
-**Type:** Critical fix / Architectural  
-**Status:** COMPLETE
+**Type:** Architecture / Implementation  
+**Branch:** `copilot/featurecore-006-audit-hardening`  
+**Merged:** PR #39
 
-Resolved GAP-C1, GAP-C2, GAP-C3, GAP-C4 (critical invariant violations):
+**Files added / modified:**
+- `audit/signing.py` — `Signer` / `Verifier` abstract interfaces; `HMACSigner` /
+  `HMACVerifier` (HMAC-SHA256 via RFC 2104). Constant-time comparison via
+  `hmac.compare_digest`. Type enforcement (bytes-only keys).
+- `audit/merkle.py` — `EventTrustCertificate` extended with `sign()`,
+  `verify_signature()`, `_signing_payload()`, and `to_dict()` signature serialisation.
+  `MerkleTree.create_etc()` updated to accept `Signer`.
+- `audit/verify.py` — `verify_etc()` added.
+- `audit/test_audit.py` — 53-test normative test suite covering signing abstraction,
+  canonical serialisation, Merkle construction, proof verification, ETC lifecycle,
+  combined verification, and cross-platform determinism vectors.
+- `scripts/generate_determinism_report.py` — generates `determinism-report-<arch>.json`
+  containing five determinism vectors (ARI hash, canonical event hash, Merkle root, ETC
+  hash, HMAC signature).
+- `scripts/compare_determinism_reports.py` — compares two reports and exits non-zero on
+  any mismatch.
+- `docs/specs/AUDIT_LAYER_SPEC.md` — normative frozen specification for the Audit Layer
+  (canonical event format, SHA-256, append-only log, Merkle tree, ETC schema, signing).
+- `.github/workflows/execution-checks.yml` — ARM64 runner enabled
+  (`ubuntu-24.04-arm`); `wasm-compat` job added; `compare-determinism` job added.
 
-- Removed `COMPLIANCE_THRESHOLD` and `"status"` field from `core/evaluator.py`; Layer 0 now returns only `{"ari": int32, "drift": int32}`
-- Converted `core/policy.py` to a deprecated backward-compatibility wrapper (re-exports from `compliance/policy.py`)
-- Converted `core/consistency.py` to a deprecated backward-compatibility wrapper (re-exports from `compliance/consistency.py`)
-- Created `compliance/evaluator_wrapper.py`: `evaluate_with_policy()` as the canonical Layer 2 orchestrator
-- All policy logic (`RegulatoryPolicy`, `KillSwitch`, `PolicyRule`, `ConsistencyCalculator`) resides exclusively in `compliance/`
-- `core/` contains only pure measurement (ARI calculation); no policy decisions
-- `check_2_integer_only.sh` and `check_3_layer_separation.sh` both pass
+**Constitutional compliance:** All changes are integer/byte-only. No float operations
+introduced. Layer separation preserved (audit/ = Layer 1). No new runtime dependencies.
 
 ---
 
-### CORE-003/004 — Remove Float from Runtime Core (2026-01-23 — 2026-07-24)
+### CORE-005 — Layer Separation Repair (2026-07-24)
 
-**Type:** Critical fix  
-**Status:** COMPLETE
+**Type:** Architecture / Critical Fix  
+**Reference:** `CORE-005-IMPLEMENTATION-REPORT.md`
 
-- Rewrote `core/evaluator.py` (`PoCAEvaluator`) to use integer-only arithmetic with 10^5 fixed-point scaling
-- Removed `import math` and all float operations from runtime paths
-- `compliance/consistency.py` (`ConsistencyCalculator`) uses integer arithmetic only
-- `core/offline_normalizer.py` remains the sole permitted float computation (DET_01)
-- `check_2_integer_only.sh` passes
+**Summary:** Resolved GAP-C1 through GAP-C4 identified in GAP-001:
+- Removed float arithmetic from `core/evaluator.py` (GAP-C1).
+- Removed float arithmetic from `core/consistency.py` → deprecated wrapper (GAP-C2).
+- Removed policy/threshold logic from `core/evaluator.py` (GAP-C3).
+- Moved `RegulatoryPolicy`, `PolicyRule`, `KillSwitch` to `compliance/policy.py` (GAP-C4).
+- `core/policy.py` and `core/consistency.py` converted to backward-compatibility wrappers
+  emitting `DeprecationWarning`; scheduled removal in v4.0 (KL-002).
+- `compliance/evaluator_wrapper.py` created: `evaluate_with_policy()` orchestrator.
+- All tests updated to import from `compliance.*`.
 
 ---
 
-## [v3.2] — Historical (Float Era)
+## v3.2 — Legacy Float Era (pre-2026)
 
-v3.2 used floating-point cosine similarity at runtime. This violated cross-architecture bit-identity requirements (IEEE-754 non-determinism on AVX vs NEON vs WASM).
+Prior to v3.3, `core/evaluator.py` used `math.sqrt` and IEEE-754 floating-point cosine
+similarity at runtime, which violated cross-architecture reproducibility requirements
+(ADR-005). The v3.2 artifact is retained for audit traceability only.
 
-v3.2 is not auditable under EU AI Act Article 13 due to non-reproducible float results.
-
-**Migration path:** v3.2 → v3.3 requires replacing all runtime float operations with int32 fixed-point arithmetic and pre-normalising vectors offline.
+See `docs/mathematical_foundation.md` §"Semantic Alignment — Historical Background" for
+the removed float implementation.
 
 ---
 
 **Custodian:** Kamil Krasiński  
-**License:** Business Source License 1.1  
-**Scaling Factor:** 100,000 (FROZEN)  
-**Sentinel Constant:** 0.68 (FROZEN)  
-**Runtime Float Count:** 0  
+**Constitutional Version:** 1.0  
+**Entropy Budget:** Frozen

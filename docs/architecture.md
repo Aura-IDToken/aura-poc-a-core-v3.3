@@ -96,3 +96,9 @@ evaluator = PoCAEvaluator(constitution_vector_int32)
 result = evaluate_with_policy(evaluator, agent_id, vector_int32, valid_schema)
 # {"ari": <int32>, "drift": <int32>}
 ```
+
+---
+
+**Document Version**: 1.0.0  
+**Instrument**: Aura Protocol v3.3 Iron Core  
+**Status**: FROZEN — MC-READY 2026
