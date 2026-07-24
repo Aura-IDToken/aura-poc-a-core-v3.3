@@ -54,6 +54,7 @@ class TestAuditLayer(unittest.TestCase):
         self.assertEqual(hashes[1], second.event.canonical_hash())
 
     def test_corrupted_merkle_path_fails(self):
+        self.pipeline.append_and_certify(self._event_payload("evt-0"))
         result = self.pipeline.append_and_certify(self._event_payload("evt-1"))
         cert = result.certificate
         bad_proof = list(cert.merkle_proof)
