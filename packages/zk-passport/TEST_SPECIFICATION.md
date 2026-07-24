@@ -45,4 +45,4 @@ from compliance.evaluator_wrapper import evaluate_with_policy
 from compliance.policy import RegulatoryPolicy
 ```
 
-Do not document or test against nonexistent helpers such as `calculate_ari()`.
+Use only current repository APIs; do not rely on nonexistent helpers such as `calculate_ari()`.
