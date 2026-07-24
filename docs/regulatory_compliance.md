@@ -113,7 +113,40 @@ By maximizing T (minimizing S), Aura Protocol achieves:
 
 **Architecture Guarantee**: Agent ID field constrained to machine identifiers.
 
-## Audit Readiness
+## Non-Repudiation and Signing
+
+### Current Implementation: HMAC-SHA256
+
+Event Trust Certificates (ETCs) are signed using **HMAC-SHA256**.
+
+Implementation: `audit/signing.py :: HMACSigner` / `HMACVerifier`
+
+The signing key is external to this repository and must be managed by the
+Protocol Custodian.  All certificate verification requires the same key.
+
+### Future Roadmap: Ed25519 Asymmetric Signing
+
+The signing abstraction (`audit/signing.py`) exposes `Signer` / `Verifier`
+base classes.  `FutureEd25519Signer` and `FutureEd25519Verifier` stubs are
+provided but are **not implemented** in v3.3.
+
+Migration to Ed25519 requires:
+1. A new instrument version (new lineage, not a patch)
+2. Formal regulatory re-assessment
+3. Key generation and custody procedures
+
+The abstraction ensures the Audit Layer API will not change when this migration
+is performed.
+
+### Normative Audit Specification
+
+The complete normative specification for the Audit Layer is:
+
+**[docs/specs/AUDIT_LAYER_SPEC.md](specs/AUDIT_LAYER_SPEC.md)**
+
+---
+
+
 
 ### Regulatory Audit Support
 
