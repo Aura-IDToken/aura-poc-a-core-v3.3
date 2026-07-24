@@ -3,7 +3,6 @@ Consistency Calculator for Proof of Consistent Agency (PoCA)
 Integrates with policy enforcement and kill-switch oversight
 """
 
-import math
 from typing import Dict, Any, List
 from compliance.policy import PolicyRule, SystemHaltException, get_kill_switch
 
@@ -16,7 +15,12 @@ class ConsistencyCalculator:
     with policy enforcement and emergency halt capability.
     """
 
-    def __init__(self, constitution_vector: List[float], rules: List[PolicyRule]):
+    SCALING_FACTOR = 100000
+    STRUCTURAL_WEIGHT = 30000
+    SEMANTIC_WEIGHT = 70000
+    VIOLATION_PENALTY = 10000
+
+    def __init__(self, constitution_vector: List[int], rules: List[PolicyRule]):
         self.constitution = constitution_vector
         self.rules = rules
         self._kill_switch = get_kill_switch()
@@ -37,21 +41,25 @@ class ConsistencyCalculator:
             self._kill_switch.assert_not_halted()
         except SystemHaltException as e:
             return {
-                "score": 0.0,
+                "score": 0,
                 "reason": f"System halted: {str(e)}",
                 "status": "HALTED",
                 "halted": True,
             }
 
         structural = self._validate_structure(event)
-        if structural == 0.0:
+        if structural == 0:
             return self._fail("Invalid structure")
 
         semantic = self._semantic_alignment(event["embedding"])
         penalty = self._policy_penalty(event)
 
-        score = (0.3 * structural) + (0.7 * semantic) - penalty
-        final_score = max(0.0, min(1.0, score))
+        score = (
+            self.STRUCTURAL_WEIGHT * structural // self.SCALING_FACTOR
+            + self.SEMANTIC_WEIGHT * semantic // self.SCALING_FACTOR
+            - penalty
+        )
+        final_score = max(0, min(self.SCALING_FACTOR, score))
 
         return {
             "score": final_score,
@@ -61,37 +69,33 @@ class ConsistencyCalculator:
             "halted": False,
         }
 
-    def _validate_structure(self, event: Dict[str, Any]) -> float:
+    def _validate_structure(self, event: Dict[str, Any]) -> int:
         """Validate event has required structure."""
         required = ["timestamp", "embedding", "content"]
-        return 1.0 if all(k in event for k in required) else 0.0
+        return self.SCALING_FACTOR if all(k in event for k in required) else 0
 
-    def _semantic_alignment(self, event_vec: List[float]) -> float:
+    def _semantic_alignment(self, event_vec: List[int]) -> int:
         """
-        Calculate cosine similarity between event and constitution.
-        Deterministic semantic alignment score.
+        Calculate fixed-point similarity between pre-normalized event and constitution vectors.
         """
+        if not any(event_vec) or not any(self.constitution):
+            return 0
+
         dot = sum(a * b for a, b in zip(event_vec, self.constitution))
-        norm_a = math.sqrt(sum(a * a for a in event_vec))
-        norm_b = math.sqrt(sum(b * b for b in self.constitution))
+        return dot // self.SCALING_FACTOR
 
-        if norm_a == 0 or norm_b == 0:
-            return 0.0
-
-        return dot / (norm_a * norm_b)
-
-    def _policy_penalty(self, event: Dict[str, Any]) -> float:
+    def _policy_penalty(self, event: Dict[str, Any]) -> int:
         """
         Calculate penalty from policy violations.
         Art. 5 Compliance: Purely algorithmic evaluation.
         """
-        violations = sum(1.0 for rule in self.rules if rule.is_violated(event))
-        return violations * 0.1
+        violations = sum(1 for rule in self.rules if rule.is_violated(event))
+        return violations * self.VIOLATION_PENALTY
 
     def _fail(self, reason: str) -> Dict[str, Any]:
         """Return failure result with reason."""
         return {
-            "score": 0.0,
+            "score": 0,
             "reason": reason,
             "status": "FAIL",
             "halted": False,

@@ -39,7 +39,7 @@ def test_art5_algorithmic_policy():
         print(f"✓ Correctly rejected non-callable policy: {e}")
     
     # Test policy violation detection
-    event = {"content": "x" * 1001, "timestamp": "2026-01-17", "embedding": [0.5] * 32}
+    event = {"content": "x" * 1001, "timestamp": "2026-01-17", "embedding": [50000] * 32}
     is_violated = rule.is_violated(event)
     print(f"✓ Policy violation detected: {is_violated}")
     
@@ -148,18 +148,18 @@ def test_art14_kill_switch():
         print(f"✓ System correctly halted: {str(e)[:80]}...")
     
     # Test consistency calculator respects kill-switch
-    constitution = [0.5] * 32
+    constitution = [50000] * 32
     rules = []
     calc = ConsistencyCalculator(constitution, rules)
     
     event = {
         "timestamp": "2026-01-17T14:00:00Z",
-        "embedding": [0.5] * 32,
+        "embedding": [50000] * 32,
         "content": "test content"
     }
     
     result = calc.calculate(event)
-    if result.get("halted", False) and result["score"] == 0.0:
+    if result.get("halted", False) and result["score"] == 0:
         print(f"✓ Consistency calculator respects kill-switch")
     else:
         print(f"✗ Consistency calculator did not respect kill-switch: {result}")
@@ -179,8 +179,8 @@ def test_art14_kill_switch():
     
     # Verify system operates normally
     result = calc.calculate(event)
-    if not result.get("halted", False) and result["score"] > 0.0:
-        print(f"✓ System operates normally after deactivation (score: {result['score']:.3f})")
+    if not result.get("halted", False) and result["score"] > 0:
+        print(f"✓ System operates normally after deactivation (score: {result['score']})")
     else:
         print(f"✗ System not operating after deactivation: {result}")
         return False
@@ -218,7 +218,7 @@ def test_integrated_poca_flow():
     # Calculate consistency
     result = calc.calculate(event)
     if "score" in result:
-        print(f"✓ Consistency score calculated: {result['score']:.3f}")
+        print(f"✓ Consistency score calculated: {result['score']}")
     else:
         print(f"✗ Failed to calculate consistency: {result}")
         return False
@@ -238,8 +238,8 @@ def test_integrated_poca_flow():
         agent_id="test_agent_001",
         timestamp=event["timestamp"],
         ari_score=result["score"],
-        drift=0.0,
-        status="COMPLIANT" if result["score"] > 0.7 else "DRIFT",
+        drift=0,
+        status="COMPLIANT" if result["score"] > 70000 else "DRIFT",
         merkle_root=tree.get_root(),
         leaf_hash=tree.leaves[0],
     )
