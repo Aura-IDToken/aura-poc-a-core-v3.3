@@ -33,9 +33,9 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
-from core.offline_normalizer import generate_sample_constitution, SCALING_FACTOR
+from core.offline_normalizer import generate_sample_constitution
 from audit.merkle import MerkleTree, sha256
-from audit.signing import HMACSigner, HMACVerifier
+from audit.signing import HMACSigner
 
 # ---------------------------------------------------------------------------
 # Engine version
