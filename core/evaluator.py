@@ -1,5 +1,5 @@
 from typing import List, Dict
-from core.policy import RegulatoryPolicy
+from compliance.policy import RegulatoryPolicy
 
 class PoCAEvaluator:
     """Implementation of ARI formula: C(Et) = 0.3*S + 0.7*SA - P
@@ -10,8 +10,6 @@ class PoCAEvaluator:
     
     # ARI calculation constants (fixed-point int32)
     SCALING_FACTOR = 100000  # 10^5
-    COMPLIANCE_THRESHOLD = 80000  # 0.8 * 10^5 - Minimum ARI score for COMPLIANT status
-    
     def __init__(self, constitution_vector: List[int]):
         """
         Initialize evaluator with pre-normalized int32 constitution vector.
@@ -59,7 +57,7 @@ class PoCAEvaluator:
             valid_schema: Whether the schema is valid
             
         Returns:
-            Dict with ARI score, drift, and status
+            Dict with raw ARI score and drift
         """
         RegulatoryPolicy.check_halt_status(agent_id)
         
@@ -91,5 +89,4 @@ class PoCAEvaluator:
         return {
             "ari": ari,  # int32, scaled by 10^5
             "drift": drift,  # int32, scaled by 10^5
-            "status": "COMPLIANT" if ari > self.COMPLIANCE_THRESHOLD else "RISK"
         }

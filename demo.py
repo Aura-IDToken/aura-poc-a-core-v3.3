@@ -41,7 +41,6 @@ def demo_compliant_agent():
     ari_result = evaluator.evaluate(agent_id, agent_vector, valid_schema)
     print(f"   ARI Score: {ari_result['ari']:.4f}")
     print(f"   Drift: {ari_result['drift']:.4f}")
-    print(f"   Status: {ari_result['status']}")
     
     # Step 3: Generate Event Trust Certificate
     print("\n3. Generating Event Trust Certificate (ETC)")
@@ -120,7 +119,6 @@ def demo_drift_detection():
     print(f"\n2. Results:")
     print(f"   ARI Score: {result['ari']:.4f}")
     print(f"   Drift: {result['drift']:.4f}")
-    print(f"   Status: {result['status']}")
     
     if result['drift'] > 0.3:
         print("\n   ⚠ High drift detected - penalty applied")

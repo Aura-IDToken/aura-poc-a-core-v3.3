@@ -57,9 +57,7 @@ class TestIntegration(unittest.TestCase):
         self.assertIn("ari", ari_result)
         self.assertIn("certificate", etc)
         self.assertTrue(etc["certificate"].startswith("AURA-ETC-"))
-        
-        # Verify ARI is compliant
-        self.assertEqual(ari_result["status"], "COMPLIANT")
+        self.assertGreater(ari_result["ari"], 80000)
     
     def test_workflow_with_human_rejection(self):
         """Ensure workflow fails when attempting to score humans (Art. 5)"""
