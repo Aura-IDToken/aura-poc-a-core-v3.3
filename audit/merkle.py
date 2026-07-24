@@ -53,8 +53,10 @@ class EventTrustCertificate:
         for sibling, direction in self.merkle_proof:
             if direction == "left":
                 current = sha256(sibling + current)
-            else:
+            elif direction == "right":
                 current = sha256(current + sibling)
+            else:
+                return False
         return current == self.merkle_root
 
 
@@ -192,6 +194,8 @@ def verify_proof(leaf: str, proof: List[Tuple[str, str]], root: str) -> bool:
     for sibling, direction in proof:
         if direction == "left":
             current = sha256(sibling + current)
-        else:
+        elif direction == "right":
             current = sha256(current + sibling)
+        else:
+            return False
     return current == root

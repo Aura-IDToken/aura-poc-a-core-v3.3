@@ -5,6 +5,8 @@ from typing import Dict, Any
 import json
 import hashlib
 
+from audit.pipeline import AuditLayerPipeline, AuditPipelineResult
+
 
 @dataclass(frozen=True)
 class AuraEventCertificate:
@@ -68,3 +70,31 @@ class AuraEventCertificate:
         """
         payload = json.dumps(self.to_dict(), sort_keys=True)
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def issue_audit_certificate(
+    pipeline: AuditLayerPipeline,
+    event_id: str,
+    timestamp: str,
+    agent_id: str,
+    ari: int,
+    drift: int,
+    schema_valid: bool,
+    engine_version: str,
+    policy_version: str,
+) -> AuditPipelineResult:
+    """
+    Compliance-layer entry point for issuing an audit-layer certificate.
+    """
+    return pipeline.append_and_certify(
+        {
+            "event_id": event_id,
+            "timestamp": timestamp,
+            "agent_id": agent_id,
+            "ari": ari,
+            "drift": drift,
+            "schema_valid": schema_valid,
+            "engine_version": engine_version,
+            "policy_version": policy_version,
+        }
+    )
