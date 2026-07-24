@@ -52,7 +52,8 @@ Drift: {cert.drift:.4f}
 Status: {cert.status}
 
 Formula: ARI = 0.3 * StructuralIntegrity + 0.7 * SemanticAlignment - Penalties
-Semantic Alignment: Integer fixed-point dot product on pre-normalized int32 vectors (scaling factor 10^5)
+Semantic Alignment: Integer fixed-point dot product on pre-normalized int32 vectors
+  (vectors are scaled to unit magnitude then multiplied by 10^5; no float arithmetic at runtime)
 
 AUDIT TRAIL
 -----------

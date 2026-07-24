@@ -9,7 +9,7 @@ MACHINE_ACCOUNT Agent → Event → PoCA Core → Audit Layer → Compliance Out
 ```
 
 This system enforces:
-- **Deterministic measurement**: Same input → Same ARI (bit-identical on x86; ARM and WASM cross-platform verification is an architectural goal — see GAP-001)
+- **Deterministic measurement**: Same input → Same ARI (bit-identical on x86; ARM and WASM cross-platform verification is an architectural goal — see docs/GAP-001.md)
 - **Cryptographic non-repudiation**: Merkle proofs + SHA-256
 - **Regulator-readable outputs**: AI Act Article 13 compliance
 - **Agent-only scope**: MACHINE_ACCOUNT entities only (Art. 5 compliant)
