@@ -22,93 +22,78 @@ They are **architectural debt** acknowledged for transparency.
 
 ---
 
-## KL-001: evaluator.py contains legacy interpretation logic
+## KL-001: evaluator.py contained legacy interpretation logic
 
-**Location:** `core/evaluator.py:94`
+**Location:** `core/evaluator.py` (v3.2 and earlier)
 
-**Status:** Known Anomaly  
-**Risk:** Low (POC scope only)  
+**Status:** ✅ RESOLVED — SUPERSEDED BY CORE-005  
+**Risk:** N/A (resolved)  
 **Discovered:** 2026-01-24  
+**Resolved:** 2026-07-24 (CORE-005)  
 **Reporter:** Constitutional Compliance Audit  
 
 ### Description
 
-The `evaluate()` method returns a `status` field that interprets the ARI measurement:
+The `evaluate()` method previously returned a `status` field that interpreted the ARI measurement:
 
 ```python
+# REMOVED — was present in v3.2:
 "status": "COMPLIANT" if ari > self.COMPLIANCE_THRESHOLD else "RISK"
 ```
 
-### Violation
+### Resolution
 
-This violates **Constitutional Decree Article I, Section 6 (Layer Separation)**:
+CORE-005 (2026-07-24) removed the `status` field and the `COMPLIANCE_THRESHOLD` constant
+from `core/evaluator.py`. The method now returns only raw numeric metrics:
 
-- ❌ Layer 0 (`core/`) should MEASURE only
-- ❌ Layer 2 should DECIDE (thresholds, allow/deny)
-- ❌ Interpretation logic belongs in `compliance/` or `audit/` layer
+```python
+return {
+    "ari": ari,    # int32, scaled by 10^5 — measurement only
+    "drift": drift, # int32, scaled by 10^5 — measurement only
+}
+```
+
+Policy enforcement (threshold decisions, halt checks) is now handled exclusively by
+`compliance/evaluator_wrapper.py` (Layer 2), in compliance with the Constitutional
+Decree layer-separation invariant.
+
+**Verification:** `check_3_layer_separation.sh` — PASSED post-CORE-005.
+
+---
+
+## KL-002: Deprecated compatibility wrappers in core/
+
+**Location:** `core/policy.py`, `core/consistency.py`
+
+**Status:** Accepted Architectural Debt — Scheduled removal in v4.0  
+**Risk:** Low (emit DeprecationWarning; no functional impact)  
+**Discovered:** 2026-07-24 (CORE-005 gap analysis)  
+**Reporter:** CORE-005 implementation  
+
+### Description
+
+As part of CORE-005, `core/policy.py` and `core/consistency.py` were converted from
+production modules to backward-compatibility wrappers that re-export their counterparts
+from the `compliance/` layer. Both files:
+
+- Emit a `DeprecationWarning` at import time
+- Re-export classes from `compliance.policy` / `compliance.consistency`
+- Violate the Layer 0 purity principle by importing from Layer 2
 
 ### Impact
 
-**Technical:**
-- Does not affect bit-identity (threshold comparison is deterministic)
-- Does not affect measurement accuracy (ARI calculation is unaffected)
-- Violates architectural separation of concerns
-
-**Regulatory:**
-- No EU AI Act violation (interpretation is transparent and traceable)
-- Audit trail remains intact (raw ARI value is still returned)
-
-**Operational:**
-- External auditors can ignore the `status` field
-- Raw ARI score is the normative measurement
-- Layer 2 components can re-interpret based on their own thresholds
-
-### Mitigation
-
-**For Auditors:**
-- Interpretation logic is **non-normative**
-- Use raw `ari` and `drift` values only
-- Ignore the `status` field in compliance decisions
-
-**For Integrators:**
-- Do NOT rely on `status` field for production decisions
-- Implement threshold logic in Layer 2 (compliance layer)
-- Use raw metrics for policy enforcement
+- Does not affect measurement correctness or bit-identity
+- Does not affect test results (test imports updated to use `compliance.*` directly)
+- Wrappers are excluded from `check_3_layer_separation.sh` by design
 
 ### Resolution Plan
 
-**Target Version:** v4.x (next instrument lineage)
+**Target Version:** v4.0 (next instrument lineage)
 
-**Remediation:**
-1. Remove the `status` field from `core/evaluator.py`
-2. Remove the `COMPLIANCE_THRESHOLD` constant from Layer 0
-3. Move threshold interpretation to the `compliance/` layer
-4. Update all tests to check raw metrics only
-5. Update integration contracts to remove the `status` dependency
-
-**Blocked By:**
-- Requires backward-incompatible API change
-- Requires audit of all downstream consumers
-- Requires Layer 2 policy module implementation
-
-### Why Not Fixed Now?
-
-1. **POC Scope:** Current implementation is demonstration-grade
-2. **Audit Status:** External auditors have been instructed to ignore `status`
-3. **Migration Cost:** Removing would require coordinated downstream changes
-4. **Risk Assessment:** Low priority (does not affect correctness or compliance)
-5. **Instrument Freeze:** v3.3 is approaching seal; changes deferred to v4.x
-
-### Acceptance Criteria
-
-This anomaly is **acceptable** because:
-
-- ✅ It does not compromise determinism
-- ✅ It does not violate bit-identity
-- ✅ It does not affect regulatory compliance
-- ✅ Auditors have been notified
-- ✅ Workaround is documented
-- ✅ Remediation plan exists for next lineage
+1. Delete `core/policy.py`
+2. Delete `core/consistency.py`
+3. Update CHECK 3 to remove wrapper exclusions
+4. Update all external code to import from `compliance.*`
 
 ---
 

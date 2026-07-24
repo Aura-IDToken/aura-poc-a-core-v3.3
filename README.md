@@ -82,15 +82,17 @@ This eliminates hardware drift and enables bit-exact hashing.
 
 ### 3.3 Deterministic Semantic Alignment (SA)
 
-Semantic alignment is computed using:
+Semantic alignment is computed using integer fixed-point dot product on pre-normalised int32 vectors:
 
 ```python
-fixed_point_dot_product(int32_vector, int32_constitution)
+dot = sum(a * b for a, b in zip(event_vector_int32, constitution_int32))
+sa  = dot // SCALING_FACTOR   # rescale back to [−10^5, 10^5]
 ```
 
 - No sqrt.
-- No cosine similarity.
-- No floating-point normalization at runtime.
+- No cosine similarity at runtime.
+- No floating-point operations at runtime.
+- Pre-normalisation (float → int32 conversion) is performed offline only, via `core/offline_normalizer.py`.
 
 ### 3.4 Schema Integrity as Circuit Breaker (SI)
 
@@ -146,20 +148,27 @@ This repository enforces:
 
 ```
 /core
-  evaluator.py               # Deterministic ARI measurement engine (int-only)
-  offline_normalizer.py      # Offline float → int32 normalization
-  merkle.py                  # Audit & proof layer
-  policy.py                  # Regulatory enforcement (Art. 5 / 14)
-  consistency.py             # Consistency validation
-  embedding.py               # Vector embedding utilities
+  evaluator.py               # Layer 0: Deterministic ARI measurement engine (int-only)
+  offline_normalizer.py      # Offline float → int32 normalization (DET_01)
+  merkle.py                  # Merkle proof stub (Layer 1)
+  policy.py                  # DEPRECATED: backward-compat wrapper → compliance/policy.py
+  consistency.py             # DEPRECATED: backward-compat wrapper → compliance/consistency.py
+  embedding.py               # Vector embedding placeholder utilities
   test_bitwise_replay.py     # Cross-platform determinism test (CRITICAL)
   test_ari.py                # ARI calculation tests
   test_integration.py        # Integration tests
   test_offline_normalizer.py # Offline normalization tests
 
+/compliance
+  evaluator_wrapper.py       # Layer 2: Policy + measurement orchestrator
+  policy.py                  # Layer 2: Regulatory policy (Art. 5, 14)
+  consistency.py             # Layer 2: ConsistencyCalculator
+  certificate.py             # AuraEventCertificate (audit output)
+  renderer.py                # Certificate rendering
+
 /packages
-  /database-client           # pgvector SDK (bit-identity)
-  /zk-passport               # ZK circuits for reputation proof
+  /database-client           # pgvector SDK (TypeScript, bit-identity interface)
+  /zk-passport               # ZK circuits for reputation proof (Circom source only)
 
 /docs
   ADR_005_NO_FLOAT_RUNTIME.md    # Zero-float architecture decision
@@ -168,6 +177,7 @@ This repository enforces:
   regulatory_compliance.md        # AI Act mapping
   threat_model.md                 # Security threat model
   KNOWN_LIMITATIONS.md            # Known anomalies and architectural debt
+  GAP-001.md                      # Implementation gap analysis
 
 /infra
   docker-compose.yml         # Sovereign stack (CPU-only)
@@ -195,13 +205,29 @@ This is the **only place floats are allowed**.
 
 ### 6.2 Runtime Measurement
 
-```python
-from core.evaluator import evaluate
+**Layer 0 — pure measurement (no policy):**
 
-result = evaluate(action_vector_int32, constitution_vector_int32)
+```python
+from core.evaluator import PoCAEvaluator
+
+evaluator = PoCAEvaluator(constitution_vector_int32)
+result = evaluator.evaluate(agent_id, action_vector_int32, valid_schema=True)
+# result = {"ari": <int32>, "drift": <int32>}
 ```
 
-Output is deterministic and audit-ready.
+**Layer 2 — measurement with policy enforcement (recommended for production flows):**
+
+```python
+from core.evaluator import PoCAEvaluator
+from compliance.evaluator_wrapper import evaluate_with_policy
+from compliance.policy import RegulatoryPolicy
+
+evaluator = PoCAEvaluator(constitution_vector_int32)
+result = evaluate_with_policy(evaluator, agent_id, action_vector_int32, valid_schema=True)
+# result = {"ari": <int32>, "drift": <int32>}
+```
+
+All values are int32 scaled by 10^5. Output is deterministic and audit-ready.
 
 ### 6.3 Verification (Golden Test)
 

@@ -32,7 +32,7 @@
 
 **Documentation**:
 - Formula: `ARI = 0.3 × SI + 0.7 × SA - P`
-- Semantic space: ℝ¹⁵³⁶ (cosine similarity)
+- Semantic alignment: integer fixed-point dot product on pre-normalised int32 vectors
 - Non-repudiation: SHA-256 + Merkle trees
 
 ### Article 14: Human Oversight
@@ -149,7 +149,7 @@ By maximizing T (minimizing S), Aura Protocol achieves:
 
 **Immutable Components**:
 1. ARI Formula: `0.3 × SI + 0.7 × SA - P`
-2. Semantic Space: ℝ¹⁵³⁶
+2. Semantic Alignment: integer fixed-point dot product (pre-normalised int32 vectors, scaling factor 10^5)
 3. Nomenclature: "Agent Reliability Index"
 4. Scope: MACHINE_ACCOUNT only
 5. Krasinski Principle: T ∝ 1/S
@@ -162,9 +162,9 @@ Changes require formal review + compliance re-assessment.
 
 **Author**: Kamil Krasiński
 
-**License**: MIT (open-source)
+**License**: Business Source License 1.1 (BSL 1.1) — see LICENSE
 
-**Status**: Research-backed prototype → Production-ready core
+**Status**: Research-backed prototype (POC phase — MC-READY 2026)
 
 ---
 
