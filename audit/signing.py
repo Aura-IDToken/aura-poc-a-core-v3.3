@@ -81,7 +81,7 @@ class HMACSigner(Signer):
                  a private key object.
         """
         if not isinstance(key, (bytes, bytearray)):
-            raise TypeError("key must be bytes")
+            raise TypeError("key must be bytes or bytearray")
         self._key = bytes(key)
 
     def sign(self, payload: bytes) -> bytes:
@@ -102,7 +102,7 @@ class HMACVerifier(Verifier):
                  must match the key used by HMACSigner.
         """
         if not isinstance(key, (bytes, bytearray)):
-            raise TypeError("key must be bytes")
+            raise TypeError("key must be bytes or bytearray")
         self._key = bytes(key)
 
     def verify(self, payload: bytes, signature: bytes) -> bool:

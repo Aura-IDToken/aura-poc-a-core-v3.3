@@ -96,10 +96,10 @@ hex string.
 ### 2.4 Determinism Guarantee
 
 The same Canonical Event string **MUST** produce the same 64-character
-hex digest on:
+hex digest on currently verified runtime targets:
 - x86_64 (Verified)
 - ARM64  (Verified — CI cross-platform job confirms bit-identity)
-- WASM   (Architectural goal; CI verifies WASM-safe patterns only, not full WASM runtime execution)
+- WASM   (Architectural goal only; CI verifies WASM-safe patterns, not full WASM runtime execution)
 
 ---
 
