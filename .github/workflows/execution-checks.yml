@@ -11,51 +11,72 @@ permissions:
 
 jobs:
   execution-checks:
-    name: Run Mandatory Execution Checks (${{ matrix.platform }})
+    name: Run Mandatory Execution Checks (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          # x86_64 — verified platform
-          - runner: ubuntu-latest
-            platform: x86_64
-          # ARM64 — verified platform (GitHub-hosted ubuntu-24.04-arm)
-          - runner: ubuntu-24.04-arm
-            platform: arm64
-    
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      
+
       - name: Run Execution Checks
         run: |
           chmod +x scripts/run_all_checks.sh
           ./scripts/run_all_checks.sh
-      
+
       - name: Generate determinism report
-        run: python scripts/generate_determinism_report.py determinism-report.json
+        run: |
+          python scripts/generate_determinism_report.py determinism-report-${{ matrix.arch }}.json
 
       - name: Upload determinism report
         uses: actions/upload-artifact@v4
         with:
-          name: determinism-report-${{ matrix.platform }}
-          path: determinism-report.json
+          name: determinism-report-${{ matrix.arch }}
+          path: determinism-report-${{ matrix.arch }}.json
           retention-days: 30
 
       - name: Upload check results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: check-results-${{ matrix.platform }}
+          name: check-results-${{ matrix.arch }}
           path: |
             core/test_bitwise_replay_*.hash
           retention-days: 30
+
+  wasm-compat:
+    name: WASM Compatibility Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pytest
+
+      - name: Run WASM compatibility tests
+        run: |
+          python -m pytest core/test_bitwise_replay.py::WASMCompatibilityTest -v
+        # Note: This verifies WASM-safe arithmetic patterns.
+        # Full WASM execution (wasmtime + Python) is an architectural goal;
+        # see docs/architecture.md and docs/GAP-001.md for status.
 
   compare-determinism:
     name: Compare Cross-Platform Determinism
@@ -70,28 +91,28 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Download x86_64 report
+      - name: Download x86_64 determinism report
         uses: actions/download-artifact@v4
         with:
           name: determinism-report-x86_64
           path: ./reports/x86_64
 
-      - name: Download arm64 report
+      - name: Download arm64 determinism report
         uses: actions/download-artifact@v4
         with:
           name: determinism-report-arm64
           path: ./reports/arm64
 
-      - name: Compare determinism reports
+      - name: Compare determinism vectors
         run: |
           python scripts/compare_determinism_reports.py \
-            ./reports/x86_64/determinism-report.json \
-            ./reports/arm64/determinism-report.json
+            reports/x86_64/determinism-report-x86_64.json \
+            reports/arm64/determinism-report-arm64.json
 
       - name: Upload combined determinism report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: determinism-reports-all-platforms
-          path: ./reports/
-          retention-days: 90
+          name: determinism-comparison-result
+          path: reports/
+          retention-days: 30

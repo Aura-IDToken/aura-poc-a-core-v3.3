@@ -1,154 +1,112 @@
 """
-Audit Layer Signing Abstraction
-Art. 13 Transparency: Cryptographic signing of Event Trust Certificates
+Audit Signing Abstraction
+Art. 13 Transparency: Signing abstraction for Event Trust Certificates
 
-Provides a stable API that supports:
-  - Current implementation: HMAC-SHA256 (HMACSigner / HMACVerifier)
-  - Future migration path: Ed25519 asymmetric signing (stubs provided)
+Current implementation: HMAC-SHA256 via HMACSigner / HMACVerifier.
 
-Layer separation note:
-  This module belongs to Layer 1 (audit/).
-  It must NOT be imported by Layer 0 (core/).
+Architecture:
+    The abstraction is designed to allow future migration to asymmetric
+    signing (e.g., Ed25519) without changing the Audit Layer API.
+    Only the concrete Signer/Verifier implementation changes; all callers
+    use the abstract interface.
+
+Layer: 1 (audit/)
 """
 
-import hmac
 import hashlib
+import hmac
 from abc import ABC, abstractmethod
 
 
 class Signer(ABC):
-    """
-    Abstract base for Audit Layer certificate signing.
+    """Abstract signing interface.
 
-    All implementations must produce a deterministic hex-encoded
-    signature string from a bytes payload.
+    Implementations must produce a deterministic byte signature
+    for a given payload.  The same key and payload must always
+    produce the same signature (required by BIT-IDENTITY law).
     """
 
     @abstractmethod
-    def sign(self, payload: bytes) -> str:
-        """
-        Sign a payload.
+    def sign(self, payload: bytes) -> bytes:
+        """Return the signature for *payload*.
 
         Args:
-            payload: Raw bytes to sign.
+            payload: Canonical byte representation of the item to sign.
 
         Returns:
-            Hex-encoded signature string.
+            Signature bytes.  Length and encoding depend on the
+            concrete implementation.
         """
-
-    @abstractmethod
-    def algorithm(self) -> str:
-        """Return the canonical algorithm name (e.g. 'HMAC-SHA256')."""
 
 
 class Verifier(ABC):
-    """
-    Abstract base for Audit Layer certificate verification.
+    """Abstract verification interface.
 
-    Implementations must perform constant-time comparison where possible
-    to resist timing attacks.
+    Implementations must verify a signature produced by the
+    corresponding Signer.
     """
 
     @abstractmethod
-    def verify(self, payload: bytes, signature: str) -> bool:
-        """
-        Verify a signature against a payload.
+    def verify(self, payload: bytes, signature: bytes) -> bool:
+        """Return True iff *signature* is valid for *payload*.
 
         Args:
-            payload:   Raw bytes that were originally signed.
-            signature: Hex-encoded signature to verify.
+            payload:   The original byte representation that was signed.
+            signature: The signature bytes to verify.
 
         Returns:
             True if the signature is valid, False otherwise.
         """
 
-    @abstractmethod
-    def algorithm(self) -> str:
-        """Return the canonical algorithm name (e.g. 'HMAC-SHA256')."""
-
 
 class HMACSigner(Signer):
-    """
-    HMAC-SHA256 signer. Current production implementation.
+    """HMAC-SHA256 signer.
 
-    Uses Python's ``hmac`` module with SHA-256 as the hash function.
-    The signing key must be a non-empty bytes object supplied by the
-    caller (e.g. a secret loaded from a secure store).
+    Current implementation for the Aura Protocol v3.3 Iron Core.
+    Uses ``hmac.new(key, payload, sha256).digest()`` to produce a
+    32-byte deterministic MAC.
+
+    This implementation satisfies:
+    - BIT-IDENTITY: same key + payload → identical bytes on all platforms
+    - Zero-Float: pure integer / byte-level computation
+    - Art. 13: deterministic, publicly verifiable algorithm
     """
 
     def __init__(self, key: bytes) -> None:
-        if not key:
-            raise ValueError("HMAC key must not be empty")
-        self._key = key
+        """
+        Args:
+            key: Secret key bytes.  Must be kept confidential.
+                 A future Ed25519 migration will replace this with
+                 a private key object.
+        """
+        if not isinstance(key, (bytes, bytearray)):
+            raise TypeError("key must be bytes")
+        self._key = bytes(key)
 
-    def sign(self, payload: bytes) -> str:
-        return hmac.new(self._key, payload, hashlib.sha256).hexdigest()
-
-    def algorithm(self) -> str:
-        return "HMAC-SHA256"
+    def sign(self, payload: bytes) -> bytes:
+        """Return HMAC-SHA256(key, payload)."""
+        return hmac.new(self._key, payload, hashlib.sha256).digest()
 
 
 class HMACVerifier(Verifier):
-    """
-    HMAC-SHA256 verifier. Current production implementation.
+    """HMAC-SHA256 verifier.
 
-    Uses ``hmac.compare_digest`` for constant-time comparison to
-    prevent timing-oracle attacks.
+    Uses ``hmac.compare_digest`` to prevent timing-oracle attacks.
     """
 
     def __init__(self, key: bytes) -> None:
-        if not key:
-            raise ValueError("HMAC key must not be empty")
-        self._key = key
+        """
+        Args:
+            key: Secret key bytes — must match the key used by HMACSigner.
+        """
+        if not isinstance(key, (bytes, bytearray)):
+            raise TypeError("key must be bytes")
+        self._key = bytes(key)
 
-    def verify(self, payload: bytes, signature: str) -> bool:
-        expected = hmac.new(self._key, payload, hashlib.sha256).hexdigest()
+    def verify(self, payload: bytes, signature: bytes) -> bool:
+        """Return True iff HMAC-SHA256(key, payload) == signature."""
+        expected = hmac.new(self._key, payload, hashlib.sha256).digest()
         return hmac.compare_digest(expected, signature)
-
-    def algorithm(self) -> str:
-        return "HMAC-SHA256"
-
-
-class FutureEd25519Signer(Signer):
-    """
-    Placeholder for future Ed25519 asymmetric signing.
-
-    This class satisfies the Signer interface so the Audit Layer API
-    remains stable when Ed25519 is introduced.  It is intentionally
-    not implemented — calling ``sign`` raises NotImplementedError.
-
-    Migration path:
-        Replace this stub with a real Ed25519 implementation using
-        the ``cryptography`` package without changing any caller code.
-    """
-
-    def sign(self, payload: bytes) -> str:
-        raise NotImplementedError(
-            "Ed25519 signing is reserved for a future instrument version requiring "
-            "Protocol Custodian approval and a new instrument lineage. "
-            "Current Audit Layer uses HMAC-SHA256 (HMACSigner)."
-        )
-
-    def algorithm(self) -> str:
-        return "Ed25519"
-
-
-class FutureEd25519Verifier(Verifier):
-    """
-    Placeholder for future Ed25519 asymmetric verification.
-
-    See FutureEd25519Signer for migration notes.
-    """
-
-    def verify(self, payload: bytes, signature: str) -> bool:
-        raise NotImplementedError(
-            "Ed25519 verification is reserved for a future instrument version requiring "
-            "Protocol Custodian approval and a new instrument lineage. "
-            "Current Audit Layer uses HMAC-SHA256 (HMACVerifier)."
-        )
-
-    def algorithm(self) -> str:
-        return "Ed25519"
 
 
 __all__ = [
@@ -156,6 +114,4 @@ __all__ = [
     "Verifier",
     "HMACSigner",
     "HMACVerifier",
-    "FutureEd25519Signer",
-    "FutureEd25519Verifier",
 ]

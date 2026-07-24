@@ -4,8 +4,11 @@ Art. 13 Transparency: Cryptographic audit trails and Event Trust Certificates (E
 """
 
 import hashlib
+import json
 from typing import List, Dict, Any, Tuple, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from .signing import Signer, Verifier
 
 
 def sha256(data: str) -> str:
@@ -18,22 +21,34 @@ class EventTrustCertificate:
     """
     Event Trust Certificate (ETC)
     Art. 13 Compliance: Cryptographic proof of event integrity
-    
+
     An ETC provides:
     - Immutable event hash
     - Merkle proof for batch verification
     - Temporal ordering
     - Non-repudiation
+
+    Optional signature field:
+    When a Signer is provided at creation time the ETC carries a
+    HMAC-SHA256 signature over the canonical payload (see
+    ``_signing_payload()``).  Future migrations to asymmetric signing
+    (e.g. Ed25519) require only swapping the concrete Signer/Verifier
+    implementation; the ETC schema and Audit Layer API remain unchanged.
     """
     event_hash: str
     merkle_root: str
     merkle_proof: List[Tuple[str, str]]  # List of (sibling_hash, direction)
     timestamp: str
     batch_id: Optional[str] = None
-    
+    signature: Optional[bytes] = field(default=None, repr=False)
+
+    # ------------------------------------------------------------------ #
+    # Serialisation                                                        #
+    # ------------------------------------------------------------------ #
+
     def to_dict(self) -> Dict[str, Any]:
         """Serialize ETC to dictionary."""
-        return {
+        d: Dict[str, Any] = {
             "event_hash": self.event_hash,
             "merkle_root": self.merkle_root,
             "merkle_proof": [
@@ -43,7 +58,46 @@ class EventTrustCertificate:
             "timestamp": self.timestamp,
             "batch_id": self.batch_id,
         }
-    
+        if self.signature is not None:
+            d["signature"] = self.signature.hex()
+        return d
+
+    # ------------------------------------------------------------------ #
+    # Signing                                                              #
+    # ------------------------------------------------------------------ #
+
+    def _signing_payload(self) -> bytes:
+        """Canonical signing payload: deterministic JSON of core fields.
+
+        The payload is UTF-8 encoded JSON with sorted keys, containing
+        only the fields that constitute the event identity:
+        event_hash, merkle_root, and timestamp.
+
+        Proof steps and batch_id are intentionally excluded so that the
+        signing payload is stable even when the same event appears in
+        multiple batches.
+        """
+        canonical: Dict[str, Any] = {
+            "event_hash": self.event_hash,
+            "merkle_root": self.merkle_root,
+            "timestamp": self.timestamp,
+        }
+        return json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+    def sign(self, signer: Signer) -> "EventTrustCertificate":
+        """Return a new ETC with a signature produced by *signer*.
+
+        The original ETC is not modified (dataclass field update returns
+        a new object via ``dataclasses.replace``-style reconstruction).
+        """
+        import dataclasses
+        sig = signer.sign(self._signing_payload())
+        return dataclasses.replace(self, signature=sig)
+
+    # ------------------------------------------------------------------ #
+    # Verification                                                         #
+    # ------------------------------------------------------------------ #
+
     def verify(self) -> bool:
         """
         Verify the ETC's Merkle proof.
@@ -56,6 +110,17 @@ class EventTrustCertificate:
             else:
                 current = sha256(current + sibling)
         return current == self.merkle_root
+
+    def verify_signature(self, verifier: Verifier) -> bool:
+        """Verify the ETC signature using *verifier*.
+
+        Returns:
+            True if the signature is present and valid.
+            False if no signature is attached or the signature is invalid.
+        """
+        if self.signature is None:
+            return False
+        return verifier.verify(self._signing_payload(), self.signature)
 
 
 class MerkleTree:

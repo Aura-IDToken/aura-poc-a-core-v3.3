@@ -9,10 +9,22 @@ MACHINE_ACCOUNT Agent → Event → PoCA Core → Audit Layer → Compliance Out
 ```
 
 This system enforces:
-- **Deterministic measurement**: Same input → Same ARI (bit-identical on x86_64 and ARM64 — verified in CI; WASM is an architectural goal pending native runtime integration)
-- **Cryptographic non-repudiation**: Merkle proofs + SHA-256 + HMAC-SHA256 signing
+- **Deterministic measurement**: Same input → Same ARI (bit-identical)
+- **Cryptographic non-repudiation**: Merkle proofs + SHA-256
 - **Regulator-readable outputs**: AI Act Article 13 compliance
 - **Agent-only scope**: MACHINE_ACCOUNT entities only (Art. 5 compliant)
+
+## Cross-Platform Determinism
+
+| Platform | Status                | Evidence                                                              |
+|----------|-----------------------|-----------------------------------------------------------------------|
+| x86_64   | ✅ Verified           | CI `execution-checks` job; `determinism-report-x86_64.json`           |
+| ARM64    | ✅ Verified           | CI `execution-checks` job (ubuntu-24.04-arm); `determinism-report-arm64.json` |
+| WASM     | 🔶 Architectural Goal | WASM-safe arithmetic patterns verified; full WASM runtime is a future goal |
+
+Cross-platform bit-identity is verified automatically on every CI run by the
+`compare-determinism` job, which compares `determinism-report-*.json` artifacts
+across architectures.  The CI fails if any vector differs.
 
 ## Krasinski Principle
 
@@ -25,7 +37,7 @@ Transparency (T) inversely proportional to Secrecy/Entropy (S).
 | Layer | Path | Responsibility |
 |-------|------|---------------|
 | 0 | `core/` | Measurement only — integer ARI calculation, no policy decisions |
-| 1 | `audit/` | Merkle tree construction, immutable anchoring, proof generation, signing |
+| 1 | `audit/` | Merkle tree construction, immutable anchoring, proof generation, signing abstraction |
 | 2 | `compliance/` | Policy enforcement, certificate generation, compliance rendering |
 
 ## Key Components
@@ -33,7 +45,26 @@ Transparency (T) inversely proportional to Secrecy/Entropy (S).
 1. **Core Engine** (`/core`): ARI measurement — integer-only, frozen formula
 2. **Audit Layer** (`/audit`): Merkle trees + proof verification + signing abstraction
 3. **Compliance Layer** (`/compliance`): Policy enforcement, certificate generation, rendering
-4. **Documentation** (`/docs`): Mathematical foundation, regulatory mapping, ADRs, specifications
+4. **Documentation** (`/docs`): Mathematical foundation, regulatory mapping, ADRs
+
+## Audit Layer — Signing Architecture
+
+The Audit Layer uses a signing abstraction that separates the signing
+interface from the concrete algorithm:
+
+| Class          | Role                              | Current implementation |
+|----------------|-----------------------------------|------------------------|
+| `Signer`       | Abstract signing interface        | ABC                    |
+| `Verifier`     | Abstract verification interface   | ABC                    |
+| `HMACSigner`   | Current signer                    | HMAC-SHA256            |
+| `HMACVerifier` | Current verifier                  | HMAC-SHA256            |
+
+**Current implementation**: HMAC-SHA256 (RFC 2104).  
+**Future roadmap**: Asymmetric signing (e.g., Ed25519) can be added by
+implementing new `Signer`/`Verifier` subclasses without changing the
+Audit Layer API or the Event Trust Certificate schema.
+
+See `docs/specs/AUDIT_LAYER_SPEC.md` for the normative specification.
 
 ## Canonical API
 
@@ -45,6 +76,18 @@ result = evaluator.evaluate(agent_id, vector_int32, valid_schema)
 # {"ari": <int32>, "drift": <int32>}
 ```
 
+**Layer 1 (audit — Merkle + ETC):**
+```python
+from audit.merkle import MerkleTree
+from audit.signing import HMACSigner, HMACVerifier
+
+tree = MerkleTree(canonical_events)
+etc = tree.create_etc(leaf_index=0, timestamp="...", batch_id="...")
+signed_etc = etc.sign(HMACSigner(key))
+assert signed_etc.verify()                          # Merkle proof
+assert signed_etc.verify_signature(HMACVerifier(key))  # HMAC signature
+```
+
 **Layer 2 (measurement + policy):**
 ```python
 from core.evaluator import PoCAEvaluator
@@ -53,37 +96,3 @@ evaluator = PoCAEvaluator(constitution_vector_int32)
 result = evaluate_with_policy(evaluator, agent_id, vector_int32, valid_schema)
 # {"ari": <int32>, "drift": <int32>}
 ```
-
-## Audit Layer Signing
-
-The Audit Layer uses **HMAC-SHA256** to sign Event Trust Certificates (ETCs).
-A signing abstraction (`audit/signing.py`) isolates the algorithm behind stable
-`Signer` / `Verifier` interfaces:
-
-```
-Current:  HMACSigner / HMACVerifier    (HMAC-SHA256, production)
-Future:   FutureEd25519Signer / FutureEd25519Verifier  (stub, not implemented)
-```
-
-The abstraction allows future migration to asymmetric (Ed25519) signing without
-changing the Audit Layer API.  Such a migration requires a new instrument version.
-
-Normative specification: [`docs/specs/AUDIT_LAYER_SPEC.md`](specs/AUDIT_LAYER_SPEC.md)
-
-## Cross-Platform Determinism
-
-CI verifies bit-identical outputs on **x86_64** and **ARM64** using
-`scripts/generate_determinism_report.py` and
-`scripts/compare_determinism_reports.py`.
-
-Compared values per platform:
-- ARI (int32)
-- Drift (int32)
-- Canonical Event Hash (SHA-256)
-- Merkle Root (SHA-256)
-- Audit Certificate Hash (SHA-256)
-
-WASM compatibility is verified by `WASMCompatibilityTest` in
-`core/test_bitwise_replay.py` (operational WASM execution is an architectural
-goal; see docs/GAP-001.md).
-
