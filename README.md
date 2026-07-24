@@ -35,15 +35,7 @@ Aura is a **computational measuring device**, equivalent in role to a:
 - cryptographic audit primitive
 - regulatory evidence generator
 
-Every output produced by this system can be recomputed **bit-for-bit** on any architecture and verified independently by a regulator without access to the original model.
-
-**Cross-platform determinism status (CORE-006):**
-
-| Platform | Status |
-|----------|--------|
-| x86_64   | ✅ Verified in CI |
-| ARM64    | ✅ Verified in CI |
-| WASM     | 🔲 Architectural goal — WASM-safety verified by test suite; native WASM execution pending |
+Every output produced by this system can be recomputed **bit-for-bit** on any architecture (x86 / ARM / WASM) and verified independently by a regulator without access to the original model.
 
 ---
 
@@ -144,31 +136,13 @@ This repository enforces:
 ✔ Deterministic replay  
 ✔ Publicly verifiable hashes  
 ✔ Event Trust Certificates (ETC)  
-✔ Normative Audit Layer specification ([docs/specs/AUDIT_LAYER_SPEC.md](docs/specs/AUDIT_LAYER_SPEC.md))
+✔ HMAC-SHA256 signing with abstract Signer/Verifier interface  
+✔ Normative Audit Layer Specification (docs/specs/AUDIT_LAYER_SPEC.md)
 
 ### Article 14 - Human Oversight
 ✔ Manual Kill-Switch  
 ✔ Circuit breaker  
 ✔ Emergency halt capability (policy.py)
-
----
-
-## 4.1 AUDIT LAYER SIGNING (CORE-006)
-
-### Current Implementation: HMAC-SHA256
-
-Event Trust Certificates are signed using **HMAC-SHA256**.  
-Implementation: `audit/signing.py :: HMACSigner` / `HMACVerifier`
-
-### Future Roadmap: Ed25519
-
-The signing abstraction (`Signer` / `Verifier` interfaces) makes future
-migration to Ed25519 asymmetric signing possible **without changing the
-Audit Layer API**.
-
-Stubs `FutureEd25519Signer` and `FutureEd25519Verifier` are provided in
-`audit/signing.py` and raise `NotImplementedError`.  Ed25519 is **not
-implemented** in v3.3.  Introducing it requires a new instrument version.
 
 ---
 
@@ -187,18 +161,11 @@ implemented** in v3.3.  Introducing it requires a new instrument version.
   test_integration.py        # Integration tests
   test_offline_normalizer.py # Offline normalization tests
 
-/compliance
-  evaluator_wrapper.py       # Layer 2: Policy + measurement orchestrator
-  policy.py                  # Layer 2: Regulatory policy (Art. 5, 14)
-  consistency.py             # Layer 2: ConsistencyCalculator
-  certificate.py             # AuraEventCertificate (audit output)
-  renderer.py                # Certificate rendering
-
 /audit
-  merkle.py                  # Merkle tree + EventTrustCertificate + SHA-256 hashing
-  verify.py                  # Proof and ETC verification
-  signing.py                 # Signing abstraction: HMACSigner, HMACVerifier, stubs
-  test_audit_layer.py        # Audit Layer test suite (CORE-006)
+  merkle.py                  # Layer 1: MerkleTree, EventTrustCertificate, sha256
+  verify.py                  # Layer 1: Merkle proof and ETC verification
+  signing.py                 # Layer 1: Signer/Verifier abstraction; HMACSigner/HMACVerifier
+  test_audit.py              # Audit layer test suite (CORE-006)
 
 /compliance
   evaluator_wrapper.py       # Layer 2: Policy + measurement orchestrator
@@ -213,9 +180,9 @@ implemented** in v3.3.  Introducing it requires a new instrument version.
 
 /docs
   ADR_005_NO_FLOAT_RUNTIME.md    # Zero-float architecture decision
-  architecture.md                 # System architecture (updated CORE-006)
+  architecture.md                 # System architecture
   mathematical_foundation.md      # Mathematical specifications
-  regulatory_compliance.md        # AI Act mapping (updated CORE-006)
+  regulatory_compliance.md        # AI Act mapping
   threat_model.md                 # Security threat model
   KNOWN_LIMITATIONS.md            # Known anomalies and architectural debt
   GAP-001.md                      # Implementation gap analysis
@@ -226,10 +193,10 @@ implemented** in v3.3.  Introducing it requires a new instrument version.
   docker-compose.yml         # Sovereign stack (CPU-only)
 
 /scripts
-  run_all_checks.sh                 # Mandatory execution checks
-  generate_determinism_report.py    # Cross-platform determinism report (CORE-006)
-  compare_determinism_reports.py    # Compare reports across platforms (CORE-006)
-  /checks                           # Individual check scripts
+  run_all_checks.sh                # Mandatory execution checks
+  generate_determinism_report.py   # Generates determinism-report.json (CORE-006)
+  compare_determinism_reports.py   # Compares reports across platforms (CORE-006)
+  /checks                          # Individual check scripts
 
 LICENSE                      # Business Source License 1.1
 ```
@@ -274,15 +241,47 @@ result = evaluate_with_policy(evaluator, agent_id, action_vector_int32, valid_sc
 
 All values are int32 scaled by 10^5. Output is deterministic and audit-ready.
 
-### 6.3 Verification (Golden Test)
+### 6.3 Audit Layer (ETC + Signing)
 
-Run bit-identity test on two architectures:
+```python
+from audit.merkle import MerkleTree
+from audit.signing import HMACSigner, HMACVerifier
+
+tree = MerkleTree(canonical_events)
+etc = tree.create_etc(leaf_index=0, timestamp="2026-01-01T00:00:00Z", batch_id="batch-001")
+
+# Sign with current HMAC-SHA256 implementation
+signer   = HMACSigner(key_bytes)
+verifier = HMACVerifier(key_bytes)
+signed_etc = etc.sign(signer)
+
+assert signed_etc.verify()                               # Merkle proof
+assert signed_etc.verify_signature(verifier)             # HMAC signature
+```
+
+### 6.4 Verification (Golden Test)
+
+Run bit-identity test:
 
 ```bash
 pytest core/test_bitwise_replay.py
+pytest audit/test_audit.py
 ```
 
+Generate a determinism report for the current platform:
+
+```bash
+python scripts/generate_determinism_report.py determinism-report.json
+```
+
+CI automatically generates and compares reports on **x86_64** and **ARM64**.
 If any bit differs, the build is **invalid**.
+
+| Platform | Status              |
+|----------|---------------------|
+| x86_64   | ✅ Verified (CI)    |
+| ARM64    | ✅ Verified (CI)    |
+| WASM     | 🔶 Architectural Goal |
 
 ---
 

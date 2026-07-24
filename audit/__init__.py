@@ -1,2 +1,4 @@
 """Audit package: Merkle tree, verifier, and signing abstraction."""
-__all__ = ["merkle", "verify", "signing"]
+from .signing import Signer, Verifier, HMACSigner, HMACVerifier
+
+__all__ = ["merkle", "verify", "signing", "Signer", "Verifier", "HMACSigner", "HMACVerifier"]

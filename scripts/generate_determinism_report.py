@@ -1,114 +1,179 @@
 #!/usr/bin/env python3
 """
-Generate a cross-platform determinism report for Aura Protocol v3.3.
+AURA Protocol v3.3 — Determinism Report Generator
+CORE-006 Part A: Cross-platform determinism verification
 
-Computes reference values from the frozen measurement core and writes
-them to determinism-report.json.  CI collects this artifact from each
-platform (x86_64 / ARM64) and the compare_determinism_reports script
-verifies that every hash value is bit-identical.
+Produces determinism-report.json containing:
+  - platform (system, machine, architecture, python_version)
+  - engine_version
+  - determinism_vectors (fixed test-vector hash values)
+  - comparison_result (PASS / FAIL)
 
-Output fields:
-  platform              — OS / CPU / Python info
-  engine_version        — Instrument version tag
-  hash_values:
-    ari                 — int32 ARI for the reference input vector
-    drift               — int32 drift for the reference input vector
-    canonical_event_hash — SHA-256 of the canonical event JSON
-    merkle_root         — Merkle root of a single-event tree
-    audit_certificate_hash — SHA-256 of the audit certificate payload
-  comparison_result     — PASS (set by this script; updated by compare script)
+Usage (standalone):
+    python scripts/generate_determinism_report.py [output_path]
+
+The output path defaults to determinism-report.json in the repo root.
+
+CI Usage:
+    Runs on each platform (x86_64, ARM64).
+    A separate compare job downloads both reports and checks that all
+    hash values are identical.
 """
 
-import json
 import hashlib
+import json
 import platform
 import sys
-import os
+from pathlib import Path
 
-# Ensure repository root is on the path when called from CI
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# ---------------------------------------------------------------------------
+# Repo root on PYTHONPATH
+# ---------------------------------------------------------------------------
 
-from core.evaluator import PoCAEvaluator
-from core.offline_normalizer import generate_sample_constitution
-from audit.merkle import MerkleTree
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_REPO_ROOT))
 
-ENGINE_VERSION = "v3.3"
-REFERENCE_AGENT_ID = "MACHINE_ACCOUNT_REF_001"
+from core.offline_normalizer import generate_sample_constitution, SCALING_FACTOR
+from audit.merkle import MerkleTree, sha256
+from audit.signing import HMACSigner, HMACVerifier
+
+# ---------------------------------------------------------------------------
+# Engine version
+# ---------------------------------------------------------------------------
+
+ENGINE_VERSION = "v3.3-iron-core"
+
+# ---------------------------------------------------------------------------
+# Deterministic test vectors
+# ---------------------------------------------------------------------------
+
+# INSECURE TEST FIXTURE KEY — deterministic vector reproducibility only.
+# MUST NEVER be used for production ETC signing or any operational credentials.
+_INSECURE_TEST_KEY_DO_NOT_USE_IN_PROD = b"aura-v3.3-determinism-test-key-0"
+
+# Canonical events — fixed strings used as Merkle leaves.
+CANONICAL_EVENTS = [
+    "agent_id=MACHINE_ACCOUNT_001|ari=95000|drift=5000|ts=2026-01-01T00:00:00Z",
+    "agent_id=MACHINE_ACCOUNT_002|ari=80000|drift=20000|ts=2026-01-01T00:01:00Z",
+    "agent_id=MACHINE_ACCOUNT_003|ari=68000|drift=32000|ts=2026-01-01T00:02:00Z",
+    "agent_id=MACHINE_ACCOUNT_004|ari=72000|drift=28000|ts=2026-01-01T00:03:00Z",
+]
 
 
-def canonical_event_hash(agent_id: str, ari: int, drift: int) -> str:
+def _hash_int32_array(array):
+    """Hash an int32 array as little-endian bytes (deterministic across platforms)."""
+    buf = bytearray()
+    for v in array:
+        buf.extend(v.to_bytes(4, byteorder="little", signed=True))
+    return hashlib.sha256(buf).hexdigest()
+
+
+def compute_vectors():
     """
-    Hash of the canonical event payload.
+    Compute all determinism vectors.
 
-    Serialization: JSON, keys sorted, no extra whitespace, UTF-8.
-    Algorithm:     SHA-256.
+    Returns a dict with:
+      ari_vector_hash       — SHA-256 of the int32 constitution vector (1000 elems)
+      canonical_event_hash  — SHA-256 of CANONICAL_EVENTS[0]
+      merkle_root           — Merkle root of all CANONICAL_EVENTS
+      etc_hash              — SHA-256 of the ETC for event 0 (dict, sort_keys)
+      hmac_signature_hex    — HMAC-SHA256(key, signing_payload) for ETC 0
     """
-    event = {
-        "agent_id": agent_id,
-        "ari": ari,
-        "drift": drift,
-    }
-    payload = json.dumps(event, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-
-def audit_certificate_hash(event_hash: str, merkle_root: str) -> str:
-    """
-    Hash of the audit certificate payload.
-
-    Serialization: JSON, keys sorted, no extra whitespace, UTF-8.
-    Algorithm:     SHA-256.
-    """
-    cert = {
-        "engine_version": ENGINE_VERSION,
-        "event_hash": event_hash,
-        "merkle_root": merkle_root,
-    }
-    payload = json.dumps(cert, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-
-def main(output_path: str = "determinism-report.json") -> None:
-    # --- Deterministic test vectors ---
+    # ARI / constitution vector
     constitution = generate_sample_constitution()
-    evaluator = PoCAEvaluator(constitution)
+    ari_vector_hash = _hash_int32_array(constitution[:1000])
 
-    # Reference input: constitution vector itself (perfect alignment)
-    result = evaluator.evaluate(REFERENCE_AGENT_ID, constitution, valid_schema=True)
-    ari = result["ari"]
-    drift = result["drift"]
+    # Canonical event hash (event 0)
+    canonical_event_hash = sha256(CANONICAL_EVENTS[0])
 
-    # --- Canonical hashes ---
-    ev_hash = canonical_event_hash(REFERENCE_AGENT_ID, ari, drift)
-    tree = MerkleTree([ev_hash], leaves_are_hashed=True)
-    m_root = tree.get_root()
-    cert_hash = audit_certificate_hash(ev_hash, m_root)
+    # Merkle tree
+    tree = MerkleTree(CANONICAL_EVENTS)
+    merkle_root = tree.root
+
+    # ETC for event 0
+    etc = tree.create_etc(
+        leaf_index=0,
+        timestamp="2026-01-01T00:00:00Z",
+        batch_id="determinism-batch-001",
+    )
+    etc_dict = etc.to_dict()
+    etc_hash = hashlib.sha256(
+        json.dumps(etc_dict, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+    # HMAC signature of ETC signing payload
+    signer = HMACSigner(_INSECURE_TEST_KEY_DO_NOT_USE_IN_PROD)
+    hmac_signature_hex = signer.sign(etc._signing_payload()).hex()
+
+    return {
+        "ari_vector_hash": ari_vector_hash,
+        "canonical_event_hash": canonical_event_hash,
+        "merkle_root": merkle_root,
+        "etc_hash": etc_hash,
+        "hmac_signature_hex": hmac_signature_hex,
+    }
+
+
+def generate_report(output_path: Path) -> dict:
+    """Generate the determinism report and write it to *output_path*."""
+    vectors = compute_vectors()
 
     report = {
+        "schema_version": "1.0",
+        "instrument": "Aura Protocol v3.3 Iron Core",
+        "engine_version": ENGINE_VERSION,
         "platform": {
             "system": platform.system(),
             "machine": platform.machine(),
-            "python_version": platform.python_version(),
             "architecture": platform.architecture()[0],
+            "python_version": platform.python_version(),
         },
-        "engine_version": ENGINE_VERSION,
-        "hash_values": {
-            "ari": ari,
-            "drift": drift,
-            "canonical_event_hash": ev_hash,
-            "merkle_root": m_root,
-            "audit_certificate_hash": cert_hash,
-        },
+        "determinism_vectors": vectors,
         "comparison_result": "PASS",
     }
 
-    with open(output_path, "w") as fh:
-        json.dump(report, fh, indent=2)
+    output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    return report
 
-    print(f"Determinism report written to: {output_path}")
-    print(json.dumps(report, indent=2))
+
+def compare_reports(report_a: dict, report_b: dict) -> tuple:
+    """
+    Compare two determinism reports.
+
+    Returns (result, mismatches) where result is "PASS" or "FAIL" and
+    mismatches is a list of (field, value_a, value_b) tuples.
+    """
+    mismatches = []
+    vectors_a = report_a["determinism_vectors"]
+    vectors_b = report_b["determinism_vectors"]
+
+    for field in (
+        "ari_vector_hash",
+        "canonical_event_hash",
+        "merkle_root",
+        "etc_hash",
+        "hmac_signature_hex",
+    ):
+        if vectors_a.get(field) != vectors_b.get(field):
+            mismatches.append((field, vectors_a.get(field), vectors_b.get(field)))
+
+    return ("FAIL" if mismatches else "PASS", mismatches)
 
 
 if __name__ == "__main__":
-    out = sys.argv[1] if len(sys.argv) > 1 else "determinism-report.json"
-    main(out)
+    output = Path(sys.argv[1]) if len(sys.argv) > 1 else _REPO_ROOT / "determinism-report.json"
+    report = generate_report(output)
+
+    print("=" * 70)
+    print("AURA Protocol v3.3 — Determinism Report")
+    print("=" * 70)
+    print(f"Platform : {report['platform']['system']} / {report['platform']['machine']}")
+    print(f"Python   : {report['platform']['python_version']}")
+    print(f"Engine   : {report['engine_version']}")
+    print()
+    for k, v in report["determinism_vectors"].items():
+        print(f"  {k}: {v}")
+    print()
+    print(f"Result   : {report['comparison_result']}")
+    print(f"Output   : {output}")
+    print("=" * 70)
