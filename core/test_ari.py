@@ -34,7 +34,16 @@ class TestLayerSeparation(unittest.TestCase):
     core/evaluator.py MUST NOT return compliance status fields.
     """
 
-    PROHIBITED_KEYS = {"status", "COMPLIANT", "RISK", "ALLOW", "DENY", "PASS", "FAIL"}
+    # Prohibited dict keys — both the exact casing from the violation description
+    # and lowercase variants to cover all case conventions.
+    PROHIBITED_KEYS = {
+        "status", "COMPLIANT", "compliant",
+        "RISK", "risk",
+        "ALLOW", "allow",
+        "DENY", "deny",
+        "PASS", "pass",
+        "FAIL", "fail",
+    }
 
     def setUp(self):
         RegulatoryPolicy.HALTED_AGENTS.clear()
@@ -48,10 +57,14 @@ class TestLayerSeparation(unittest.TestCase):
         return self.evaluator.evaluate("test_layer_sep", vector, True)
 
     def test_evaluate_returns_only_measurement_keys(self):
-        """Layer 0 must return only raw measurements: ari and drift."""
+        """Layer 0 must return only raw measurements: ari and drift (int, non-negative)."""
         result = self._evaluate("high")
         self.assertSetEqual(set(result.keys()), {"ari", "drift"},
                             "core/evaluator.py must return ONLY 'ari' and 'drift'")
+        self.assertIsInstance(result["ari"], int)
+        self.assertIsInstance(result["drift"], int)
+        self.assertGreaterEqual(result["ari"], 0)
+        self.assertGreaterEqual(result["drift"], 0)
 
     def test_evaluate_contains_no_prohibited_keys(self):
         """Layer 0 must never return compliance status strings."""
