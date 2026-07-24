@@ -75,7 +75,8 @@ class HMACSigner(Signer):
     def __init__(self, key: bytes) -> None:
         """
         Args:
-            key: Secret key bytes.  Must be kept confidential.
+            key: Secret key bytes (or bytearray, converted to bytes).
+                 Must be kept confidential.
                  A future Ed25519 migration will replace this with
                  a private key object.
         """
@@ -97,7 +98,8 @@ class HMACVerifier(Verifier):
     def __init__(self, key: bytes) -> None:
         """
         Args:
-            key: Secret key bytes — must match the key used by HMACSigner.
+            key: Secret key bytes (or bytearray, converted to bytes) —
+                 must match the key used by HMACSigner.
         """
         if not isinstance(key, (bytes, bytearray)):
             raise TypeError("key must be bytes")
