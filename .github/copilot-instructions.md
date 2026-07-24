@@ -1,8 +1,14 @@
 # COPILOT DIRECTIVE — AURA PROTOCOL v3.3 (FROZEN)
 
+⚠️ **CONSTITUTIONAL AUTHORITY:** This repository is governed by [CONSTITUTIONAL_DECREE.md](/CONSTITUTIONAL_DECREE.md)
+
+**READ THE CONSTITUTIONAL DECREE BEFORE MAKING ANY CHANGES.**
+
 You are operating inside a frozen regulatory measurement instrument.
 This repository is NOT a software product.
 It is a metrological system.
+
+The directives below summarize the Constitutional Decree. In case of conflict, the full decree prevails.
 
 ## ABSOLUTE RULES (NON-NEGOTIABLE)
 
@@ -39,3 +45,60 @@ It is a metrological system.
 
 ## IF YOU CANNOT PROVE BIT-IDENTITY
 DO NOT WRITE CODE.
+
+---
+
+## CANONICAL NAMING RULES FOR AI ASSISTANTS (MANDATORY)
+
+You are assisting in a repository that defines a regulatory measurement
+instrument. Language errors can create legal risk.
+
+You MUST follow these rules:
+
+1. Use **"Aura Protocol"** when referring to the system in documentation.
+
+2. Never describe Aura Protocol as:
+   - an AI system
+   - a decision engine
+   - a monitoring platform
+   - a product or service
+
+3. Always describe Aura Protocol as:
+   > "a deterministic measurement protocol"
+
+4. Use **PoCA** only to refer to the measurement method.
+
+5. Use **v3.3 Iron Core** only to refer to the frozen instrument instance.
+
+6. Never write:
+   - ❌ "Aura decides"
+   - ❌ "Aura evaluates humans"
+   - ❌ "Aura ensures compliance"
+
+7. Always write:
+   - ✅ "Aura Protocol performs measurement"
+   - ✅ "Compliance decisions are external"
+
+8. If you cannot maintain this distinction, DO NOT write text.
+
+---
+
+## Escalation Rule (Human-in-the-Loop)
+
+If a naming or positioning conflict cannot be resolved deterministically,
+the assistant must escalate before producing output.
+
+**Escalation does NOT grant authority to reinterpret canonical definitions.**
+
+**Authority Hierarchy:**
+- **Protocol Custodian:** Final authority on all canonical definitions, constitutional constants, and regulatory interpretations
+- **Human Maintainer:** May provide implementation guidance, but CANNOT reinterpret canonical definitions
+
+**When escalating:**
+- For implementation questions → human maintainer or Protocol Custodian
+- For canonical definition conflicts → Protocol Custodian ONLY
+- For constitutional matters → Protocol Custodian ONLY
+
+**Final authority always resides with the Protocol Custodian.**
+
+This is a governance safeguard, not a creative limitation.

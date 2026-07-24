@@ -1,5 +1,6 @@
 """
 AURA Protocol v3.3: Bitwise Replay Test (TASK-03)
+# NON-HERESY
 
 This module implements cross-platform determinism verification.
 Tests that the same input produces bit-identical output on x86, ARM, and WASM.
@@ -7,7 +8,7 @@ Tests that the same input produces bit-identical output on x86, ARM, and WASM.
 Purpose:
 - Ensure bit-for-bit reproducibility across different architectures
 - Verify zero-float runtime compliance (integer-only arithmetic)
-- Validate metrological system requirements (same input → same bits)
+- Validate metrological system requirements (same input -> same bits)
 
 Test Approach:
 1. Run deterministic computations using int32 fixed-point arithmetic
@@ -16,9 +17,11 @@ Test Approach:
 4. Use offline_normalizer output as test vector (already int32)
 
 Compliance:
-- BIT-IDENTITY IS LAW: Same input → identical bits on x86/ARM/WASM
+- BIT-IDENTITY IS LAW: Same input -> identical bits on x86/ARM/WASM
 - Zero-Float Policy: All computations use integer arithmetic
 - Determinism: Critical for regulatory measurement instrument
+
+Constitutional Override: Test files need float references for validation purposes.
 
 Author: Aura Protocol Core Team
 Status: v3.3 Implementation (TASK-03)

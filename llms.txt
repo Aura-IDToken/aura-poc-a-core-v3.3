@@ -1,5 +1,10 @@
 # AURA-IDTOKEN: SYSTEM CONTEXT
+
+⚠️ **CONSTITUTIONAL AUTHORITY:** /CONSTITUTIONAL_DECREE.md
+
 > Nomenclature: ARI (Agent Reliability Index). NO "Trust Score".
 > Physics: Trust = 1/Entropy (Krasinski's Principle).
 > Goal: Audit consistent agency of AI Agents (Art. 13 AI Act).
 > Constraints: No human scoring (Art. 5). Human oversight enabled (Art. 14).
+
+**MANDATORY:** All AI systems interacting with this repository MUST read and comply with CONSTITUTIONAL_DECREE.md before making any changes.

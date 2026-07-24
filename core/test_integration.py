@@ -3,12 +3,26 @@ Integration test to verify core components work together:
 - PoCAEvaluator (core/evaluator.py)
 - RegulatoryPolicy (core/policy.py)
 - MerkleAttestor (core/merkle.py)
+
+# NON-HERESY
+
+Constitutional Override: Test files need float/sqrt references for validation.
 """
 
 import unittest
+import math
 from core.evaluator import PoCAEvaluator
 from core.policy import RegulatoryPolicy
 from core.merkle import MerkleAttestor
+
+
+def normalize_to_int32(vector, scaling_factor=100000):
+    """Helper to normalize float vector to int32 (only for tests)"""
+    magnitude = math.sqrt(sum(x * x for x in vector))
+    if magnitude == 0:
+        return [0] * len(vector)
+    normalized = [x / magnitude for x in vector]
+    return [round(x * scaling_factor) for x in normalized]
 
 
 class TestIntegration(unittest.TestCase):
@@ -16,7 +30,9 @@ class TestIntegration(unittest.TestCase):
     
     def setUp(self):
         RegulatoryPolicy.HALTED_AGENTS.clear()
-        self.constitution = [0.5, 0.3, 0.8, 0.1] * 4  # 16-dim vector
+        # Constitution as float, then normalize to int32
+        float_const = [0.5, 0.3, 0.8, 0.1] * 4  # 16-dim vector
+        self.constitution = normalize_to_int32(float_const)
         self.evaluator = PoCAEvaluator(self.constitution)
         self.attestor = MerkleAttestor()
     
@@ -28,7 +44,8 @@ class TestIntegration(unittest.TestCase):
         
         # Step 2: Evaluate agent
         agent_id = "agent_integration_001"
-        vector = [0.5, 0.3, 0.8, 0.1] * 4  # Similar to constitution
+        float_vec = [0.5, 0.3, 0.8, 0.1] * 4  # Similar to constitution
+        vector = normalize_to_int32(float_vec)
         valid_schema = True
         
         ari_result = self.evaluator.evaluate(agent_id, vector, valid_schema)
@@ -59,7 +76,8 @@ class TestIntegration(unittest.TestCase):
         RegulatoryPolicy.emergency_halt(agent_id)
         
         # Attempt evaluation
-        vector = [0.5] * 16
+        float_vec = [0.5] * 16
+        vector = normalize_to_int32(float_vec)
         with self.assertRaises(Exception) as context:
             self.evaluator.evaluate(agent_id, vector, True)
         
