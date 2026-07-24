@@ -18,7 +18,7 @@ This directory contains formal specifications, design documents, and compliance 
 
 ## Directory Structure
 
-- `/core` — PoCA math & logic (ARI calculation, embeddings, policy)
+- `/core` — PoCA math & logic (ARI calculation, embeddings)
 - `/audit` — Merkle proofs, hash verification, signing abstraction, audit tooling
 - `/compliance` — Certificate generation, rendering, schemas
 - `/docs` — This directory (specifications and compliance docs)

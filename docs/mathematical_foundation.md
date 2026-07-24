@@ -28,7 +28,7 @@ All values are **int32 scaled by 10^5** (SCALING_FACTOR = 100,000):
 |-----------------|---------------|
 | 0.0             | 0             |
 | 1.0             | 100,000       |
-| 0.8 (sentinel)  | 80,000        |
+| 0.68 (sentinel) | 68,000        |
 
 ### Output Range
 
