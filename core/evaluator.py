@@ -1,5 +1,4 @@
 from typing import List, Dict
-from compliance.policy import RegulatoryPolicy
 
 class PoCAEvaluator:
     """Implementation of ARI formula: C(Et) = 0.3*S + 0.7*SA - P
@@ -47,28 +46,28 @@ class PoCAEvaluator:
         
         return similarity
 
-    def evaluate(self, agent_id: str, vector: List[int], valid_schema: bool) -> Dict:
+    def evaluate(self, agent_id: str, vector: List[int], valid_schema: bool, penalty: int = 0) -> Dict:
         """
         Evaluate agent reliability using fixed-point int32 arithmetic.
         
+        Layer 0 Measurement: This method performs ONLY deterministic calculation.
+        Policy decisions (halt checks, penalty calculation) must be handled by the caller.
+        
         Args:
-            agent_id: Agent identifier (for halt check)
+            agent_id: Agent identifier (for audit trail only)
             vector: Agent action vector (int32, scaled by 10^5)
             valid_schema: Whether the schema is valid
+            penalty: Penalty value (int32, scaled by 10^5, default=0)
+                     Calculated by Layer 2 policy engine
             
         Returns:
-            Dict with raw ARI score and drift
+            Dict with raw ARI score and drift (measurement only, no policy decisions)
         """
-        RegulatoryPolicy.check_halt_status(agent_id)
-        
         # Structural integrity: 0 or 1 (scaled by 10^5 for consistency)
         si = self.SCALING_FACTOR if valid_schema else 0
         
         # Semantic alignment (already scaled by 10^5)
         sa = self.vector_similarity_int32(vector, self.constitution)
-        
-        # Penalty (returned as int scaled by 10^5)
-        penalty = RegulatoryPolicy.calculate_penalties(sa)
         
         # ARI = 0.3*S + 0.7*SA - P (all in fixed-point)
         # (weight * si) is (30000 * 100000) or 0, divide by 10^5 to rescale
