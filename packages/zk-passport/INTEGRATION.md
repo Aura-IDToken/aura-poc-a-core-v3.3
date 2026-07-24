@@ -18,21 +18,20 @@ This document explains how the `reputation_check.circom` ZK circuit integrates w
 │   /core/evaluator.py                │
 │                                     │
 │   ARI = 0.3×SI + 0.7×SA - Penalties│
-│   Output: ARI ∈ [0.0, 1.0]         │
+│   Output: ARI ∈ [0, 100000] (int32)│
 └────────┬────────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────────┐
-│   Integer Scaling                   │
-│   /core/offline_normalizer.py      │
+│   ZK Circuit Input Preparation      │
 │                                     │
-│   ARI_int = round(ARI × 10⁵)       │
-│   Output: ARI_int ∈ [0, 100000]    │
+│   secretARI = ari_int  (already     │
+│   in 10^5 scale — no re-scaling)    │
 └────────┬────────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────────┐
-│   ZK Circuit                        │
+│   ZK Circuit (external toolchain)   │
 │   packages/zk-passport/             │
 │   reputation_check.circom           │
 │                                     │
@@ -58,28 +57,39 @@ This document explains how the `reputation_check.circom` ZK circuit integrates w
 
 ## Python Integration Example
 
+> **Note:** The Python steps below show how ARI output from the Aura core is prepared
+> for the ZK circuit. Steps 3–4 (proof generation and verification) require the
+> external `circom` / `snarkjs` toolchain, which is **not** included in this repository.
+> See `packages/zk-passport/TEST_SPECIFICATION.md` for circuit test details.
+
 ### Step 1: Calculate ARI (Core Evaluator)
 
 ```python
-from core.evaluator import calculate_ari
+from core.evaluator import PoCAEvaluator
+from compliance.evaluator_wrapper import evaluate_with_policy
 from core.offline_normalizer import SCALING_FACTOR
 
-# Evaluate agent event
-result = calculate_ari(
-    event=agent_event,
-    constitution_vector=constitution,
-    policies=policy_set
+# Build evaluator with pre-normalized int32 constitution vector
+evaluator = PoCAEvaluator(constitution_vector_int32)
+
+# Evaluate agent event (Layer 2 orchestrator handles policy)
+result = evaluate_with_policy(
+    evaluator,
+    agent_id=agent_id,
+    vector=action_vector_int32,
+    valid_schema=True,
 )
 
-# Extract components
-ari_float = result['ari']           # e.g., 0.85
-structural_integrity = result['si']  # 0.0 or 1.0
-is_machine = result['target_type'] == "MACHINE_ACCOUNT"  # bool
+# Extract components (all values are int32 scaled by SCALING_FACTOR = 100,000)
+ari_int = result["ari"]    # e.g., 85000 (represents 0.85)
+drift_int = result["drift"] # e.g., 15000 (represents 0.15)
 
-# Scale to integer (v3.3 spec)
-ari_int = round(ari_float * SCALING_FACTOR)  # 85000
-si_int = int(structural_integrity)           # 1
-machine_int = int(is_machine)                # 1
+# Schema validity and machine-account flag are inputs to evaluation, not outputs
+valid_schema = True        # validated before calling evaluate_with_policy
+is_machine = 1             # enforced by RegulatoryPolicy.validate_target()
+
+# Scale check: ARI is already in int32 space (no further conversion needed)
+si_int = 1 if valid_schema else 0
 ```
 
 ### Step 2: Prepare ZK Circuit Inputs
@@ -94,7 +104,7 @@ threshold_int = round(threshold_float * SCALING_FACTOR)  # 80000
 # Prepare witness (private inputs)
 witness = {
     "secretARI": str(ari_int),           # "85000"
-    "isMachine": str(machine_int),       # "1"
+    "isMachine": str(is_machine),        # "1"
     "schemaIntegrity": str(si_int)       # "1"
 }
 
@@ -267,18 +277,19 @@ auditor_can_verify(compliance_proof)
 
 ### Determinism
 
-The entire pipeline is deterministic:
+The Python evaluation pipeline is deterministic:
 
 ```python
-# Same event → Same ARI → Same ZK inputs → Same proof verification result
-event_hash = deterministic_hash(agent_event)
-ari_1 = calculate_ari(event, t=0)
-ari_2 = calculate_ari(event, t=1000)
-assert ari_1 == ari_2  # Deterministic
+from core.evaluator import PoCAEvaluator
 
-proof_1 = generate_proof(ari_1)
-proof_2 = generate_proof(ari_2)
-assert verify(proof_1) == verify(proof_2)  # Deterministic
+evaluator = PoCAEvaluator(constitution_vector_int32)
+
+result_1 = evaluator.evaluate(agent_id, vector_int32, valid_schema=True)
+result_2 = evaluator.evaluate(agent_id, vector_int32, valid_schema=True)
+
+assert result_1["ari"] == result_2["ari"]    # Deterministic
+assert result_1["drift"] == result_2["drift"] # Deterministic
+# Same ZK inputs → same proof verification result
 ```
 
 ## Performance Considerations
@@ -299,10 +310,10 @@ assert verify(proof_1) == verify(proof_2)  # Deterministic
 ## Status
 
 **Version**: v3.3 (Iron Core Correct)  
-**Integration Status**: Reference Implementation  
+**Integration Status**: Circuit source available — proof toolchain (circom, snarkjs) is an external dependency not included in this repository  
 **Dependencies**: 
 - Core Evaluator: `/core/evaluator.py`
-- Integer Normalizer: `/core/offline_normalizer.py`
+- Layer 2 Orchestrator: `/compliance/evaluator_wrapper.py`
 - ZK Circuit: `/packages/zk-passport/reputation_check.circom`
 
 ## Author

@@ -141,8 +141,8 @@ Event → Core Evaluator → ARI (private) → ZK Circuit → Proof
 ## Specification Compliance
 
 **Version**: v3.3 (Iron Core Correct)  
-**Status**: FROZEN (MC-READY 2026)  
-**Determinism**: Guaranteed (integer-only operations)  
+**Status**: FROZEN circuit source — external proof toolchain (circom/snarkjs) not included  
+**Determinism**: Circuit logic is integer-only and deterministic; proof generation requires an external ZK toolchain  
 **Scaling Factor**: $10^5$ (per v3.3 spec)
 
 ## Author
@@ -152,4 +152,4 @@ Based on Krasinski Principle: **T ∝ 1/S** (Transparency inversely proportional
 
 ## License
 
-MIT
+Business Source License 1.1 (BSL 1.1) — see repository root LICENSE file.

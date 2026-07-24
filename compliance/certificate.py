@@ -17,6 +17,22 @@ class AuraEventCertificate:
     
     Uses Agent Reliability Index (ARI) - NOT "Trust Score" to avoid 
     Social Scoring classification under EU AI Act.
+
+    ## Layer 0 / Layer 2 Representation
+
+    The Layer 0 measurement engine (`core/evaluator.py`) produces ARI and drift
+    as **int32 values scaled by 10^5** (e.g., 0.85 → 85000).
+
+    This certificate stores those values as **float** for human-readable output
+    and external API compatibility.  The conversion is:
+
+        ari_score  = ari_int32  / SCALING_FACTOR   (e.g., 85000 / 100000 = 0.85)
+        drift      = drift_int32 / SCALING_FACTOR
+
+    This conversion is intentional and limited to the presentation/reporting layer.
+    Raw int32 values remain the normative measurement.  Callers that need bit-exact
+    int32 values should read them directly from the evaluator result dict before
+    constructing this certificate.
     """
 
     agent_id: str  # MACHINE_ACCOUNT identifier only
