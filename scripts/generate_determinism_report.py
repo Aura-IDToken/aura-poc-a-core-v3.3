@@ -119,7 +119,8 @@ def generate_report(output_path: Path) -> dict:
 
     report = {
         "schema_version": "1.0",
-        "instrument": "Aura Protocol v3.3 Iron Core",
+        "instrument": "Aura Protocol",
+        "instrument_version": "v3.3 Iron Core",
         "engine_version": ENGINE_VERSION,
         "platform": {
             "system": platform.system(),

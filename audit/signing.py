@@ -18,6 +18,13 @@ import hmac
 from abc import ABC, abstractmethod
 
 
+def _require_bytes_key(key: object) -> bytes:
+    """Validate that *key* is bytes-like and return it as ``bytes``."""
+    if not isinstance(key, (bytes, bytearray)):
+        raise TypeError("key must be bytes")
+    return bytes(key)
+
+
 class Signer(ABC):
     """Abstract signing interface.
 
@@ -79,9 +86,7 @@ class HMACSigner(Signer):
                  A future Ed25519 migration will replace this with
                  a private key object.
         """
-        if not isinstance(key, (bytes, bytearray)):
-            raise TypeError("key must be bytes")
-        self._key = bytes(key)
+        self._key = _require_bytes_key(key)
 
     def sign(self, payload: bytes) -> bytes:
         """Return HMAC-SHA256(key, payload)."""
@@ -99,9 +104,7 @@ class HMACVerifier(Verifier):
         Args:
             key: Secret key bytes — must match the key used by HMACSigner.
         """
-        if not isinstance(key, (bytes, bytearray)):
-            raise TypeError("key must be bytes")
-        self._key = bytes(key)
+        self._key = _require_bytes_key(key)
 
     def verify(self, payload: bytes, signature: bytes) -> bool:
         """Return True iff HMAC-SHA256(key, payload) == signature."""
