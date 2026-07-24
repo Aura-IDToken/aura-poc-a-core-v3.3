@@ -25,13 +25,13 @@ WARNINGS=0
 # Function to report violation
 violation() {
     echo -e "${RED}✗ VIOLATION:${NC} $1"
-    ((VIOLATIONS++))
+    VIOLATIONS=$((VIOLATIONS + 1))
 }
 
 # Function to report warning
 warning() {
     echo -e "${YELLOW}⚠ WARNING:${NC} $1"
-    ((WARNINGS++))
+    WARNINGS=$((WARNINGS + 1))
 }
 
 # Function to report pass

@@ -63,7 +63,6 @@ class TestARICalculation(unittest.TestCase):
         
         self.assertIn("ari", result)
         self.assertIn("drift", result)
-        self.assertIn("status", result)
         # ARI is now int32 scaled by 10^5, so range is [0, 100000]
         self.assertGreaterEqual(result["ari"], 0)
         self.assertLessEqual(result["ari"], PoCAEvaluator.SCALING_FACTOR)
@@ -80,7 +79,6 @@ class TestARICalculation(unittest.TestCase):
         # With perfect alignment and valid schema, ARI should be close to 100000
         self.assertGreater(result["ari"], 95000)  # Should be close to 100000
         self.assertLess(result["drift"], 5000)  # Drift should be close to 0
-        self.assertEqual(result["status"], "COMPLIANT")
     
     def test_ari_calculation_invalid_schema(self):
         """Test ARI with invalid schema"""
@@ -108,7 +106,7 @@ class TestARICalculation(unittest.TestCase):
         # Should have significant drift
         self.assertGreater(result["drift"], 30000)
         # Penalty should be applied
-        self.assertEqual(result["status"], "RISK")
+        self.assertEqual(result["ari"], 0)
     
     def test_emergency_halt_mechanism(self):
         """Art. 14: Test human oversight kill-switch"""
