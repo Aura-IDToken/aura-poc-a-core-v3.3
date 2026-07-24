@@ -9,6 +9,9 @@ This directory contains formal specifications, design documents, and compliance 
 - **[architecture.md](architecture.md)**: System architecture and component overview
 - **[threat_model.md](threat_model.md)**: Security considerations and mitigations
 
+### Audit Layer
+- **[specs/AUDIT_LAYER_SPEC.md](specs/AUDIT_LAYER_SPEC.md)**: Normative specification for the Audit Layer — Canonical Event, Canonical Hash, Merkle Tree, Event Trust Certificate, Signing, Independent Verification
+
 ### Compliance Materials  
 - **[regulatory_compliance.md](regulatory_compliance.md)**: EU AI Act compliance, nomenclature, audit readiness
 - **[KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)**: Known anomalies and architectural debt in v3.3
@@ -16,9 +19,10 @@ This directory contains formal specifications, design documents, and compliance 
 ## Directory Structure
 
 - `/core` — PoCA math & logic (ARI calculation, embeddings, policy)
-- `/audit` — Merkle proofs, hash verification, audit tooling
+- `/audit` — Merkle proofs, hash verification, signing abstraction, audit tooling
 - `/compliance` — Certificate generation, rendering, schemas
 - `/docs` — This directory (specifications and compliance docs)
+- `/docs/specs` — Normative specifications
 
 ## Key Principles
 
@@ -47,3 +51,4 @@ Kamil Krasiński
 2. Check regulatory compliance doc for AI Act mapping
 3. See architecture doc for system component descriptions
 4. Consult threat model for security guarantees
+5. See `specs/AUDIT_LAYER_SPEC.md` for normative Audit Layer specification

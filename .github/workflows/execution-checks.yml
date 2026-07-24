@@ -11,57 +11,108 @@ permissions:
 
 jobs:
   execution-checks:
-    name: Run Mandatory Execution Checks
-    runs-on: ${{ matrix.os }}
+    name: Run Mandatory Execution Checks (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        # Future: Add ARM runner for cross-platform validation
-        # os: [ubuntu-latest, ubuntu-latest-arm]
-    
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      
+
       - name: Run Execution Checks
         run: |
           chmod +x scripts/run_all_checks.sh
           ./scripts/run_all_checks.sh
-      
+
+      - name: Generate determinism report
+        run: |
+          python scripts/generate_determinism_report.py determinism-report-${{ matrix.arch }}.json
+
+      - name: Upload determinism report
+        uses: actions/upload-artifact@v4
+        with:
+          name: determinism-report-${{ matrix.arch }}
+          path: determinism-report-${{ matrix.arch }}.json
+          retention-days: 30
+
       - name: Upload check results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: check-results-${{ matrix.os }}
+          name: check-results-${{ matrix.arch }}
           path: |
             core/test_bitwise_replay_*.hash
           retention-days: 30
 
-  # Future: Cross-platform hash comparison job
-  # compare-hashes:
-  #   name: Compare Cross-Platform Hashes
-  #   needs: execution-checks
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download x86_64 results
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: check-results-ubuntu-latest
-  #         path: ./hashes-x86
-  #     
-  #     - name: Download ARM results
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: check-results-ubuntu-latest-arm
-  #         path: ./hashes-arm
-  #     
-  #     - name: Compare hashes
-  #       run: |
-  #         diff ./hashes-x86/core/test_bitwise_replay_x86_64.hash \
-  #              ./hashes-arm/core/test_bitwise_replay_aarch64.hash
+  wasm-compat:
+    name: WASM Compatibility Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pytest
+
+      - name: Run WASM compatibility tests
+        run: |
+          python -m pytest core/test_bitwise_replay.py::WASMCompatibilityTest -v
+        # Note: This verifies WASM-safe arithmetic patterns.
+        # Full WASM execution (wasmtime + Python) is an architectural goal;
+        # see docs/architecture.md and docs/GAP-001.md for status.
+
+  compare-determinism:
+    name: Compare Cross-Platform Determinism
+    needs: execution-checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Download x86_64 determinism report
+        uses: actions/download-artifact@v4
+        with:
+          name: determinism-report-x86_64
+          path: ./reports/x86_64
+
+      - name: Download arm64 determinism report
+        uses: actions/download-artifact@v4
+        with:
+          name: determinism-report-arm64
+          path: ./reports/arm64
+
+      - name: Compare determinism vectors
+        run: |
+          python scripts/compare_determinism_reports.py \
+            reports/x86_64/determinism-report-x86_64.json \
+            reports/arm64/determinism-report-arm64.json
+
+      - name: Upload combined determinism report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: determinism-comparison-result
+          path: reports/
+          retention-days: 30
