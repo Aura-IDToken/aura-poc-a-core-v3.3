@@ -78,8 +78,17 @@ class ConsistencyCalculator:
         """
         Calculate fixed-point similarity between pre-normalized event and constitution vectors.
         """
-        if not any(event_vec) or not any(self.constitution):
+        if not event_vec or not self.constitution:
             return 0
+
+        if all(value == 0 for value in event_vec) or all(value == 0 for value in self.constitution):
+            return 0
+
+        if any(abs(value) > self.SCALING_FACTOR for value in event_vec):
+            raise ValueError("Event vector must be normalized to the fixed-point scaling factor.")
+
+        if any(abs(value) > self.SCALING_FACTOR for value in self.constitution):
+            raise ValueError("Constitution vector must be normalized to the fixed-point scaling factor.")
 
         dot = sum(a * b for a, b in zip(event_vec, self.constitution))
         return dot // self.SCALING_FACTOR
