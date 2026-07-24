@@ -256,7 +256,7 @@ $ python -m unittest core.test_bitwise_replay
 
 The precision loss is **acceptable** because:
 - Constitution vectors are semantic embeddings (approximate by nature)
-- Threshold is 0.8 → 80,000 in fixed-point (precise enough)
+- Threshold is 0.68 → 68,000 in fixed-point (precise enough)
 - Error margin of ±0.00001 (1 unit in 10^5) is negligible for ARI calculation
 
 ---
