@@ -133,47 +133,52 @@ These checks should be integrated into your CI/CD pipeline:
 
 ## Expected Status
 
-**Current Status:**
+**Current Status (post CORE-005, 2026-07-24):**
+- CHECK 0: ✅ PASS (constitutional compliance verified)
 - CHECK 1: ✅ PASS (bitwise replay tests working)
-- CHECK 2: ❌ FAIL (float operations in runtime core)
-- CHECK 3: ❌ FAIL (compliance status in evaluator.py)
+- CHECK 2: ✅ PASS (integer-only arithmetic in runtime core)
+- CHECK 3: ✅ PASS (layer separation maintained; core/ returns raw metrics only)
 - CHECK 4: ✅ PASS (audit path components verified)
 - CHECK 5: ✅ PASS (no entropy increase)
 
-**Known Violations:**
+All checks pass. The violations listed below were resolved by CORE-005.
 
-The following files currently violate the checks and need remediation:
+**Previously Known Violations (RESOLVED by CORE-005):**
 
-1. `core/evaluator.py` - Uses float types and math.sqrt (CHECK 2)
-2. `core/evaluator.py` - Returns compliance status (CHECK 3)
-3. `core/consistency.py` - Uses math.sqrt (CHECK 2)
-4. `core/embedding.py` - Uses float operations (CHECK 2)
-5. `core/policy.py` - Uses float types, enforces thresholds (CHECK 2, CHECK 3)
+The following files previously violated the checks and have been remediated:
 
-## Remediation
+1. `core/evaluator.py` - Previously used float types and math.sqrt → **FIXED**: integer-only
+2. `core/evaluator.py` - Previously returned compliance status → **FIXED**: returns `{"ari", "drift"}` only
+3. `core/consistency.py` - Previously used math.sqrt → **FIXED**: converted to deprecated Layer 2 wrapper
+4. `core/policy.py` - Previously enforced thresholds in Layer 0 → **FIXED**: converted to deprecated Layer 2 wrapper
 
-To fix the violations:
+Note: `core/consistency.py` and `core/policy.py` remain as deprecated backward-compatibility wrappers
+that re-export from `compliance/`. They will be removed in v4.0. CHECK 3 explicitly excludes them.
+
+## Remediation (Historical Reference)
+
+The following shows the changes made in CORE-005 to fix prior violations.
 
 ### For CHECK 2 (Integer Only)
 
-Replace all float operations with int32 fixed-point arithmetic:
+Replaced float operations with int32 fixed-point arithmetic:
 
 ```python
-# BEFORE (violates CHECK 2)
+# BEFORE (violated CHECK 2)
 similarity = 0.85
 norm = math.sqrt(sum(x**2 for x in vector))
 
 # AFTER (complies with CHECK 2)
 similarity_int = 85000  # 0.85 × 10^5
-# For norm: use integer-only approximation or pre-computed values
+# Norm pre-computed offline via core/offline_normalizer.py
 ```
 
 ### For CHECK 3 (Layer Separation)
 
-Remove compliance decisions from core, return raw metrics only:
+Removed compliance decisions from core, returning raw metrics only:
 
 ```python
-# BEFORE (violates CHECK 3)
+# BEFORE (violated CHECK 3)
 return {
     "ari": 0.85,
     "status": "COMPLIANT" if ari > 0.8 else "RISK"
@@ -184,7 +189,7 @@ return {
     "ari": 85000,  # Raw metric in int32
     "drift": 15000
 }
-# Let Layer 2 (compliance/) decide COMPLIANT vs RISK
+# Layer 2 (compliance/evaluator_wrapper.py) handles policy decisions
 ```
 
 ## Reference
