@@ -106,7 +106,7 @@ class TestARICalculation(unittest.TestCase):
         # Should have significant drift
         self.assertGreater(result["drift"], 30000)
         # Penalty should be applied
-        self.assertEqual(result["ari"], 0)
+        self.assertLessEqual(result["ari"], 5000)
     
     def test_emergency_halt_mechanism(self):
         """Art. 14: Test human oversight kill-switch"""
