@@ -1,5 +1,3 @@
-# compliance/renderer.py
-
 """
 Compliance output renderer for Aura Protocol.
 
@@ -7,36 +5,35 @@ Transforms AuraEventCertificate into human-readable formats
 while maintaining compliance with AI Act transparency requirements.
 """
 
-from typing import Dict, Any
+import json
+from typing import Dict, Any, Union
 from .certificate import AuraEventCertificate
 
 
-def render_certificate(cert: AuraEventCertificate, format: str = "json") -> str:
+def render_certificate(cert: AuraEventCertificate, format: str = "json") -> Union[str, Dict[str, Any]]:
     """
     Render an AuraEventCertificate in the specified format.
-    
+
     Args:
         cert: The certificate to render
-        format: Output format ('json', 'text', 'compliance')
-    
+        format: Output format ('json', 'text', 'compliance', 'dict')
+
     Returns:
-        Formatted certificate string
-    
+        Formatted certificate string or dictionary
+
     Note: Uses Agent Reliability Index (ARI) terminology to comply
     with AI Act and avoid Social Scoring classification.
     """
+    if format == "dict":
+        return cert.to_dict()
     if format == "json":
-        import json
         return json.dumps(cert.to_dict(), indent=2, sort_keys=True)
-    
-    elif format == "text":
+    if format == "text":
         return _render_text(cert)
-    
-    elif format == "compliance":
+    if format == "compliance":
         return _render_compliance_report(cert)
-    
-    else:
-        raise ValueError(f"Unsupported format: {format}")
+
+    raise ValueError(f"Unsupported format: {format}")
 
 
 def _render_text(cert: AuraEventCertificate) -> str:
