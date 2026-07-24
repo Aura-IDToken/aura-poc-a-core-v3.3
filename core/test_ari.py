@@ -26,6 +26,49 @@ def normalize_to_int32(vector, scaling_factor=100000):
     return int_vector
 
 
+class TestLayerSeparation(unittest.TestCase):
+    """Regression tests for Constitutional Layer Separation (Art. I §6).
+
+    Layer 0 (core/) MEASURES only.
+    Layer 2 (compliance/) decides.
+    core/evaluator.py MUST NOT return compliance status fields.
+    """
+
+    PROHIBITED_KEYS = {"status", "COMPLIANT", "RISK", "ALLOW", "DENY", "PASS", "FAIL"}
+
+    def setUp(self):
+        RegulatoryPolicy.HALTED_AGENTS.clear()
+        float_const = [0.5] * 10
+        constitution = normalize_to_int32(float_const)
+        self.evaluator = PoCAEvaluator(constitution)
+
+    def _evaluate(self, alignment="high"):
+        float_vec = [0.5] * 10 if alignment == "high" else [-0.5] * 10
+        vector = normalize_to_int32(float_vec)
+        return self.evaluator.evaluate("test_layer_sep", vector, True)
+
+    def test_evaluate_returns_only_measurement_keys(self):
+        """Layer 0 must return only raw measurements: ari and drift."""
+        result = self._evaluate("high")
+        self.assertSetEqual(set(result.keys()), {"ari", "drift"},
+                            "core/evaluator.py must return ONLY 'ari' and 'drift'")
+
+    def test_evaluate_contains_no_prohibited_keys(self):
+        """Layer 0 must never return compliance status strings."""
+        for alignment in ("high", "low"):
+            result = self._evaluate(alignment)
+            overlap = set(result.keys()) & self.PROHIBITED_KEYS
+            self.assertSetEqual(overlap, set(),
+                                f"Prohibited keys found in evaluator output: {overlap}")
+
+    def test_evaluate_values_are_integers(self):
+        """All measurement values returned by Layer 0 must be integers (fixed-point)."""
+        result = self._evaluate("high")
+        for key, value in result.items():
+            self.assertIsInstance(value, int,
+                                  f"Layer 0 measurement '{key}' must be int, got {type(value)}")
+
+
 class TestARICalculation(unittest.TestCase):
     """Tests for ARI (Agent Reliability Index) calculation and regulatory compliance"""
     
