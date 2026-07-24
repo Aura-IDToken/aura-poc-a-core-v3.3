@@ -85,6 +85,17 @@ def issue_audit_certificate(
 ) -> AuditPipelineResult:
     """
     Compliance-layer entry point for issuing an audit-layer certificate.
+
+    Args:
+        pipeline: Configured audit pipeline with signing key material.
+        event_id: Unique event identifier.
+        timestamp: Event timestamp in ISO-8601 format.
+        agent_id: MACHINE_ACCOUNT identifier tied to the measurement.
+        ari: Deterministic ARI measurement (int32 scaled by 10^5).
+        drift: Deterministic drift measurement (int32 scaled by 10^5).
+        schema_valid: Structural integrity flag used in measurement.
+        engine_version: v3.3 Iron Core measurement engine version.
+        policy_version: External Layer 2 policy version applied to penalties.
     """
     return pipeline.append_and_certify(
         {

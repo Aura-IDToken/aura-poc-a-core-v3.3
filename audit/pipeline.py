@@ -35,7 +35,7 @@ class AuditLayerPipeline:
         tree = MerkleTree(list(self._log.hashes()), leaves_are_hashed=True)
         proof = tree.get_proof(log_entry.index)
 
-        certificate = AuraEventTrustCertificate(
+        unsigned_certificate = AuraEventTrustCertificate(
             event_id=event.event_id,
             ari=event.ari,
             drift=event.drift,
@@ -46,11 +46,10 @@ class AuditLayerPipeline:
             policy_version=event.policy_version,
             timestamp=event.timestamp,
         )
-        certificate.sign(self._signing_key)
+        certificate = unsigned_certificate.signed(self._signing_key)
 
         return AuditPipelineResult(
             event=event,
             log_entry=log_entry,
             certificate=certificate,
         )
-

@@ -14,7 +14,7 @@ from .signature import (
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class AuraEventTrustCertificate:
     event_id: str
     ari: int
@@ -55,14 +55,26 @@ class AuraEventTrustCertificate:
             self.payload_dict(),
             ensure_ascii=False,
             separators=(",", ":"),
-            sort_keys=False,
+            sort_keys=True,
         )
 
     def canonical_payload_hash(self) -> str:
         return hashlib.sha256(self.canonical_payload_json().encode("utf-8")).hexdigest()
 
-    def sign(self, signing_key: str) -> None:
-        self.signature = sign_canonical_hash(self.canonical_payload_hash(), signing_key)
+    def signed(self, signing_key: str) -> "AuraEventTrustCertificate":
+        return AuraEventTrustCertificate(
+            event_id=self.event_id,
+            ari=self.ari,
+            drift=self.drift,
+            canonical_hash=self.canonical_hash,
+            merkle_root=self.merkle_root,
+            merkle_proof=self.merkle_proof,
+            engine_version=self.engine_version,
+            policy_version=self.policy_version,
+            timestamp=self.timestamp,
+            signature=sign_canonical_hash(self.canonical_payload_hash(), signing_key),
+            signature_algorithm=self.signature_algorithm,
+        )
 
     def verify_signature(self, verification_key: str) -> bool:
         if not self.signature:
@@ -92,4 +104,3 @@ class AuraEventTrustCertificate:
             signature=payload.get("signature", ""),
             signature_algorithm=payload.get("signature_algorithm", SIGNATURE_ALGORITHM),
         )
-

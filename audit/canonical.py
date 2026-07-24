@@ -48,7 +48,7 @@ class CanonicalEvent:
             self.to_ordered_dict(),
             ensure_ascii=False,
             separators=(",", ":"),
-            sort_keys=False,
+            sort_keys=True,
         )
 
     def to_canonical_bytes(self) -> bytes:
@@ -73,4 +73,3 @@ class CanonicalEvent:
             engine_version=str(payload["engine_version"]),
             policy_version=str(payload["policy_version"]),
         )
-
