@@ -26,14 +26,16 @@ They are **architectural debt** acknowledged for transparency.
 
 **Location:** `core/evaluator.py:94`
 
-**Status:** Known Anomaly  
-**Risk:** Low (POC scope only)  
-**Discovered:** 2026-01-24  
-**Reporter:** Constitutional Compliance Audit  
+**Status:** ✅ RESOLVED (fixed in CORE-005, 2026-07-24)
+**Risk:** N/A — resolved
+**Discovered:** 2026-01-24
+**Resolved:** 2026-07-24
+**Reporter:** Constitutional Compliance Audit
+**Resolution:** CORE-005 Layer Separation Repair
 
 ### Description
 
-The `evaluate()` method returns a `status` field that interprets the ARI measurement:
+The `evaluate()` method previously returned a `status` field that interpreted the ARI measurement:
 
 ```python
 "status": "COMPLIANT" if ari > self.COMPLIANCE_THRESHOLD else "RISK"
@@ -41,7 +43,7 @@ The `evaluate()` method returns a `status` field that interprets the ARI measure
 
 ### Violation
 
-This violates **Constitutional Decree Article I, Section 6 (Layer Separation)**:
+This violated **Constitutional Decree Article I, Section 6 (Layer Separation)**:
 
 - ❌ Layer 0 (`core/`) should MEASURE only
 - ❌ Layer 2 should DECIDE (thresholds, allow/deny)
@@ -77,38 +79,36 @@ This violates **Constitutional Decree Article I, Section 6 (Layer Separation)**:
 
 ### Resolution Plan
 
-**Target Version:** v4.x (next instrument lineage)
+**Target Version:** v3.3 (completed ahead of schedule)
 
-**Remediation:**
-1. Remove the `status` field from `core/evaluator.py`
-2. Remove the `COMPLIANCE_THRESHOLD` constant from Layer 0
-3. Move threshold interpretation to the `compliance/` layer
-4. Update all tests to check raw metrics only
-5. Update integration contracts to remove the `status` dependency
+**Remediation completed in CORE-005 (2026-07-24):**
+1. ✅ Removed the `status` field from `core/evaluator.py`
+2. ✅ Removed the `COMPLIANCE_THRESHOLD` constant from Layer 0
+3. ✅ Moved threshold interpretation to the `compliance/` layer (`compliance/policy.py`)
+4. ✅ Updated all tests to check raw metrics (`ari`, `drift`) only
+5. ✅ Created `compliance/evaluator_wrapper.py` as the Layer 2 orchestrator
 
-**Blocked By:**
-- Requires backward-incompatible API change
-- Requires audit of all downstream consumers
-- Requires Layer 2 policy module implementation
+### Resolution Verification
 
-### Why Not Fixed Now?
+- ✅ CHECK 2 (Integer Only): PASS
+- ✅ CHECK 3 (Layer Separation): PASS
+- ✅ `core/evaluator.py` returns only `{"ari": int, "drift": int}` — no status field
+- ✅ All 58 tests pass
 
-1. **POC Scope:** Current implementation is demonstration-grade
-2. **Audit Status:** External auditors have been instructed to ignore `status`
-3. **Migration Cost:** Removing would require coordinated downstream changes
-4. **Risk Assessment:** Low priority (does not affect correctness or compliance)
-5. **Instrument Freeze:** v3.3 is approaching seal; changes deferred to v4.x
+### Why Fixed Now?
+
+CORE-005 was implemented before v3.3 seal to resolve this layer violation while preserving backward compatibility via deprecated wrappers in `core/policy.py` and `core/consistency.py`.
 
 ### Acceptance Criteria
 
-This anomaly is **acceptable** because:
+This anomaly was **acceptable** at the time because:
 
-- ✅ It does not compromise determinism
-- ✅ It does not violate bit-identity
-- ✅ It does not affect regulatory compliance
-- ✅ Auditors have been notified
-- ✅ Workaround is documented
-- ✅ Remediation plan exists for next lineage
+- ✅ It did not compromise determinism
+- ✅ It did not violate bit-identity
+- ✅ It did not affect regulatory compliance
+- ✅ Auditors were notified
+- ✅ Workaround was documented
+- ✅ Remediation plan existed (now completed)
 
 ---
 

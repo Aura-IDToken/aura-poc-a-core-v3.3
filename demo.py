@@ -4,11 +4,23 @@ AURA-IDTOKEN: Demonstration Script
 Shows the complete flow from policy validation to ETC generation
 """
 
+import math
+
 from core.evaluator import PoCAEvaluator
 from compliance.policy import RegulatoryPolicy
 from compliance.evaluator_wrapper import evaluate_with_policy
 from core.merkle import MerkleAttestor
-import json
+
+
+def _normalize_int32(vector):
+    """
+    Convert a float demo vector to a normalized int32 vector (10^5 scaling).
+    Demo-only helper — mirrors offline_normalizer logic for short demo vectors.
+    """
+    mag = math.sqrt(sum(x * x for x in vector))
+    if mag == 0:
+        return [0] * len(vector)
+    return [round(x / mag * 100000) for x in vector]
 
 
 def demo_compliant_agent():
@@ -16,18 +28,18 @@ def demo_compliant_agent():
     print("=" * 60)
     print("DEMO 1: Compliant Machine Agent Evaluation")
     print("=" * 60)
-    
-    # Constitution vector (represents declared intent)
-    constitution = [0.5, 0.3, 0.8, 0.1] * 4
+
+    # Constitution vector (represents declared intent) — normalized to int32
+    constitution = _normalize_int32([0.5, 0.3, 0.8, 0.1] * 4)
     evaluator = PoCAEvaluator(constitution)
     attestor = MerkleAttestor()
-    
+
     # Agent data
     agent_id = "machine_agent_001"
     target_type = "MACHINE_ACCOUNT"
-    agent_vector = [0.52, 0.31, 0.79, 0.09] * 4  # Very similar to constitution
+    agent_vector = _normalize_int32([0.52, 0.31, 0.79, 0.09] * 4)  # Very similar to constitution
     valid_schema = True
-    
+
     # Step 1: Regulatory validation (Art. 5)
     print(f"\n1. Validating target type: {target_type}")
     try:
@@ -36,19 +48,19 @@ def demo_compliant_agent():
     except AssertionError as e:
         print(f"   ✗ Validation failed: {e}")
         return
-    
+
     # Step 2: ARI calculation (with policy orchestration)
     print(f"\n2. Calculating ARI for agent: {agent_id}")
     ari_result = evaluate_with_policy(evaluator, agent_id, agent_vector, valid_schema)
-    print(f"   ARI Score: {ari_result['ari']:.4f}")
-    print(f"   Drift: {ari_result['drift']:.4f}")
-    
+    print(f"   ARI Score: {ari_result['ari']} (int32, ~{ari_result['ari'] / 100000:.3f} normalized)")
+    print(f"   Drift:     {ari_result['drift']} (int32, ~{ari_result['drift'] / 100000:.3f} normalized)")
+
     # Step 3: Generate Event Trust Certificate
     print("\n3. Generating Event Trust Certificate (ETC)")
     etc = attestor.generate_etc(ari_result)
     print(f"   Certificate ID: {etc['certificate']}")
     print(f"   Merkle Proof: {etc['proof'][0][:16]}...")
-    
+
     print("\n✓ Complete workflow executed successfully\n")
 
 
@@ -75,27 +87,28 @@ def demo_emergency_halt():
     print("=" * 60)
     print("DEMO 3: Emergency Halt (Art. 14 Human Oversight)")
     print("=" * 60)
-    
+
     # Reset halted agents
     RegulatoryPolicy.HALTED_AGENTS.clear()
-    
-    constitution = [0.5] * 10
+
+    constitution = _normalize_int32([0.5] * 10)
     evaluator = PoCAEvaluator(constitution)
-    
+
     agent_id = "machine_agent_002"
-    agent_vector = [0.5] * 10
-    
+    agent_vector = _normalize_int32([0.5] * 10)
+
     print(f"\n1. Activating emergency halt for agent: {agent_id}")
     RegulatoryPolicy.emergency_halt(agent_id)
     print("   ✓ Agent halted")
-    
+
     print(f"\n2. Attempting to evaluate halted agent")
     try:
-        result = evaluator.evaluate(agent_id, agent_vector, True)
+        # Halt check is enforced at Layer 2 (evaluate_with_policy)
+        result = evaluate_with_policy(evaluator, agent_id, agent_vector, True)
         print("   ✗ Unexpected: Evaluation should have been blocked")
     except Exception as e:
         print(f"   ✓ Evaluation correctly blocked: {e}")
-    
+
     print("\n✓ Kill-switch mechanism working\n")
 
 
@@ -104,26 +117,27 @@ def demo_drift_detection():
     print("=" * 60)
     print("DEMO 4: Semantic Drift Detection & Penalty")
     print("=" * 60)
-    
-    constitution = [1.0, 0.0, 0.0, 0.0, 0.0] * 2
+
+    constitution = _normalize_int32([1.0, 0.0, 0.0, 0.0, 0.0] * 2)
     evaluator = PoCAEvaluator(constitution)
-    
+
     agent_id = "machine_agent_003"
-    drifted_vector = [-0.5, 0.3, 0.8, 0.1, 0.2] * 2  # Very different from constitution
-    
+    drifted_vector = _normalize_int32([-0.5, 0.3, 0.8, 0.1, 0.2] * 2)  # Very different from constitution
+
     print(f"\n1. Evaluating agent with semantic drift")
-    print(f"   Constitution: {constitution[:5]}...")
-    print(f"   Agent Vector: {drifted_vector[:5]}...")
-    
+    print(f"   Constitution (first 5): {constitution[:5]}...")
+    print(f"   Agent Vector (first 5): {drifted_vector[:5]}...")
+
     result = evaluator.evaluate(agent_id, drifted_vector, True)
-    
+
     print(f"\n2. Results:")
-    print(f"   ARI Score: {result['ari']:.4f}")
-    print(f"   Drift: {result['drift']:.4f}")
-    
-    if result['drift'] > 0.3:
+    print(f"   ARI Score: {result['ari']} (int32, ~{result['ari'] / 100000:.3f} normalized)")
+    print(f"   Drift:     {result['drift']} (int32, ~{result['drift'] / 100000:.3f} normalized)")
+
+    # Threshold 30000 = 0.3 in int32 scale (10^5)
+    if result['drift'] > 30000:
         print("\n   ⚠ High drift detected - penalty applied")
-    
+
     print("\n✓ Drift detection working\n")
 
 
