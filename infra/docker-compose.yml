@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  db:
+    image: ankane/pgvector:v0.7.0
+    container_name: aura_iron_db
+    environment:
+      POSTGRES_DB: aura_sandbox
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cathedral_secure}
+    command: >
+      postgres 
+      -c shared_buffers=4GB 
+      -c maintenance_work_mem=1GB
+    ports:
+      - "5432:5432"

@@ -237,7 +237,7 @@ def test_integrated_poca_flow():
     cert = AuraEventCertificate(
         agent_id="test_agent_001",
         timestamp=event["timestamp"],
-        poca_score=result["score"],
+        ari_score=result["score"],
         drift=0.0,
         status="COMPLIANT" if result["score"] > 0.7 else "DRIFT",
         merkle_root=tree.get_root(),

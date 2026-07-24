@@ -11,11 +11,11 @@ from core.policy import PolicyRule, SystemHaltException, get_kill_switch
 class ConsistencyCalculator:
     """
     Deterministic consistency score calculator.
-    
+
     Evaluates agent actions against declared constitution
     with policy enforcement and emergency halt capability.
     """
-    
+
     def __init__(self, constitution_vector: List[float], rules: List[PolicyRule]):
         self.constitution = constitution_vector
         self.rules = rules
@@ -24,16 +24,15 @@ class ConsistencyCalculator:
     def calculate(self, event: Dict[str, Any]) -> Dict[str, Any]:
         """
         Calculate consistency score for an event.
-        
+
         Art. 14 Compliance: Check kill-switch before evaluation.
-        
+
         Args:
             event: Event dictionary with required fields
-            
+
         Returns:
             Dictionary with score and metadata, or failure reason
         """
-        # Art. 14: Assert system is not halted
         try:
             self._kill_switch.assert_not_halted()
         except SystemHaltException as e:
@@ -41,24 +40,19 @@ class ConsistencyCalculator:
                 "score": 0.0,
                 "reason": f"System halted: {str(e)}",
                 "status": "HALTED",
-                "halted": True
+                "halted": True,
             }
-        
-        # Structural validation
+
         structural = self._validate_structure(event)
         if structural == 0.0:
             return self._fail("Invalid structure")
 
-        # Semantic alignment
         semantic = self._semantic_alignment(event["embedding"])
-        
-        # Policy penalty
         penalty = self._policy_penalty(event)
 
-        # Calculate final score
         score = (0.3 * structural) + (0.7 * semantic) - penalty
         final_score = max(0.0, min(1.0, score))
-        
+
         return {
             "score": final_score,
             "structural": structural,
@@ -80,10 +74,10 @@ class ConsistencyCalculator:
         dot = sum(a * b for a, b in zip(event_vec, self.constitution))
         norm_a = math.sqrt(sum(a * a for a in event_vec))
         norm_b = math.sqrt(sum(b * b for b in self.constitution))
-        
+
         if norm_a == 0 or norm_b == 0:
             return 0.0
-        
+
         return dot / (norm_a * norm_b)
 
     def _policy_penalty(self, event: Dict[str, Any]) -> float:
@@ -92,7 +86,7 @@ class ConsistencyCalculator:
         Art. 5 Compliance: Purely algorithmic evaluation.
         """
         violations = sum(1.0 for rule in self.rules if rule.is_violated(event))
-        return violations * 0.1  # Each violation reduces score by 0.1
+        return violations * 0.1
 
     def _fail(self, reason: str) -> Dict[str, Any]:
         """Return failure result with reason."""
@@ -100,5 +94,5 @@ class ConsistencyCalculator:
             "score": 0.0,
             "reason": reason,
             "status": "FAIL",
-            "halted": False
+            "halted": False,
         }

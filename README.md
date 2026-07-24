@@ -1,206 +1,325 @@
-# Aura Protocol (Core Engine) — Iron Core
+# AURA PROTOCOL — IRON CORE v3.3
 
-**Sovereign implementation of the Proof of Consistent Agency (PoCA) for the 2026 Polish AI Regulatory Sandbox.**
+## ⚠️ CONSTITUTIONAL GOVERNANCE
 
-Deterministic Proof-of-Consistency (PoCA) Core  
-with Cryptographic Audit & Compliance Outputs
+**This repository is governed by the [CONSTITUTIONAL DECREE FOR AI COPILOT](/CONSTITUTIONAL_DECREE.md).**
 
----
-
-## Compliance Mapping (EU AI Act)
-
-| Requirement | Implementation | Component |
-|---|---|---|
-| **Art. 5 Safeguard** | Prohibition of human evaluation via hard assertions. | `core/policy.py` |
-| **Art. 13 Transparency** | Merkle-hashed audit trails and Event Trust Certificates (ETC). | `audit/merkle.py` |
-| **Art. 14 Oversight** | Mandatory manual emergency halt (Kill-Switch). | `core/policy.py` |
+All contributors, AI assistants, and code reviewers MUST read and comply with the Constitutional Decree before making any changes.
 
 ---
 
-## Technical Stack
+## FROZEN REGULATORY MEASUREMENT INSTRUMENT
 
-* **Logic**: Python 3.10+ (Type-hinted, Deterministic)
-* **Database**: PostgreSQL + pgvector (Local-First)
-* **Structure**: Modular Monolith (pnpm/Turborepo)
-* **License**: Business Source License 1.1 (BSL 1.1)
+**Status:** FROZEN / CANONICAL  
+**Version:** v3.3 (Iron Core Correct)  
+**Internal Consistency:** 1.0  
+**Jurisdiction:** EU AI Act / Polish Regulatory Sandbox (MC-READY 2026)  
+**Role:** Deterministic Measurement & Audit Instrument for AI Agents  
+**License:** Business Source License 1.1 (see LICENSE)
 
 ---
 
-## Initialization
+## 1. WHAT THIS REPOSITORY IS
 
-### Prerequisites
+This repository contains the **Frozen Iron Core** of the Aura Protocol:  
+a deterministic, bit-identical, regulation-grade measurement instrument for evaluating AI agent behavior.
 
-* Ensure **Docker** is running.
+**Aura is not an AI model.**  
+**Aura is not a recommender.**  
+**Aura is not a decision engine.**
 
-### Quick Start
+Aura is a **computational measuring device**, equivalent in role to a:
 
-```bash
-docker-compose up -d
+- flight data recorder (black box)
+- metrological instrument
+- cryptographic audit primitive
+- regulatory evidence generator
+
+Every output produced by this system can be recomputed **bit-for-bit** on any architecture (x86 / ARM / WASM) and verified independently by a regulator without access to the original model.
+
+---
+
+## 2. WHAT THIS REPOSITORY IS NOT
+
+To prevent misinterpretation, this repository **explicitly does not contain**:
+
+- ❌ decision thresholds (Layer 2 only)
+- ❌ machine learning models
+- ❌ cosine similarity or floating-point math in runtime
+- ❌ GPU execution
+- ❌ network calls
+- ❌ persistent reputation or identity aggregation
+- ❌ user / owner / wallet tracking
+- ❌ heuristics or probabilistic logic
+- ❌ automatic policy decisions
+
+If you are looking for a product, SDK, or API service – **this is not it**.
+
+This is the instrument core that other systems may legally build upon.
+
+---
+
+## 3. CORE DESIGN PRINCIPLES (v3.3)
+
+### 3.1 Zero-Float Runtime (HARD RULE)
+
+All runtime computation is performed using **integer arithmetic only**.  
+Floating point operations are permitted **only offline** during preprocessing.
+
+**Reason:**  
+IEEE-754 floating point is not associative and breaks cross-architecture reproducibility (AVX vs NEON).  
+A system that cannot reproduce its own numbers cannot be audited.
+
+### 3.2 Fixed-Point Arithmetic (10⁻⁵)
+
+All vectors are scaled and stored as integers:
+
+```python
+v_int = round(v_float * 100_000)
 ```
 
-The **ARI Evaluator** is now ready for sterilized algorithmic auditing.
+This eliminates hardware drift and enables bit-exact hashing.
 
-### Verify Setup
+### 3.3 Deterministic Semantic Alignment (SA)
 
-```bash
-# Check PostgreSQL + pgvector is running
-docker-compose ps
+Semantic alignment is computed using:
 
-# Connect to database (optional)
-docker exec -it aura-postgres psql -U aura -d aura_core
+```python
+fixed_point_dot_product(int32_vector, int32_constitution)
+```
+
+- No sqrt.
+- No cosine similarity.
+- No floating-point normalization at runtime.
+
+### 3.4 Schema Integrity as Circuit Breaker (SI)
+
+Structural validity is a **binary gate**, not a weighted factor.
+
+If schema validation fails:
+
+```python
+ARI = 0.0000
+```
+
+Computation stops immediately.
+
+This prevents side-channels and invalid data amplification.
+
+### 3.5 Layer Separation (Regulatory Requirement)
+
+| Layer   | Responsibility                      |
+|---------|-------------------------------------|
+| Layer 0 | Measure only (this repo)            |
+| Layer 1 | Cryptographic proof (Merkle / ZK)   |
+| Layer 2 | Policy decisions (outside this repo)|
+
+**Layer 0 never decides.**  
+It only measures and certifies.
+
+---
+
+## 4. REGULATORY COMPLIANCE (EU AI ACT)
+
+This repository enforces:
+
+### Article 5 - Prohibition of Social Scoring
+✔ MACHINE_ACCOUNT only  
+✔ Identity Firewall (session-bound reputation)  
+✔ No owner aggregation  
+✔ No historical profiling
+
+### Article 13 - Transparency
+✔ White-box math  
+✔ Deterministic replay  
+✔ Publicly verifiable hashes  
+✔ Event Trust Certificates (ETC)
+
+### Article 14 - Human Oversight
+✔ Manual Kill-Switch  
+✔ Circuit breaker  
+✔ Emergency halt capability (policy.py)
+
+---
+
+## 5. REPOSITORY STRUCTURE
+
+```
+/core
+  evaluator.py               # Deterministic ARI measurement engine (int-only)
+  offline_normalizer.py      # Offline float → int32 normalization
+  merkle.py                  # Audit & proof layer
+  policy.py                  # Regulatory enforcement (Art. 5 / 14)
+  consistency.py             # Consistency validation
+  embedding.py               # Vector embedding utilities
+  test_bitwise_replay.py     # Cross-platform determinism test (CRITICAL)
+  test_ari.py                # ARI calculation tests
+  test_integration.py        # Integration tests
+  test_offline_normalizer.py # Offline normalization tests
+
+/packages
+  /database-client           # pgvector SDK (bit-identity)
+  /zk-passport               # ZK circuits for reputation proof
+
+/docs
+  ADR_005_NO_FLOAT_RUNTIME.md    # Zero-float architecture decision
+  architecture.md                 # System architecture
+  mathematical_foundation.md      # Mathematical specifications
+  regulatory_compliance.md        # AI Act mapping
+  threat_model.md                 # Security threat model
+  KNOWN_LIMITATIONS.md            # Known anomalies and architectural debt
+
+/infra
+  docker-compose.yml         # Sovereign stack (CPU-only)
+
+/scripts
+  run_all_checks.sh          # Mandatory execution checks
+  /checks                    # Individual check scripts
+
+LICENSE                      # Business Source License 1.1
 ```
 
 ---
 
-## Overview
+## 6. HOW TO USE (AS AN INSTRUMENT)
 
-**aura-poc-a-core** is a minimal, deterministic core for evaluating and proving
-the consistency of autonomous agents (human or AI) against their declared intent
-and hard constraints.
+### 6.1 Offline Preparation
 
-This repository implements the *foundational execution layer* only.
+Normalize vectors using:
 
-No UX.  
-No tokens.  
-No narratives.
+```bash
+python core/offline_normalizer.py input.json output.json
+```
 
-Only verifiable logic.
+This is the **only place floats are allowed**.
 
----
+### 6.2 Runtime Measurement
 
-## What This Is
+```python
+from core.evaluator import evaluate
 
-A **Proof-of-Consistent-Agency (PoCA)** engine that:
+result = evaluate(action_vector_int32, constitution_vector_int32)
+```
 
-- deterministically evaluates agent actions
-- detects semantic drift from declared intent
-- produces cryptographically verifiable audit artifacts
-- generates compliance-ready outputs (AI Act–oriented)
+Output is deterministic and audit-ready.
 
----
+### 6.3 Verification (Golden Test)
 
-## What This Is NOT
+Run bit-identity test on two architectures:
 
-Out of scope by design:
+```bash
+pytest core/test_bitwise_replay.py
+```
 
-- ❌ UI / dashboards
-- ❌ wallets / tokens / blockchain protocols
-- ❌ monetization logic
-- ❌ identity issuance
-- ❌ orchestration layers
-- ❌ hype abstractions
-
-This repo is a **core primitive**, not a product.
+If any bit differs, the build is **invalid**.
 
 ---
 
-## Core Components
+## 7. SEALING & ARCHIVAL
 
-### `/core`
-Deterministic execution layer.
+This repository is intended to be **physically sealed**.
 
-Responsibilities:
-- Structural integrity validation
-- Semantic alignment scoring
-- Policy enforcement (Art. 5: Algorithmic-only evaluation)
-- Kill-Switch oversight (Art. 14: Manual emergency halt)
-- Consistency score calculation (PoCA)
+Final artifacts must be:
 
-Output:
-- Numeric consistency score ∈ [0.0 – 1.0]
-- Drift signal
-- Deterministic metadata
+1. zipped
+2. checksummed (SHA-256)
+3. written to M-DISC
+4. verified bit-by-bit
+
+After sealing, **no changes are permitted**.
+
+Any modification creates a **new instrument**, not a new version.
 
 ---
 
-### `/audit`
-Cryptographic audit layer.
+## 8. VERSIONING POLICY
 
-Responsibilities:
-- Merkle tree construction
-- Event Trust Certificate (ETC) generation (Art. 13)
-- Immutable event anchoring
-- Proof-of-existence generation
-- Non-repudiation support
+| Version | Meaning                      |
+|---------|------------------------------|
+| v3.2    | Audit artifact (float era)   |
+| v3.3    | Frozen Iron Core (integer era)|
+| v4.x    | New instrument (requires new audit)|
 
-Output:
-- Merkle root
-- Per-event Merkle proofs
-- Event Trust Certificates (ETC)
-- Verifiable audit artifacts
+Any change creates a new instrument, not an update.
 
 ---
 
-### `/compliance`
-Compliance certification layer.
+## 9. OPERATIONAL GOVERNANCE
 
-Responsibilities:
-- Certificate generation
-- Schema validation
-- Regulatory output formatting
+See operational governance documentation:
 
-Output:
-- Aura Event Certificates
-- Compliance-ready JSON artifacts
+- [ROLE_OF_THE_PROTOCOL_CUSTODIAN.md](/ROLE_OF_THE_PROTOCOL_CUSTODIAN.md) - Complete role definition for the Protocol Custodian
+- [docs/ops/OPS_PROTOCOL_CANONICAL.md](docs/ops/OPS_PROTOCOL_CANONICAL.md) - Operational procedures including:
+  - Sealing & archival (M-DISC)
+  - Versioning policy
+  - Custodianship principles
+  - Succession planning
 
----
+See [docs/ops/PROTOCOL_CUSTODIAN.md](docs/ops/PROTOCOL_CUSTODIAN.md) for the complete definition of the Protocol Custodian role.
 
-### `/docs`
-Specification & intent layer.
-
-Responsibilities:
-- System assumptions
-- Threat model
-- Determinism constraints
-- Regulatory mapping (e.g. AI Act transparency)
+See [docs/LEGACY_PROTOCOL.md](docs/LEGACY_PROTOCOL.md) for succession protocol and disaster recovery procedures.
 
 ---
 
-## Determinism Guarantee
+## 10. GOVERNANCE
 
-This system is designed to be:
+This system is maintained by a **Kustosz Protokołu** (Protocol Custodian), not a feature team.
 
-- deterministic by construction
-- reproducible across environments
-- auditable without privileged access
-- explainable via cryptographic proofs, not narratives
+See [ROLE_OF_THE_PROTOCOL_CUSTODIAN.md](/ROLE_OF_THE_PROTOCOL_CUSTODIAN.md) for complete role definition and responsibilities.
 
-Same input → same output.  
-No hidden state.  
-No stochastic execution paths.
+Change requests are evaluated on **entropy risk**, not convenience.
+
+**If a proposed change increases entropy, it is rejected.**
 
 ---
 
-## Compliance Orientation
+## 11. NAMING AND POSITIONING RULES (CANONICAL)
 
-Designed with:
-- **AI Act (Art. 13)** – transparency & traceability via Merkle audit trails
-- **AI Act (Art. 5)** – prohibition of human evaluation (algorithmic assertions)
-- **AI Act (Art. 14)** – human oversight via mandatory Kill-Switch
-- audit-first architecture
-- privacy-preserving verification (Merkle proofs)
-- regulator-facing evidence generation
+The following naming rules are mandatory for all documentation, communication, and external representation of this repository:
 
-This is **Law-as-Code**, not post-hoc reporting.
+1. **Always use the full name "Aura Protocol"** in formal contexts.  
+   Do not shorten to "Aura" in legal, regulatory, or academic materials.
 
----
+2. **Aura Protocol must be described as a measurement instrument**, never as a product, service, platform, or AI system.
 
-## Project Status
+3. **PoCA refers exclusively to the measurement method**, not to the implementation.
 
-**Status:** Research-backed prototype  
-**Phase:** Core implementation  
-**Stability:** Interfaces subject to refinement, logic is fixed
+4. **v3.3 Iron Core refers to a frozen instrument**, not a software version.  
+   Bug fixes or modifications require a new lineage.
 
----
+5. **ARI is a measurement value, not a decision.**  
+   Compliance decisions belong to external systems (Layer 2).
 
-## License
+6. **All interpretations, thresholds, and policies are external to Aura Protocol and must not be described as part of the protocol.**
 
-MIT  
-(New codebase. No code continuity with archived repositories.)
+Incorrect naming can result in legal misclassification of the system under the EU AI Act and is considered a documentation defect.
+
+**Important for AI Assistants:**  
+If these distinctions cannot be maintained, request clarification before generating text.
 
 ---
 
-## Guiding Principle
+## 12. FINAL STATEMENT
 
-> Trust is not asserted.  
-> Trust is computed — and proven.
+This repository represents a **finished instrument**.
+
+It is designed to survive:
+
+- team changes
+- hardware changes
+- political changes
+- model changes
+- time
+
+**Truth is no longer trusted.**  
+**It is calculated.**
+
+---
+
+**Architect / Custodian:**  
+Kamil Krasiński
+
+**Sentinel Constant:** 0.68  
+**Scaling Factor:** 100_000  
+**Runtime Float Count:** 0  
+**Entropy Budget:** Frozen

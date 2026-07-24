@@ -1,14 +1,49 @@
-# Project docs
+# Aura Protocol Documentation
 
-This directory contains formal specifications, design docs, and reference material.
+This directory contains formal specifications, design documents, and compliance materials.
 
-Top-level directories:
-- /core — PoCA math & logic (proofs, algorithms, experiments)
-- /audit — Merkle / hash proofs, audit tooling and test vectors
-- /compliance — JSON / PDF schemas, compliance artifacts and mappings
-- /docs — Formal specs, API documentation, RFCs
+## Documents
 
-Suggested next steps:
-1. Add a short README in each directory describing intended substructure (e.g., /core/algorithms, /core/tests).
-2. Add CI checks to validate schemas in /compliance and proof tests in /audit.
-3. If you want, I can push these placeholders and the README to a repo — tell me the owner/name and branch to use.
+### Core Specifications
+- **[mathematical_foundation.md](mathematical_foundation.md)**: ARI formula, Krasinski Principle, semantic alignment in ℝ¹⁵³⁶
+- **[architecture.md](architecture.md)**: System architecture and component overview
+- **[threat_model.md](threat_model.md)**: Security considerations and mitigations
+
+### Compliance Materials  
+- **[regulatory_compliance.md](regulatory_compliance.md)**: EU AI Act compliance, nomenclature, audit readiness
+- **[KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)**: Known anomalies and architectural debt in v3.3
+
+## Directory Structure
+
+- `/core` — PoCA math & logic (ARI calculation, embeddings, policy)
+- `/audit` — Merkle proofs, hash verification, audit tooling
+- `/compliance` — Certificate generation, rendering, schemas
+- `/docs` — This directory (specifications and compliance docs)
+
+## Key Principles
+
+### Krasinski Principle
+**T ∝ 1/S**  
+Transparency (T) inversely proportional to Secrecy/Entropy (S).
+
+### Agent Reliability Index (ARI)
+```
+ARI = 0.3 × StructuralIntegrity + 0.7 × SemanticAlignment - Penalties
+```
+
+### Regulatory Compliance
+- **Scope**: MACHINE_ACCOUNT entities only
+- **Prohibition**: No human profiling (AI Act Art. 5)
+- **Nomenclature**: "Agent Reliability Index" not "Trust Score"
+- **Status**: FROZEN (MC-READY 2026)
+
+## Author
+
+Kamil Krasiński
+
+## Next Steps
+
+1. Review mathematical foundation for ARI calculation details
+2. Check regulatory compliance doc for AI Act mapping
+3. See architecture doc for system component descriptions
+4. Consult threat model for security guarantees

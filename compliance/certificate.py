@@ -11,12 +11,18 @@ class AuraEventCertificate:
     """
     Deterministic, compliance-ready representation of a single evaluated event.
     This object is the ONLY external-facing output of the PoCA core.
+    
+    SCOPE: MACHINE_ACCOUNT entities only (AI Act Art. 5 compliant)
+    PROHIBITION: No human profiling or biometric data
+    
+    Uses Agent Reliability Index (ARI) - NOT "Trust Score" to avoid 
+    Social Scoring classification under EU AI Act.
     """
 
-    agent_id: str
+    agent_id: str  # MACHINE_ACCOUNT identifier only
     timestamp: str
 
-    poca_score: float
+    ari_score: float  # Agent Reliability Index ∈ [0.0, 1.0]
     drift: float
     status: str
 
@@ -28,8 +34,8 @@ class AuraEventCertificate:
             "schema_version": "1.0.0",
             "agent_id": self.agent_id,
             "timestamp": self.timestamp,
-            "poca": {
-                "score": self.poca_score,
+            "ari": {
+                "score": self.ari_score,
                 "drift": self.drift,
                 "status": self.status,
             },

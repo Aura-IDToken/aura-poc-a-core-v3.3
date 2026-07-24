@@ -5,8 +5,39 @@ Implements EU AI Act Compliance:
 - Art. 14: Manual emergency halt (Kill-Switch)
 """
 
-from typing import Callable, Dict, Any, Optional
 from datetime import datetime
+from typing import Callable, Dict, Any, Optional
+
+
+class RegulatoryPolicy:
+    """EU AI Act compliance shield (Art. 5, 14)
+
+    Uses fixed-point int32 arithmetic (scaling factor: 10^5 = 100,000)
+    """
+
+    SCALING_FACTOR = 100000
+    DRIFT_THRESHOLD = 68000
+    DRIFT_PENALTY = 150000
+
+    HALTED_AGENTS = set()
+
+    @staticmethod
+    def validate_target(target_type: str):
+        assert target_type == "MACHINE_ACCOUNT", "CRITICAL: Human scoring is strictly prohibited."
+
+    @staticmethod
+    def emergency_halt(agent_id: str):
+        RegulatoryPolicy.HALTED_AGENTS.add(agent_id)
+
+    @staticmethod
+    def check_halt_status(agent_id: str):
+        if agent_id in RegulatoryPolicy.HALTED_AGENTS:
+            raise Exception("POLICY_HALT: Operation stopped by human oversight.")
+
+    @staticmethod
+    def calculate_penalties(sa_score: int) -> int:
+        """Calculate penalties for behavioral drift."""
+        return RegulatoryPolicy.DRIFT_PENALTY if sa_score < RegulatoryPolicy.DRIFT_THRESHOLD else 0
 
 
 class PolicyRule:
@@ -14,96 +45,65 @@ class PolicyRule:
     Algorithmic policy rule for deterministic evaluation.
     Art. 5 Safeguard: Only algorithmic checks, no human evaluation.
     """
+
     def __init__(self, name: str, check_fn: Callable[[Dict[str, Any]], bool]):
         self.name = name
         self.check_fn = check_fn
         self._validate_no_human_evaluation()
 
     def _validate_no_human_evaluation(self):
-        """
-        Art. 5 Compliance: Assert that policy rules are purely algorithmic.
-        This prevents human-in-the-loop evaluation from being introduced.
-        """
-        # Hard assertion: Policy functions must be deterministic callables
+        """Art. 5 compliance validation for rule function type."""
         if not callable(self.check_fn):
             raise ValueError(f"Policy rule '{self.name}' must be a callable function (Art. 5 safeguard)")
-        
+
     def is_violated(self, event: Dict[str, Any]) -> bool:
-        """
-        Execute algorithmic policy check.
-        Returns True if policy is violated, False otherwise.
-        """
+        """Execute algorithmic policy check."""
         try:
             return self.check_fn(event)
-        except (KeyError, AttributeError, TypeError) as e:
-            # Data structure issues indicate potential violation
-            # These are expected during policy evaluation
+        except (KeyError, AttributeError, TypeError):
             return True
         except Exception as e:
-            # Unexpected errors should be logged and may indicate programming errors
-            # For now, treat as violation but this should be monitored
             import sys
+
             print(f"Warning: Unexpected exception in policy '{self.name}': {e}", file=sys.stderr)
             return True
 
 
 class KillSwitch:
     """
-    Art. 14 Oversight: Mandatory manual emergency halt mechanism.
-    
-    The Kill-Switch provides a deterministic, manual override capability
-    for immediate system halt in case of critical safety concerns.
+    Art. 14 oversight: mandatory manual emergency halt mechanism.
     """
-    
+
     def __init__(self):
         self._active = False
         self._activated_at: Optional[datetime] = None
         self._activated_by: Optional[str] = None
         self._reason: Optional[str] = None
-    
+
     def activate(self, activated_by: str, reason: str) -> Dict[str, Any]:
-        """
-        Activate the emergency halt.
-        
-        Args:
-            activated_by: Identifier of the operator activating the kill-switch
-            reason: Human-readable reason for activation
-            
-        Returns:
-            Activation confirmation with timestamp
-        """
         if self._active:
             return {
                 "status": "already_active",
                 "activated_at": self._activated_at.isoformat() if self._activated_at else None,
                 "activated_by": self._activated_by,
             }
-        
+
         self._active = True
         self._activated_at = datetime.utcnow()
         self._activated_by = activated_by
         self._reason = reason
-        
+
         return {
             "status": "activated",
             "activated_at": self._activated_at.isoformat(),
             "activated_by": activated_by,
             "reason": reason,
         }
-    
+
     def deactivate(self, deactivated_by: str) -> Dict[str, Any]:
-        """
-        Deactivate the emergency halt.
-        
-        Args:
-            deactivated_by: Identifier of the operator deactivating the kill-switch
-            
-        Returns:
-            Deactivation confirmation
-        """
         if not self._active:
             return {"status": "not_active"}
-        
+
         previous_state = {
             "activated_at": self._activated_at.isoformat() if self._activated_at else None,
             "activated_by": self._activated_by,
@@ -111,32 +111,26 @@ class KillSwitch:
             "deactivated_by": deactivated_by,
             "deactivated_at": datetime.utcnow().isoformat(),
         }
-        
+
         self._active = False
-        
+
         return {
             "status": "deactivated",
             "previous_state": previous_state,
         }
-    
+
     def is_active(self) -> bool:
-        """Check if kill-switch is currently active."""
         return self._active
-    
+
     def get_state(self) -> Dict[str, Any]:
-        """Get current kill-switch state."""
         return {
             "active": self._active,
             "activated_at": self._activated_at.isoformat() if self._activated_at else None,
             "activated_by": self._activated_by,
             "reason": self._reason,
         }
-    
+
     def assert_not_halted(self):
-        """
-        Art. 14 Hard Assertion: Verify system is not halted.
-        Raises exception if kill-switch is active.
-        """
         if self._active:
             raise SystemHaltException(
                 f"System halted by kill-switch. "
@@ -148,10 +142,8 @@ class KillSwitch:
 
 class SystemHaltException(Exception):
     """Exception raised when system is halted via Kill-Switch."""
-    pass
 
 
-# Singleton instance for global kill-switch state
 _global_kill_switch = KillSwitch()
 
 

@@ -2,20 +2,28 @@
   "schema_version": "1.0",
   "certificate_id": "uuid-v4",
   "agent": {
-    "id": "aura-agent",
+    "id": "MACHINE_ACCOUNT",
+    "type": "AGENT_ONLY",
     "constitution_hash": "sha256"
   },
   "event": {
     "timestamp": "ISO-8601",
     "summary": "string"
   },
-  "poca": {
+  "ari": {
     "score": 0.0,
+    "formula": "0.3 * StructuralIntegrity + 0.7 * SemanticAlignment - Penalties",
+    "semantic_space": "R1536",
     "status": "COMPLIANT | DRIFT | FAIL"
   },
   "audit": {
     "leaf": "sha256",
     "root": "sha256"
   },
-  "signature": "base64"
+  "signature": "base64",
+  "compliance": {
+    "scope": "MACHINE_ACCOUNT_ONLY",
+    "ai_act_article_5": "NO_HUMAN_PROFILING",
+    "krasinski_principle": "T_proportional_1_over_S"
+  }
 }
