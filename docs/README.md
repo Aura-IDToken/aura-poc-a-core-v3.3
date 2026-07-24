@@ -5,7 +5,7 @@ This directory contains formal specifications, design documents, and compliance 
 ## Documents
 
 ### Core Specifications
-- **[mathematical_foundation.md](mathematical_foundation.md)**: ARI formula, Krasinski Principle, semantic alignment in ℝ¹⁵³⁶
+- **[mathematical_foundation.md](mathematical_foundation.md)**: ARI formula, Krasinski Principle, semantic alignment (integer fixed-point dot product, v3.3 runtime)
 - **[architecture.md](architecture.md)**: System architecture and component overview
 - **[threat_model.md](threat_model.md)**: Security considerations and mitigations
 

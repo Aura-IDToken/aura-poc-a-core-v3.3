@@ -52,7 +52,7 @@ Drift: {cert.drift:.4f}
 Status: {cert.status}
 
 Formula: ARI = 0.3 * StructuralIntegrity + 0.7 * SemanticAlignment - Penalties
-Semantic Space: ℝ¹⁵³⁶ (Cosine Similarity)
+Semantic Alignment: Integer fixed-point dot product on pre-normalised int32 vectors (scaling factor 10^5)
 
 AUDIT TRAIL
 -----------
@@ -95,7 +95,7 @@ MATHEMATICAL FOUNDATION
 Formula: ARI = 0.3 × SI + 0.7 × SA - P
 Where:
   SI = Structural Integrity (binary: 0.0 or 1.0)
-  SA = Semantic Alignment (cosine similarity in ℝ¹⁵³⁶)
+  SA = Semantic Alignment (integer fixed-point dot product on pre-normalised int32 vectors)
   P = Policy Penalties (sum of violations)
 
 Krasinski Principle: T ∝ 1/S

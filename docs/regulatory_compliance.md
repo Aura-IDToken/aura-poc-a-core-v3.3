@@ -4,9 +4,7 @@
 
 ### Article 5: Prohibited AI Practices
 
-**Status**: ✓ COMPLIANT
-
-**System Scope**: MACHINE_ACCOUNT entities only
+**Status**: ✓ Implemented (POC Phase — pending formal regulatory assessment)
 
 **Absolute Prohibitions Implemented**:
 1. ❌ Human profiling or scoring
@@ -21,7 +19,7 @@
 
 ### Article 13: Transparency and Information Provision
 
-**Status**: ✓ COMPLIANT
+**Status**: ✓ Implemented (POC Phase — pending formal regulatory assessment)
 
 **Implementation**:
 1. ✓ Mathematical formula publicly documented
@@ -37,7 +35,7 @@
 
 ### Article 14: Human Oversight
 
-**Status**: ✓ COMPLIANT
+**Status**: ✓ Implemented (POC Phase — pending formal regulatory assessment)
 
 **Design**:
 - System provides ARI scores as decision support
