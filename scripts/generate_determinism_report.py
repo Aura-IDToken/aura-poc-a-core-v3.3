@@ -47,8 +47,9 @@ ENGINE_VERSION = "v3.3-iron-core"
 # Deterministic test vectors
 # ---------------------------------------------------------------------------
 
-# Fixed key — not a secret; used only for determinism verification.
-_TEST_KEY = b"aura-v3.3-determinism-test-key-0"
+# INSECURE TEST FIXTURE KEY — deterministic vector reproducibility only.
+# MUST NEVER be used for production ETC signing or any operational credentials.
+_INSECURE_TEST_KEY_DO_NOT_USE_IN_PROD = b"aura-v3.3-determinism-test-key-0"
 
 # Canonical events — fixed strings used as Merkle leaves.
 CANONICAL_EVENTS = [
@@ -101,7 +102,7 @@ def compute_vectors():
     ).hexdigest()
 
     # HMAC signature of ETC signing payload
-    signer = HMACSigner(_TEST_KEY)
+    signer = HMACSigner(_INSECURE_TEST_KEY_DO_NOT_USE_IN_PROD)
     hmac_signature_hex = signer.sign(etc._signing_payload()).hex()
 
     return {
@@ -119,8 +120,7 @@ def generate_report(output_path: Path) -> dict:
 
     report = {
         "schema_version": "1.0",
-        "instrument": "Aura Protocol",
-        "instrument_version": "v3.3 Iron Core",
+        "instrument": "Aura Protocol v3.3 Iron Core",
         "engine_version": ENGINE_VERSION,
         "platform": {
             "system": platform.system(),
