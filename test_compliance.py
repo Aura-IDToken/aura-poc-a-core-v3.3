@@ -8,8 +8,8 @@ import sys
 from datetime import datetime
 
 # Import core modules
-from core.policy import PolicyRule, SystemHaltException, get_kill_switch
-from core.consistency import ConsistencyCalculator
+from compliance.policy import PolicyRule, SystemHaltException, get_kill_switch
+from compliance.consistency import ConsistencyCalculator
 from core.embedding import embed_text
 from audit.merkle import MerkleTree, verify_proof
 from compliance.certificate import AuraEventCertificate

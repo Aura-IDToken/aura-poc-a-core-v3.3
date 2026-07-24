@@ -5,7 +5,8 @@ Shows the complete flow from policy validation to ETC generation
 """
 
 from core.evaluator import PoCAEvaluator
-from core.policy import RegulatoryPolicy
+from compliance.policy import RegulatoryPolicy
+from compliance.evaluator_wrapper import evaluate_with_policy
 from core.merkle import MerkleAttestor
 import json
 
@@ -36,9 +37,9 @@ def demo_compliant_agent():
         print(f"   ✗ Validation failed: {e}")
         return
     
-    # Step 2: ARI calculation
+    # Step 2: ARI calculation (with policy orchestration)
     print(f"\n2. Calculating ARI for agent: {agent_id}")
-    ari_result = evaluator.evaluate(agent_id, agent_vector, valid_schema)
+    ari_result = evaluate_with_policy(evaluator, agent_id, agent_vector, valid_schema)
     print(f"   ARI Score: {ari_result['ari']:.4f}")
     print(f"   Drift: {ari_result['drift']:.4f}")
     
