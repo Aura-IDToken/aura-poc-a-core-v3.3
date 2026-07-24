@@ -27,13 +27,13 @@ path_b = Path(sys.argv[2])
 report_a = json.loads(path_a.read_text(encoding="utf-8"))
 report_b = json.loads(path_b.read_text(encoding="utf-8"))
 
-result, mismatches = compare_reports(report_a, report_b)
+_, mismatches = compare_reports(report_a, report_b)
 
 platform_a = f"{report_a['platform']['system']}/{report_a['platform']['machine']}"
 platform_b = f"{report_b['platform']['system']}/{report_b['platform']['machine']}"
 
 print("=" * 70)
-print("AURA Protocol v3.3 — Cross-Platform Determinism Comparison")
+print("Aura Protocol v3.3 — Cross-Platform Determinism Comparison")
 print("=" * 70)
 print(f"Platform A : {platform_a}  (Python {report_a['platform']['python_version']})")
 print(f"Platform B : {platform_b}  (Python {report_b['platform']['python_version']})")

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-AURA Protocol v3.3 — Determinism Report Generator
+Aura Protocol v3.3 — Determinism Report Generator
 CORE-006 Part A: Cross-platform determinism verification
 
 Produces determinism-report.json containing:
   - platform (system, machine, architecture, python_version)
   - engine_version
   - determinism_vectors (fixed test-vector hash values)
-  - comparison_result (PASS / FAIL)
+  - comparison_result (NOT_COMPARED)
 
 Usage (standalone):
     python scripts/generate_determinism_report.py [output_path]
@@ -129,7 +129,7 @@ def generate_report(output_path: Path) -> dict:
             "python_version": platform.python_version(),
         },
         "determinism_vectors": vectors,
-        "comparison_result": "PASS",
+        "comparison_result": "NOT_COMPARED",
     }
 
     output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     report = generate_report(output)
 
     print("=" * 70)
-    print("AURA Protocol v3.3 — Determinism Report")
+    print("Aura Protocol v3.3 — Determinism Report")
     print("=" * 70)
     print(f"Platform : {report['platform']['system']} / {report['platform']['machine']}")
     print(f"Python   : {report['platform']['python_version']}")
