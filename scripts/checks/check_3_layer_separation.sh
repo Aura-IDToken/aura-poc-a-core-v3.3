@@ -1,6 +1,7 @@
 #!/bin/bash
 # CHECK 3 — Layer Separation
 # core/ must not: return booleans of compliance, enforce thresholds, contain business logic
+# CORE-005: Now also checks for forbidden Layer 0 → Layer 2 imports
 
 set -e
 
@@ -36,6 +37,14 @@ if [ -n "$BUSINESS_VIOLATIONS" ]; then
     VIOLATIONS="${VIOLATIONS}Threshold enforcement logic found:\n${BUSINESS_VIOLATIONS}\n\n"
 fi
 
+# Check 4: CORE-005 - Forbidden imports from compliance/ or audit/
+echo "4. Checking for Layer 0 → Layer 2 import violations (CORE-005)..."
+# Exclude deprecated wrappers: policy.py, consistency.py (intentionally retained for v3.3 compatibility)
+IMPORT_VIOLATIONS=$(grep -r "^from compliance\|^import compliance\|^from audit\|^import audit" core/*.py --exclude="test_*.py" --exclude="policy.py" --exclude="consistency.py" 2>/dev/null || true)
+if [ -n "$IMPORT_VIOLATIONS" ]; then
+    VIOLATIONS="${VIOLATIONS}Forbidden Layer 0 → Layer 2 imports found:\n${IMPORT_VIOLATIONS}\n\n"
+fi
+
 if [ -n "$VIOLATIONS" ]; then
     echo "❌ CHECK 3 FAILED: Layer separation violated"
     echo ""
@@ -44,10 +53,12 @@ if [ -n "$VIOLATIONS" ]; then
     echo "  - Layer 0 (core/) MEASURES only"
     echo "  - Layer 2 decides (thresholds, allow/deny)"
     echo "  - Do NOT add policy to core/"
+    echo "  - Do NOT import from compliance/ or audit/ in core/"
     echo ""
     echo "FIX:"
     echo "  - Remove status fields (COMPLIANT, RISK)"
     echo "  - Remove threshold enforcement"
+    echo "  - Remove imports from compliance/ or audit/ in core/"
     echo "  - Move policy logic to compliance/ or audit/ layer"
     echo "  - core/ should return RAW METRICS only (ARI score, drift value)"
     echo ""

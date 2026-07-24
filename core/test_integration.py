@@ -1,7 +1,7 @@
 """
 Integration test to verify core components work together:
 - PoCAEvaluator (core/evaluator.py)
-- RegulatoryPolicy (core/policy.py)
+- RegulatoryPolicy (compliance/policy.py)
 - MerkleAttestor (core/merkle.py)
 
 # NON-HERESY
@@ -12,7 +12,8 @@ Constitutional Override: Test files need float/sqrt references for validation.
 import unittest
 import math
 from core.evaluator import PoCAEvaluator
-from core.policy import RegulatoryPolicy
+from compliance.policy import RegulatoryPolicy
+from compliance.evaluator_wrapper import evaluate_with_policy
 from core.merkle import MerkleAttestor
 
 
@@ -42,13 +43,13 @@ class TestIntegration(unittest.TestCase):
         target_type = "MACHINE_ACCOUNT"
         RegulatoryPolicy.validate_target(target_type)
         
-        # Step 2: Evaluate agent
+        # Step 2: Evaluate agent (using orchestrator for full policy integration)
         agent_id = "agent_integration_001"
         float_vec = [0.5, 0.3, 0.8, 0.1] * 4  # Similar to constitution
         vector = normalize_to_int32(float_vec)
         valid_schema = True
         
-        ari_result = self.evaluator.evaluate(agent_id, vector, valid_schema)
+        ari_result = evaluate_with_policy(self.evaluator, agent_id, vector, valid_schema)
         
         # Step 3: Generate Event Trust Certificate (ETC)
         etc = self.attestor.generate_etc(ari_result)
@@ -73,11 +74,11 @@ class TestIntegration(unittest.TestCase):
         # Emergency halt
         RegulatoryPolicy.emergency_halt(agent_id)
         
-        # Attempt evaluation
+        # Attempt evaluation (using orchestrator to trigger halt check)
         float_vec = [0.5] * 16
         vector = normalize_to_int32(float_vec)
         with self.assertRaises(Exception) as context:
-            self.evaluator.evaluate(agent_id, vector, True)
+            evaluate_with_policy(self.evaluator, agent_id, vector, True)
         
         self.assertIn("POLICY_HALT", str(context.exception))
 
