@@ -5,6 +5,8 @@ from typing import Dict, Any
 import json
 import hashlib
 
+from audit.pipeline import AuditLayerPipeline, AuditPipelineResult
+
 
 @dataclass(frozen=True)
 class AuraEventCertificate:
@@ -68,3 +70,42 @@ class AuraEventCertificate:
         """
         payload = json.dumps(self.to_dict(), sort_keys=True)
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def issue_audit_certificate(
+    pipeline: AuditLayerPipeline,
+    event_id: str,
+    timestamp: str,
+    agent_id: str,
+    ari: int,
+    drift: int,
+    schema_valid: bool,
+    engine_version: str,
+    policy_version: str,
+) -> AuditPipelineResult:
+    """
+    Compliance-layer entry point for issuing an audit-layer certificate.
+
+    Args:
+        pipeline: Configured audit pipeline with signing key material.
+        event_id: Unique event identifier.
+        timestamp: Event timestamp in ISO-8601 format.
+        agent_id: MACHINE_ACCOUNT identifier tied to the measurement.
+        ari: Deterministic ARI measurement (int32 scaled by 10^5).
+        drift: Deterministic drift measurement (int32 scaled by 10^5).
+        schema_valid: Structural integrity flag used in measurement.
+        engine_version: v3.3 Iron Core measurement engine version.
+        policy_version: External Layer 2 policy version applied to penalties.
+    """
+    return pipeline.append_and_certify(
+        {
+            "event_id": event_id,
+            "timestamp": timestamp,
+            "agent_id": agent_id,
+            "ari": ari,
+            "drift": drift,
+            "schema_valid": schema_valid,
+            "engine_version": engine_version,
+            "policy_version": policy_version,
+        }
+    )
