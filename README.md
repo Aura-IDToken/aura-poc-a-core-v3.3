@@ -35,7 +35,15 @@ Aura is a **computational measuring device**, equivalent in role to a:
 - cryptographic audit primitive
 - regulatory evidence generator
 
-Every output produced by this system can be recomputed **bit-for-bit** on any architecture (x86 / ARM / WASM) and verified independently by a regulator without access to the original model.
+Every output produced by this system can be recomputed **bit-for-bit** on any architecture and verified independently by a regulator without access to the original model.
+
+**Cross-platform determinism status (CORE-006):**
+
+| Platform | Status |
+|----------|--------|
+| x86_64   | ✅ Verified in CI |
+| ARM64    | ✅ Verified in CI |
+| WASM     | 🔲 Architectural goal — WASM-safety verified by test suite; native WASM execution pending |
 
 ---
 
@@ -135,12 +143,32 @@ This repository enforces:
 ✔ White-box math  
 ✔ Deterministic replay  
 ✔ Publicly verifiable hashes  
-✔ Event Trust Certificates (ETC)
+✔ Event Trust Certificates (ETC)  
+✔ Normative Audit Layer specification ([docs/specs/AUDIT_LAYER_SPEC.md](docs/specs/AUDIT_LAYER_SPEC.md))
 
 ### Article 14 - Human Oversight
 ✔ Manual Kill-Switch  
 ✔ Circuit breaker  
 ✔ Emergency halt capability (policy.py)
+
+---
+
+## 4.1 AUDIT LAYER SIGNING (CORE-006)
+
+### Current Implementation: HMAC-SHA256
+
+Event Trust Certificates are signed using **HMAC-SHA256**.  
+Implementation: `audit/signing.py :: HMACSigner` / `HMACVerifier`
+
+### Future Roadmap: Ed25519
+
+The signing abstraction (`Signer` / `Verifier` interfaces) makes future
+migration to Ed25519 asymmetric signing possible **without changing the
+Audit Layer API**.
+
+Stubs `FutureEd25519Signer` and `FutureEd25519Verifier` are provided in
+`audit/signing.py` and raise `NotImplementedError`.  Ed25519 is **not
+implemented** in v3.3.  Introducing it requires a new instrument version.
 
 ---
 
@@ -166,25 +194,42 @@ This repository enforces:
   certificate.py             # AuraEventCertificate (audit output)
   renderer.py                # Certificate rendering
 
+/audit
+  merkle.py                  # Merkle tree + EventTrustCertificate + SHA-256 hashing
+  verify.py                  # Proof and ETC verification
+  signing.py                 # Signing abstraction: HMACSigner, HMACVerifier, stubs
+  test_audit_layer.py        # Audit Layer test suite (CORE-006)
+
+/compliance
+  evaluator_wrapper.py       # Layer 2: Policy + measurement orchestrator
+  policy.py                  # Layer 2: Regulatory policy (Art. 5, 14)
+  consistency.py             # Layer 2: ConsistencyCalculator
+  certificate.py             # AuraEventCertificate (audit output)
+  renderer.py                # Certificate rendering
+
 /packages
   /database-client           # pgvector SDK (TypeScript, bit-identity interface)
   /zk-passport               # ZK circuits for reputation proof (Circom source only)
 
 /docs
   ADR_005_NO_FLOAT_RUNTIME.md    # Zero-float architecture decision
-  architecture.md                 # System architecture
+  architecture.md                 # System architecture (updated CORE-006)
   mathematical_foundation.md      # Mathematical specifications
-  regulatory_compliance.md        # AI Act mapping
+  regulatory_compliance.md        # AI Act mapping (updated CORE-006)
   threat_model.md                 # Security threat model
   KNOWN_LIMITATIONS.md            # Known anomalies and architectural debt
   GAP-001.md                      # Implementation gap analysis
+  /specs
+    AUDIT_LAYER_SPEC.md           # Normative Audit Layer specification (CORE-006)
 
 /infra
   docker-compose.yml         # Sovereign stack (CPU-only)
 
 /scripts
-  run_all_checks.sh          # Mandatory execution checks
-  /checks                    # Individual check scripts
+  run_all_checks.sh                 # Mandatory execution checks
+  generate_determinism_report.py    # Cross-platform determinism report (CORE-006)
+  compare_determinism_reports.py    # Compare reports across platforms (CORE-006)
+  /checks                           # Individual check scripts
 
 LICENSE                      # Business Source License 1.1
 ```

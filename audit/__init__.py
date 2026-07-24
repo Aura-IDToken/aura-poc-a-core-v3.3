@@ -1,2 +1,2 @@
-"""Audit package: Merkle tree and verifier."""
-__all__ = ["merkle", "verifier"]
+"""Audit package: Merkle tree, verifier, and signing abstraction."""
+__all__ = ["merkle", "verify", "signing"]

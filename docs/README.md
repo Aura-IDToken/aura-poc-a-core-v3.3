@@ -6,19 +6,23 @@ This directory contains formal specifications, design documents, and compliance 
 
 ### Core Specifications
 - **[mathematical_foundation.md](mathematical_foundation.md)**: ARI formula, Krasinski Principle, semantic alignment (integer fixed-point dot product, v3.3 runtime)
-- **[architecture.md](architecture.md)**: System architecture and component overview
+- **[architecture.md](architecture.md)**: System architecture, component overview, signing abstraction, cross-platform determinism
 - **[threat_model.md](threat_model.md)**: Security considerations and mitigations
 
+### Audit Layer
+- **[specs/AUDIT_LAYER_SPEC.md](specs/AUDIT_LAYER_SPEC.md)**: Normative specification for the Audit Layer — canonical event format, Merkle tree, ETC schema, signing (HMAC-SHA256), independent verification algorithm
+
 ### Compliance Materials  
-- **[regulatory_compliance.md](regulatory_compliance.md)**: EU AI Act compliance, nomenclature, audit readiness
+- **[regulatory_compliance.md](regulatory_compliance.md)**: EU AI Act compliance, nomenclature, audit readiness, signing roadmap
 - **[KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)**: Known anomalies and architectural debt in v3.3
 
 ## Directory Structure
 
 - `/core` — PoCA math & logic (ARI calculation, embeddings, policy)
-- `/audit` — Merkle proofs, hash verification, audit tooling
+- `/audit` — Merkle proofs, hash verification, signing abstraction
 - `/compliance` — Certificate generation, rendering, schemas
 - `/docs` — This directory (specifications and compliance docs)
+- `/docs/specs` — Frozen normative specifications
 
 ## Key Principles
 
@@ -37,6 +41,14 @@ ARI = 0.3 × StructuralIntegrity + 0.7 × SemanticAlignment - Penalties
 - **Nomenclature**: "Agent Reliability Index" not "Trust Score"
 - **Status**: FROZEN (MC-READY 2026)
 
+### Signing
+- **Current implementation**: HMAC-SHA256 (`audit/signing.py :: HMACSigner`)
+- **Future roadmap**: Ed25519 asymmetric signing (stub provided; requires new instrument version)
+
+### Cross-Platform Determinism
+- **Verified**: x86_64 and ARM64 (CI)
+- **Architectural goal**: Native WASM execution (WASM-safety verified by test suite)
+
 ## Author
 
 Kamil Krasiński
@@ -44,6 +56,6 @@ Kamil Krasiński
 ## Next Steps
 
 1. Review mathematical foundation for ARI calculation details
-2. Check regulatory compliance doc for AI Act mapping
+2. Check [AUDIT_LAYER_SPEC.md](specs/AUDIT_LAYER_SPEC.md) for the normative audit specification
 3. See architecture doc for system component descriptions
 4. Consult threat model for security guarantees
