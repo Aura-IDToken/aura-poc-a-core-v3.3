@@ -35,6 +35,8 @@ from audit.verify import verify_etc
 # Helpers
 # ---------------------------------------------------------------------------
 
+# Test-only fixture keys for deterministic unit tests.
+# MUST NEVER be used for production ETC signing or operational credentials.
 SAMPLE_KEY = b"aura-v3.3-test-key-00000000000001"
 SAMPLE_KEY_ALT = b"aura-v3.3-test-key-00000000000002"
 

@@ -47,7 +47,8 @@ ENGINE_VERSION = "v3.3-iron-core"
 # Deterministic test vectors
 # ---------------------------------------------------------------------------
 
-# Fixed key — not a secret; used only for determinism verification.
+# Fixed key — test-only deterministic fixture for vector reproducibility.
+# MUST NEVER be used for production ETC signing or any operational credentials.
 _TEST_KEY = b"aura-v3.3-determinism-test-key-0"
 
 # Canonical events — fixed strings used as Merkle leaves.
