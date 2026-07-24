@@ -5,7 +5,7 @@ Integrates with policy enforcement and kill-switch oversight
 
 import math
 from typing import Dict, Any, List
-from core.policy import PolicyRule, get_kill_switch
+from core.policy import PolicyRule, SystemHaltException, get_kill_switch
 
 
 class ConsistencyCalculator:
@@ -36,7 +36,7 @@ class ConsistencyCalculator:
         # Art. 14: Assert system is not halted
         try:
             self._kill_switch.assert_not_halted()
-        except Exception as e:
+        except SystemHaltException as e:
             return {
                 "score": 0.0,
                 "reason": f"System halted: {str(e)}",

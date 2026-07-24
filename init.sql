@@ -51,9 +51,9 @@ CREATE TABLE IF NOT EXISTS kill_switch_state (
 );
 
 -- Initialize kill-switch as inactive
-INSERT INTO kill_switch_state (is_active, updated_at)
-VALUES (FALSE, NOW())
-ON CONFLICT DO NOTHING;
+INSERT INTO kill_switch_state (id, is_active, updated_at)
+VALUES (1, FALSE, NOW())
+ON CONFLICT (id) DO NOTHING;
 
 -- Policy Violations Log
 -- Art. 5 Safeguard: Track algorithmic policy violations

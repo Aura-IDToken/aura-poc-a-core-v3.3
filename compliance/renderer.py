@@ -4,11 +4,11 @@ Converts AuraEventCertificate to various output formats.
 """
 
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Union
 from .certificate import AuraEventCertificate
 
 
-def render_certificate(cert: AuraEventCertificate, format: str = "json") -> str:
+def render_certificate(cert: AuraEventCertificate, format: str = "json") -> Union[str, Dict[str, Any]]:
     """
     Render an AuraEventCertificate to the specified format.
     

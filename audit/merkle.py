@@ -6,7 +6,6 @@ Art. 13 Transparency: Cryptographic audit trails and Event Trust Certificates (E
 import hashlib
 from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
-import json
 
 
 def sha256(data: str) -> str:
@@ -69,11 +68,14 @@ class MerkleTree:
     - Batch verification capability
     """
     
-    def __init__(self, leaves: List[str]):
+    def __init__(self, leaves: List[str], leaves_are_hashed: bool = False):
         if not leaves:
             raise ValueError("Cannot create Merkle tree with empty leaves")
         
-        self.leaves = [sha256(leaf) if isinstance(leaf, str) else leaf for leaf in leaves]
+        if leaves_are_hashed:
+            self.leaves = leaves
+        else:
+            self.leaves = [sha256(leaf) if isinstance(leaf, str) else leaf for leaf in leaves]
         self.tree = self._build_tree(self.leaves)
         self.root = self.tree[-1][0] if self.tree else sha256("")
     

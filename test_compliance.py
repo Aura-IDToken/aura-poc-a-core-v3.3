@@ -8,11 +8,10 @@ import sys
 from datetime import datetime
 
 # Import core modules
-from core.policy import PolicyRule, KillSwitch, SystemHaltException, get_kill_switch
+from core.policy import PolicyRule, SystemHaltException, get_kill_switch
 from core.consistency import ConsistencyCalculator
 from core.embedding import embed_text
-from audit.merkle import MerkleTree, EventTrustCertificate, sha256, verify_proof
-from audit.verify import verify_etc
+from audit.merkle import MerkleTree, verify_proof
 from compliance.certificate import AuraEventCertificate
 
 
@@ -225,8 +224,7 @@ def test_integrated_poca_flow():
         return False
     
     # Create Event Trust Certificate (Art. 13)
-    event_hash = sha256(event_content)
-    tree = MerkleTree([event_hash])
+    tree = MerkleTree([event_content])
     etc = tree.create_etc(0, event["timestamp"])
     
     if etc.verify():
@@ -243,7 +241,7 @@ def test_integrated_poca_flow():
         drift=0.0,
         status="COMPLIANT" if result["score"] > 0.7 else "DRIFT",
         merkle_root=tree.get_root(),
-        leaf_hash=event_hash,
+        leaf_hash=tree.leaves[0],
     )
     
     fingerprint = cert.fingerprint()
