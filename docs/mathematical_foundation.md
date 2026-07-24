@@ -13,7 +13,7 @@ Where:
   - Validates presence of required fields: timestamp, embedding, content
   - Runtime representation: integer (0 or 100,000)
   
-- **SemanticAlignment (SA)**: Integer fixed-point dot product of pre-normalised int32 vectors
+- **SemanticAlignment (SA)**: Integer fixed-point dot product of pre-normalized int32 vectors
   - Computed as: `dot(event_vector_int32, constitution_int32) // SCALING_FACTOR`
   - Range: approximately [−10^5, 10^5]; clamped to [0, 10^5] in final ARI
   
@@ -62,10 +62,10 @@ T ∝ 1/S
 
 ### Integer Fixed-Point Dot Product
 
-Semantic alignment is computed entirely in integer arithmetic using pre-normalised vectors:
+Semantic alignment is computed entirely in integer arithmetic using pre-normalized vectors:
 
 ```python
-# Both vectors pre-normalised offline to unit length and scaled by 10^5
+# Both vectors pre-normalized offline to unit length and scaled by 10^5
 dot = sum(a * b for a, b in zip(event_vector_int32, constitution_int32))
 sa  = dot // SCALING_FACTOR   # rescale: [−10^10, 10^10] → [−10^5, 10^5]
 ```
@@ -73,12 +73,12 @@ sa  = dot // SCALING_FACTOR   # rescale: [−10^10, 10^10] → [−10^5, 10^5]
 **Properties:**
 - No `math.sqrt` at runtime
 - No floating-point division at runtime
-- Both vectors must be unit-normalised offline (via `core/offline_normalizer.py`)
-- Result is equivalent to cosine similarity for unit-normalised inputs, computed entirely in integers
+- Both vectors must be unit-normalized offline (via `core/offline_normalizer.py`)
+- Result is equivalent to cosine similarity for unit-normalized inputs, computed entirely in integers
 
 ### Pre-normalisation (Offline Step)
 
-Vectors are normalised once offline before deployment:
+Vectors are normalized once offline before deployment:
 
 ```python
 # offline_normalizer.py (float permitted — runs once, not at runtime)
@@ -111,9 +111,9 @@ Where:
 - `||A||` = L2 norm of A (computed with `math.sqrt`)
 - `||B||` = L2 norm of B (computed with `math.sqrt`)
 
-### Legacy Normalisation
+### Legacy Normalization
 
-Raw cosine similarity ∈ [-1, 1] was normalised to [0, 1]:
+Raw cosine similarity ∈ [-1, 1] was normalized to [0, 1]:
 
 ```python
 semantic_alignment = (cosine_sim + 1.0) / 2.0

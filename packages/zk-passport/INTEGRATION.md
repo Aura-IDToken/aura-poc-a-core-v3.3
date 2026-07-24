@@ -69,7 +69,7 @@ from core.evaluator import PoCAEvaluator
 from compliance.evaluator_wrapper import evaluate_with_policy
 from core.offline_normalizer import SCALING_FACTOR
 
-# Build evaluator with pre-normalised int32 constitution vector
+# Build evaluator with pre-normalized int32 constitution vector
 evaluator = PoCAEvaluator(constitution_vector_int32)
 
 # Evaluate agent event (Layer 2 orchestrator handles policy)
