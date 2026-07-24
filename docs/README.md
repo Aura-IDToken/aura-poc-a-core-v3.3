@@ -1,49 +1,33 @@
 # Aura Protocol Documentation
 
-This directory contains formal specifications, design documents, and compliance materials.
+This directory contains the canonical documentation for Aura Protocol v3.3 Iron Core.
 
-## Documents
+Aura Protocol is a deterministic measurement protocol. It performs measurement; compliance decisions are external.
 
-### Core Specifications
-- **[mathematical_foundation.md](mathematical_foundation.md)**: ARI formula, Krasinski Principle, semantic alignment in ℝ¹⁵³⁶
-- **[architecture.md](architecture.md)**: System architecture and component overview
-- **[threat_model.md](threat_model.md)**: Security considerations and mitigations
+## Core documents
 
-### Compliance Materials  
-- **[regulatory_compliance.md](regulatory_compliance.md)**: EU AI Act compliance, nomenclature, audit readiness
-- **[KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)**: Known anomalies and architectural debt in v3.3
+- **[architecture.md](architecture.md)** — current layer model and repository structure
+- **[mathematical_foundation.md](mathematical_foundation.md)** — integer-scaled measurement formula and runtime semantics
+- **[regulatory_compliance.md](regulatory_compliance.md)** — Article 5, 13, and 14 mapping
+- **[GAP-001.md](GAP-001.md)** — post-CORE-005 gap status
+- **[KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)** — open and resolved limitations
+- **[threat_model.md](threat_model.md)** — threat surface and mitigations
 
-## Directory Structure
+## Current package map
 
-- `/core` — PoCA math & logic (ARI calculation, embeddings, policy)
-- `/audit` — Merkle proofs, hash verification, audit tooling
-- `/compliance` — Certificate generation, rendering, schemas
-- `/docs` — This directory (specifications and compliance docs)
+- `/core` — Layer 0 measurement primitives (`PoCAEvaluator`, offline normalization, deprecated wrappers)
+- `/audit` — Layer 1 Merkle proof construction and verification
+- `/compliance` — Layer 2 policy, orchestration, certificates, rendering
+- `/packages/zk-passport` — ZK threshold circuit documentation and assets
+- `/docs` — canonical repository documentation
 
-## Key Principles
+## Current import guidance
 
-### Krasinski Principle
-**T ∝ 1/S**  
-Transparency (T) inversely proportional to Secrecy/Entropy (S).
-
-### Agent Reliability Index (ARI)
+```python
+from core.evaluator import PoCAEvaluator
+from compliance.evaluator_wrapper import evaluate_with_policy
+from compliance.policy import RegulatoryPolicy
+from compliance.consistency import ConsistencyCalculator
 ```
-ARI = 0.3 × StructuralIntegrity + 0.7 × SemanticAlignment - Penalties
-```
 
-### Regulatory Compliance
-- **Scope**: MACHINE_ACCOUNT entities only
-- **Prohibition**: No human profiling (AI Act Art. 5)
-- **Nomenclature**: "Agent Reliability Index" not "Trust Score"
-- **Status**: FROZEN (MC-READY 2026)
-
-## Author
-
-Kamil Krasiński
-
-## Next Steps
-
-1. Review mathematical foundation for ARI calculation details
-2. Check regulatory compliance doc for AI Act mapping
-3. See architecture doc for system component descriptions
-4. Consult threat model for security guarantees
+Use `PoCAEvaluator` as the Layer 0 measurement interface and the `compliance.*` modules as the current Layer 2 interfaces.

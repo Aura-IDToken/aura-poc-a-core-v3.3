@@ -1,17 +1,17 @@
 """
-Aura PoCA Core — Compliance Layer
+Aura Protocol — Compliance Layer
 
-This package is responsible for:
-- Transforming PoCA Core results into compliance-ready artifacts
-- Producing machine-readable (JSON) and human-readable (PDF/HTML) outputs
-- Binding cryptographic audit proofs to semantic explanations
+This package contains Layer 2 modules that sit above the deterministic
+measurement core.
 
-This layer does NOT:
-- Make decisions
-- Modify scores
-- Perform policy enforcement
+Current responsibilities:
+- policy enforcement utilities (`compliance.policy`)
+- policy-aware orchestration (`compliance.evaluator_wrapper`)
+- consistency-layer helpers (`compliance.consistency`)
+- certificate generation and rendering
 
-It is a pure output / representation layer.
+Layer 2 may interpret measurement outputs for orchestration purposes.
+Layer 0 (`core/`) remains measurement-only.
 """
 
 from .certificate import AuraEventCertificate
