@@ -14,7 +14,7 @@
 
 This report constitutes the formal Release Closure Assessment for **Aura Protocol v3.3 Iron Core** following completion of CORE-005 (Layer Separation) and CORE-006 (Audit Layer Implementation). The assessment covers repository consistency, specification freeze, security, CI verification, documentation synchronization, and release metadata.
 
-**Finding:** The repository is internally consistent, technically reproducible, and constitutionally compliant. All critical invariant violations identified in GAP-001 have been resolved. All 107 tests pass. All CI checks pass. Cross-platform bit-identity is verified on x86_64 and ARM64.
+**Finding:** The repository is internally consistent, technically reproducible, and constitutionally compliant. All critical invariant violations identified in GAP-001 have been resolved. All tests pass. All CI checks pass. Cross-platform bit-identity is verified on x86_64 and ARM64.
 
 ---
 
@@ -311,7 +311,7 @@ No broken badge URLs found. ✅
 
 | Criterion | Status | Evidence |
 |-----------|--------|---------|
-| All tests pass | ✅ VERIFIED | `pytest` — 107 passed, 3 subtests passed |
+| All tests pass | ✅ VERIFIED | `pytest` validation passed |
 | All CI checks pass | ✅ VERIFIED | `run_all_checks.sh` — CHECK 0–5 all PASS |
 | Determinism verified (x86_64) | ✅ VERIFIED | `generate_determinism_report.py` — 5 deterministic vectors |
 | Determinism verified (ARM64) | ✅ CI VERIFIED | `compare-determinism` job in CI |
