@@ -23,6 +23,7 @@ CI Usage:
 import hashlib
 import json
 import platform
+import subprocess
 import sys
 from pathlib import Path
 
@@ -42,6 +43,7 @@ from audit.signing import HMACSigner
 # ---------------------------------------------------------------------------
 
 ENGINE_VERSION = "v3.3-iron-core"
+INT32_BYTE_ENCODING = "little-endian signed int32 (4 bytes)"
 
 # ---------------------------------------------------------------------------
 # Deterministic test vectors
@@ -60,12 +62,47 @@ CANONICAL_EVENTS = [
 ]
 
 
-def _hash_int32_array(array):
-    """Hash an int32 array as little-endian bytes (deterministic across platforms)."""
+def hash_int32_array(array):
+    """Hash an int32 array as little-endian signed int32 bytes."""
     buf = bytearray()
     for v in array:
         buf.extend(v.to_bytes(4, byteorder="little", signed=True))
     return hashlib.sha256(buf).hexdigest()
+
+
+def get_commit_sha() -> str:
+    """Get current git commit SHA."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=_REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout.strip()
+    except Exception:
+        return "UNKNOWN"
+
+
+def resolve_constitution_vector():
+    """Resolve canonical constitution vector used by determinism evidence."""
+    return generate_sample_constitution()
+
+
+def build_constitution_vector_provenance(constitution, commit_sha: str) -> dict:
+    """Build machine-verifiable provenance identity for constitution vector."""
+    return {
+        "schema_version": "1.0",
+        "instrument": "Aura Protocol v3.3 Iron Core",
+        "constitution_vector_source": "core.offline_normalizer.generate_sample_constitution",
+        "dimension": len(constitution),
+        "scaling_factor": 100000,
+        "integer_representation": "int32",
+        "byte_encoding": INT32_BYTE_ENCODING,
+        "vector_sha256": hash_int32_array(constitution),
+        "tested_commit_sha": commit_sha,
+    }
 
 
 def compute_vectors():
@@ -80,8 +117,9 @@ def compute_vectors():
       hmac_signature_hex    — HMAC-SHA256(key, signing_payload) for ETC 0
     """
     # ARI / constitution vector
-    constitution = generate_sample_constitution()
-    ari_vector_hash = _hash_int32_array(constitution[:1000])
+    constitution = resolve_constitution_vector()
+    ari_vector_hash = hash_int32_array(constitution[:1000])
+    constitution_vector_sha256 = hash_int32_array(constitution)
 
     # Canonical event hash (event 0)
     canonical_event_hash = sha256(CANONICAL_EVENTS[0])
@@ -107,6 +145,7 @@ def compute_vectors():
 
     return {
         "ari_vector_hash": ari_vector_hash,
+        "constitution_vector_sha256": constitution_vector_sha256,
         "canonical_event_hash": canonical_event_hash,
         "merkle_root": merkle_root,
         "etc_hash": etc_hash,
@@ -114,14 +153,18 @@ def compute_vectors():
     }
 
 
-def generate_report(output_path: Path) -> dict:
+def generate_report(output_path: Path, provenance_output_path: Path | None = None) -> dict:
     """Generate the determinism report and write it to *output_path*."""
     vectors = compute_vectors()
+    constitution = resolve_constitution_vector()
+    commit_sha = get_commit_sha()
+    provenance = build_constitution_vector_provenance(constitution, commit_sha)
 
     report = {
         "schema_version": "1.0",
         "instrument": "Aura Protocol v3.3 Iron Core",
         "engine_version": ENGINE_VERSION,
+        "commit_sha": commit_sha,
         "platform": {
             "system": platform.system(),
             "machine": platform.machine(),
@@ -129,10 +172,13 @@ def generate_report(output_path: Path) -> dict:
             "python_version": platform.python_version(),
         },
         "determinism_vectors": vectors,
+        "constitution_vector_provenance": provenance,
         "comparison_result": "NOT_COMPARED",
     }
 
     output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    if provenance_output_path is not None:
+        provenance_output_path.write_text(json.dumps(provenance, indent=2), encoding="utf-8")
     return report
 
 
@@ -149,6 +195,7 @@ def compare_reports(report_a: dict, report_b: dict) -> tuple:
 
     for field in (
         "ari_vector_hash",
+        "constitution_vector_sha256",
         "canonical_event_hash",
         "merkle_root",
         "etc_hash",
@@ -157,12 +204,28 @@ def compare_reports(report_a: dict, report_b: dict) -> tuple:
         if vectors_a.get(field) != vectors_b.get(field):
             mismatches.append((field, vectors_a.get(field), vectors_b.get(field)))
 
+    provenance_fields = (
+        "dimension",
+        "scaling_factor",
+        "integer_representation",
+        "byte_encoding",
+        "vector_sha256",
+    )
+    provenance_a = report_a.get("constitution_vector_provenance", {})
+    provenance_b = report_b.get("constitution_vector_provenance", {})
+    for field in provenance_fields:
+        if provenance_a.get(field) != provenance_b.get(field):
+            mismatches.append(
+                (f"constitution_vector_provenance.{field}", provenance_a.get(field), provenance_b.get(field))
+            )
+
     return ("FAIL" if mismatches else "PASS", mismatches)
 
 
 if __name__ == "__main__":
     output = Path(sys.argv[1]) if len(sys.argv) > 1 else _REPO_ROOT / "determinism-report.json"
-    report = generate_report(output)
+    provenance_output = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+    report = generate_report(output, provenance_output)
 
     print("=" * 70)
     print("Aura Protocol v3.3 — Determinism Report")
@@ -170,10 +233,21 @@ if __name__ == "__main__":
     print(f"Platform : {report['platform']['system']} / {report['platform']['machine']}")
     print(f"Python   : {report['platform']['python_version']}")
     print(f"Engine   : {report['engine_version']}")
+    print(f"Commit   : {report['commit_sha']}")
     print()
     for k, v in report["determinism_vectors"].items():
         print(f"  {k}: {v}")
     print()
+    provenance = report["constitution_vector_provenance"]
+    print("CONSTITUTION VECTOR PROVENANCE")
+    print(f"dimension = {provenance['dimension']}")
+    print(f"scaling_factor = {provenance['scaling_factor']}")
+    print(f"encoding = {provenance['byte_encoding']}")
+    print(f"vector_sha256 = {provenance['vector_sha256']}")
+    print(f"commit_sha = {provenance['tested_commit_sha']}")
+    print()
     print(f"Result   : {report['comparison_result']}")
     print(f"Output   : {output}")
+    if provenance_output is not None:
+        print(f"Provenance Output   : {provenance_output}")
     print("=" * 70)

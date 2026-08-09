@@ -41,6 +41,11 @@ from core.offline_normalizer import (
     SCALING_FACTOR,
     CONSTITUTION_DIM
 )
+from scripts.generate_determinism_report import (
+    compute_vectors,
+    resolve_constitution_vector,
+    hash_int32_array,
+)
 
 
 class BitwiseReplayTest(unittest.TestCase):
@@ -335,6 +340,52 @@ class BitwiseReplayTest(unittest.TestCase):
         # Verify the record is valid
         self.assertIsNotNone(record["test_vector_hash"])
         self.assertEqual(record["test_vector_length"], 1000)
+
+    def test_cr007_canonical_vector_resolution(self):
+        """CR-007: canonical constitution vector must resolve deterministically."""
+        vector = resolve_constitution_vector()
+        self.assertEqual(len(vector), CONSTITUTION_DIM)
+        self.assertTrue(all(isinstance(x, int) for x in vector))
+
+    def test_cr007_full_vector_hash_determinism(self):
+        """CR-007: full-vector hash must be deterministic and stable."""
+        vector = resolve_constitution_vector()
+        hash_a = hash_int32_array(vector)
+        hash_b = hash_int32_array(vector)
+        self.assertEqual(hash_a, hash_b)
+        self.assertEqual(hash_a, "4a3474f01e1b6ac0850398b027264cf49f4a1d2acab5db0c4ea53dd2ae123fae")
+
+    def test_cr007_full_vector_hash_changes_on_mutation(self):
+        """CR-007: changing one element must change full-vector hash."""
+        vector = resolve_constitution_vector()
+        baseline_hash = hash_int32_array(vector)
+        mutated = list(vector)
+        mutated[0] = mutated[0] + 1
+        mutated_hash = hash_int32_array(mutated)
+        self.assertNotEqual(mutated_hash, baseline_hash)
+
+    def test_cr007_repeated_vector_generation_same_hash(self):
+        """CR-007: repeated generation must produce same full-vector hash."""
+        hashes = []
+        for _ in range(3):
+            hashes.append(hash_int32_array(resolve_constitution_vector()))
+        self.assertEqual(hashes[0], hashes[1])
+        self.assertEqual(hashes[1], hashes[2])
+
+    def test_cr007_no_runtime_float_in_provenance_pipeline(self):
+        """CR-007: provenance/vector hashing pipeline must remain integer-only."""
+        source = Path(__file__).resolve().parents[1] / "scripts" / "generate_determinism_report.py"
+        text = source.read_text(encoding="utf-8")
+        self.assertNotIn("math.sqrt(", text)
+        self.assertNotIn("numpy", text)
+
+    def test_cr007_existing_subset_vector_hash_unchanged(self):
+        """CR-007: existing determinism vector hash must remain unchanged."""
+        vectors = compute_vectors()
+        self.assertEqual(
+            vectors["ari_vector_hash"],
+            "de563725627d2a2ccd96a2c00095a8eeea00b2e580c396145661455e4e516cd0",
+        )
 
 
 class WASMCompatibilityTest(unittest.TestCase):

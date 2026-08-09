@@ -38,13 +38,22 @@ jobs:
 
       - name: Generate determinism report
         run: |
-          python scripts/generate_determinism_report.py determinism-report-${{ matrix.arch }}.json
+          python scripts/generate_determinism_report.py \
+            determinism-report-${{ matrix.arch }}.json \
+            constitution-vector-provenance-${{ matrix.arch }}.json
 
       - name: Upload determinism report
         uses: actions/upload-artifact@v4
         with:
           name: determinism-report-${{ matrix.arch }}
           path: determinism-report-${{ matrix.arch }}.json
+          retention-days: 30
+
+      - name: Upload constitution vector provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: constitution-vector-provenance-${{ matrix.arch }}
+          path: constitution-vector-provenance-${{ matrix.arch }}.json
           retention-days: 30
 
       - name: Upload check results
@@ -107,6 +116,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: determinism-report-arm64
+          path: ./reports/arm64
+
+      - name: Download x86_64 constitution vector provenance
+        uses: actions/download-artifact@v4
+        with:
+          name: constitution-vector-provenance-x86_64
+          path: ./reports/x86_64
+
+      - name: Download arm64 constitution vector provenance
+        uses: actions/download-artifact@v4
+        with:
+          name: constitution-vector-provenance-arm64
           path: ./reports/arm64
 
       - name: Compare determinism vectors
