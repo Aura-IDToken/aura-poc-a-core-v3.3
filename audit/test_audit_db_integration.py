@@ -17,6 +17,7 @@ class TestAuditEventsAppendOnlyIntegration(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.operations = []
         ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
         cls._compose("down", "-v", "--remove-orphans", check=False)
         cls._compose("up", "-d")
@@ -30,6 +31,10 @@ class TestAuditEventsAppendOnlyIntegration(unittest.TestCase):
     @classmethod
     def _write_results(cls):
         RESULTS_FILE.write_text(json.dumps({"operations": cls.operations}, indent=2), encoding="utf-8")
+
+    @staticmethod
+    def _sql_literal(value):
+        return str(value).replace("'", "''")
 
     @classmethod
     def _run(cls, command, *, name, check=True):
@@ -146,8 +151,15 @@ class TestAuditEventsAppendOnlyIntegration(unittest.TestCase):
         return (
             "INSERT INTO audit_events "
             "(agent_id, event_hash, merkle_root, poca_score, drift, status, raw_event, certificate) "
-            f"VALUES ('{agent_id}', '{event_hash}', '{merkle_root}', {poca_score}, 0.32, "
-            f"'COMPLIANT', '{raw_event}'::jsonb, '{certificate}'::jsonb) "
+            "VALUES ("
+            f"'{TestAuditEventsAppendOnlyIntegration._sql_literal(agent_id)}', "
+            f"'{TestAuditEventsAppendOnlyIntegration._sql_literal(event_hash)}', "
+            f"'{TestAuditEventsAppendOnlyIntegration._sql_literal(merkle_root)}', "
+            f"{poca_score}, 0.32, "
+            f"'COMPLIANT', "
+            f"'{TestAuditEventsAppendOnlyIntegration._sql_literal(raw_event)}'::jsonb, "
+            f"'{TestAuditEventsAppendOnlyIntegration._sql_literal(certificate)}'::jsonb"
+            ") "
             "RETURNING id, event_hash, poca_score::text, certificate->>'RAW_ARI';"
         )
 
