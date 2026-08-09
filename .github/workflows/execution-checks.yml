@@ -56,6 +56,10 @@ jobs:
             core/test_bitwise_replay_*.hash
             artifacts/db-append-only-check.log
             artifacts/db-append-only-results.json
+            artifacts/cr-003-statelessness.log
+            artifacts/cr-003-statelessness-results.json
+            artifacts/cr-003-layer-boundary.log
+            artifacts/cr-003-layer-boundary.json
           retention-days: 30
 
   wasm-compat:
