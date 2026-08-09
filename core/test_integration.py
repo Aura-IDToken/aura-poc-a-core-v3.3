@@ -62,7 +62,7 @@ class TestIntegration(unittest.TestCase):
     
     def test_workflow_with_human_rejection(self):
         """Ensure workflow fails when attempting to score humans (Art. 5)"""
-        with self.assertRaises(AssertionError) as context:
+        with self.assertRaises(ValueError) as context:
             RegulatoryPolicy.validate_target("HUMAN")
         
         self.assertIn("Human scoring is strictly prohibited", str(context.exception))

@@ -1,8 +1,9 @@
 from typing import List, Dict
 
 class PoCAEvaluator:
-    """Implementation of ARI formula: C(Et) = 0.3*S + 0.7*SA - P
+    """Implementation of RAW_ARI formula: RAW_ARI = 0.3*SI + 0.7*SA
     
+    Layer 0 measurement only. Penalties (P) are applied by Layer 2 (compliance/).
     Uses fixed-point int32 arithmetic (scaling factor: 10^5 = 100,000)
     All values are stored as integers scaled by 100,000.
     """
@@ -46,19 +47,18 @@ class PoCAEvaluator:
         
         return similarity
 
-    def evaluate(self, agent_id: str, vector: List[int], valid_schema: bool, penalty: int = 0) -> Dict:
+    def evaluate(self, agent_id: str, vector: List[int], valid_schema: bool) -> Dict:
         """
         Evaluate agent reliability using fixed-point int32 arithmetic.
         
-        Layer 0 Measurement: This method performs ONLY deterministic calculation.
-        Policy decisions (halt checks, penalty calculation) must be handled by the caller.
+        Layer 0 Measurement: Computes RAW_ARI = 0.3*SI + 0.7*SA only.
+        Policy decisions (halt checks, penalty calculation, compliance status)
+        must be handled by Layer 2 (compliance/).
         
         Args:
             agent_id: Agent identifier (for audit trail only)
             vector: Agent action vector (int32, scaled by 10^5)
             valid_schema: Whether the schema is valid
-            penalty: Penalty value (int32, scaled by 10^5, default=0)
-                     Calculated by Layer 2 policy engine
             
         Returns:
             Dict with raw ARI score and drift (measurement only, no policy decisions)
@@ -69,14 +69,14 @@ class PoCAEvaluator:
         # Semantic alignment (already scaled by 10^5)
         sa = self.vector_similarity_int32(vector, self.constitution)
         
-        # ARI = 0.3*S + 0.7*SA - P (all in fixed-point)
+        # RAW_ARI = 0.3*SI + 0.7*SA (all in fixed-point, no penalties)
         # (weight * si) is (30000 * 100000) or 0, divide by 10^5 to rescale
         # (weight * sa) is (70000 * sa), divide by 10^5 to rescale
-        ari = (self.weight_structural * si // self.SCALING_FACTOR) + \
-              (self.weight_semantic * sa // self.SCALING_FACTOR) - penalty
+        raw_ari = (self.weight_structural * si // self.SCALING_FACTOR) + \
+                  (self.weight_semantic * sa // self.SCALING_FACTOR)
         
         # Clamp to non-negative
-        ari = max(0, ari)
+        raw_ari = max(0, raw_ari)
         
         # Drift is (1.0 - sa) in fixed-point
         # Since sa can be negative (range: [-10^5, 10^5]), drift calculation needs clamping
@@ -86,6 +86,6 @@ class PoCAEvaluator:
         drift = min(max(0, self.SCALING_FACTOR - sa), 2 * self.SCALING_FACTOR)
         
         return {
-            "ari": ari,  # int32, scaled by 10^5
+            "ari": raw_ari,  # int32, scaled by 10^5 — RAW_ARI (no penalty)
             "drift": drift,  # int32, scaled by 10^5
         }

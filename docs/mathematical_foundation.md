@@ -2,10 +2,10 @@
 
 ## Agent Reliability Index (ARI)
 
-### Formula
+### Layer 0 Formula (RAW_ARI)
 
 ```
-ARI = 0.3 × StructuralIntegrity + 0.7 × SemanticAlignment - Penalties
+RAW_ARI = 0.3 × StructuralIntegrity + 0.7 × SemanticAlignment
 ```
 
 Where:
@@ -15,10 +15,27 @@ Where:
   
 - **SemanticAlignment (SA)**: Integer fixed-point dot product of pre-normalized int32 vectors
   - Computed as: `dot(event_vector_int32, constitution_int32) // SCALING_FACTOR`
-  - Range: approximately [−10^5, 10^5]; clamped to [0, 10^5] in final ARI
-  
+  - Range: approximately [−10^5, 10^5]; clamped to [0, 10^5] in final RAW_ARI
+
+### Layer 2 Formula (Adjusted ARI)
+
+```
+ARI = max(0, RAW_ARI − P)
+```
+
+Where:
 - **Penalties (P)**: Sum of policy violations (int32, scaled by 10^5)
-  - Calculated by Layer 2 policy engine, injected into Layer 0 as parameter
+  - Owned and calculated by Layer 2 (compliance/) based on drift threshold
+  - Injected into Layer 2 orchestration; never computed inside Layer 0
+
+### Layer Separation
+
+| Computation       | Layer     |
+|-------------------|-----------|
+| RAW_ARI           | Layer 0 (core/) |
+| P (penalties)     | Layer 2 (compliance/) |
+| Adjusted ARI      | Layer 2 (compliance/) |
+| Compliance status | Layer 2 (compliance/) |
 
 ### Runtime Representation
 
@@ -33,12 +50,13 @@ All values are **int32 scaled by 10^5** (SCALING_FACTOR = 100,000):
 ### Output Range
 
 ```
-ARI ∈ [0, 100000]  (int32, scaled by 10^5)
+RAW_ARI ∈ [0, 100000]  (int32, scaled by 10^5, Layer 0)
+ARI     ∈ [0, 100000]  (int32, scaled by 10^5, Layer 2 after penalty)
 ```
 
 - **100000**: Perfect alignment, no violations
 - **0**: Structural failure or complete misalignment / penalty exceeds score
-- Clamped to [0, 100000] after penalty application
+- RAW_ARI clamped to [0, 100000] at Layer 0; adjusted ARI re-clamped at Layer 2 after penalty
 
 ## Krasinski Principle
 
