@@ -228,8 +228,8 @@ class TestCR003Statelessness(unittest.TestCase):
         # ── Phase 1: Verify empty history ────────────────────────────
         _log("\n── Phase 1: Verify empty history for test agent ──")
         count_result = self._psql(
-            f"SELECT COUNT(*)::text FROM audit_events "
-            f"WHERE agent_id = '{TEST_AGENT_ID}';",
+            "SELECT COUNT(*)::text FROM audit_events "
+            f"WHERE agent_id = $aid${TEST_AGENT_ID}$aid$;",
             name="count-history-before",
         )
         count_before = int(count_result.stdout.strip())
@@ -248,8 +248,8 @@ class TestCR003Statelessness(unittest.TestCase):
         # ── Phase 3: Insert historical audit data ───────────────────
         _log("\n── Phase 3: Insert historical audit_events rows ──")
         for i in range(3):
-            event_hash = f"cr003{'0' * 58}{i:02d}"  # 64-char unique hash
-            merkle_root = f"mr003{'0' * 58}{i:02d}"
+            event_hash = f"cr003{i:02d}{'0' * 57}"  # 5 + 2 + 57 = 64 chars
+            merkle_root = f"mr003{i:02d}{'0' * 57}"  # 5 + 2 + 57 = 64 chars
             raw_ari = 68000 + i * 1000
             poca_score_cents = (raw_ari + 500) // 1000  # deterministic rounding
             poca_score = f"0.{poca_score_cents:02d}"
@@ -277,8 +277,8 @@ class TestCR003Statelessness(unittest.TestCase):
             self._psql(sql, name=f"insert-history-row-{i}")
 
         count_result2 = self._psql(
-            f"SELECT COUNT(*)::text FROM audit_events "
-            f"WHERE agent_id = '{TEST_AGENT_ID}';",
+            "SELECT COUNT(*)::text FROM audit_events "
+            f"WHERE agent_id = $aid${TEST_AGENT_ID}$aid$;",
             name="count-history-after-insert",
         )
         count_after = int(count_result2.stdout.strip())
@@ -296,8 +296,11 @@ class TestCR003Statelessness(unittest.TestCase):
         fields_equal = (result_a == result_b)
         self.__class__._result["equality_result"] = fields_equal
 
+        all_fields_passed = True
         for key in result_a:
             with self.subTest(field=key):
+                if result_a[key] != result_b[key]:
+                    all_fields_passed = False
                 self.assertEqual(
                     result_a[key],
                     result_b[key],
@@ -306,9 +309,12 @@ class TestCR003Statelessness(unittest.TestCase):
                     "CR-003 VIOLATION: persisted history influenced Layer 0 measurement.",
                 )
 
-        _log(f"\n✅ CR-003 PASS: result_A == result_B ({result_a})")
-        _log("Persisted audit history does NOT influence Layer 0 measurement.")
-        self.__class__._result["overall"] = "PASS"
+        if all_fields_passed:
+            _log(f"\n✅ CR-003 PASS: result_A == result_B ({result_a})")
+            _log("Persisted audit history does NOT influence Layer 0 measurement.")
+            self.__class__._result["overall"] = "PASS"
+        else:
+            self.__class__._result["overall"] = "FAIL"
 
 
 if __name__ == "__main__":
