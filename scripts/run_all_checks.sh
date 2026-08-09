@@ -1,6 +1,6 @@
 #!/bin/bash
 # MASTER CHECK SCRIPT
-# Runs all 6 mandatory execution checks (0-5)
+# Runs all mandatory execution checks
 # If ANY check fails: DO NOT MERGE
 
 set -e
