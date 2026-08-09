@@ -125,6 +125,30 @@ else
     OVERALL_STATUS=1
 fi
 
+# Run CHECK 8 - CR-003 Runtime History-Independence
+echo ""
+echo "=========================================="
+echo "CHECK 8 — CR-003 History-Independence"
+echo "=========================================="
+if bash "$CHECKS_DIR/check_8_cr003_statelessness.sh"; then
+    CHECK_8_STATUS="✅ PASS"
+else
+    CHECK_8_STATUS="❌ FAIL"
+    OVERALL_STATUS=1
+fi
+
+# Run CHECK 9 - CR-003 Layer 0 Static Boundary
+echo ""
+echo "=========================================="
+echo "CHECK 9 — CR-003 Layer 0 Boundary"
+echo "=========================================="
+if bash "$CHECKS_DIR/check_9_cr003_layer_boundary.sh"; then
+    CHECK_9_STATUS="✅ PASS"
+else
+    CHECK_9_STATUS="❌ FAIL"
+    OVERALL_STATUS=1
+fi
+
 # Summary
 echo ""
 echo "=========================================="
@@ -141,6 +165,8 @@ echo "CHECK 6 - Art.5 (DEFAULT):           $CHECK_6A_STATUS"
 echo "CHECK 6 - Art.5 (-O):                $CHECK_6B_STATUS"
 echo "CHECK 6 - Art.5 (-OO):               $CHECK_6C_STATUS"
 echo "CHECK 7 - CR-004 Append-Only DB:     $CHECK_7_STATUS"
+echo "CHECK 8 - CR-003 History-Indep:      $CHECK_8_STATUS"
+echo "CHECK 9 - CR-003 Layer Boundary:     $CHECK_9_STATUS"
 echo ""
 
 if [ $OVERALL_STATUS -eq 0 ]; then
