@@ -113,6 +113,18 @@ else
     OVERALL_STATUS=1
 fi
 
+# Run CHECK 7 - CR-004 Append-Only Evidence Hardening
+echo ""
+echo "=========================================="
+echo "CHECK 7 — CR-004 Append-Only Evidence"
+echo "=========================================="
+if bash "$CHECKS_DIR/check_7_db_append_only.sh"; then
+    CHECK_7_STATUS="✅ PASS"
+else
+    CHECK_7_STATUS="❌ FAIL"
+    OVERALL_STATUS=1
+fi
+
 # Summary
 echo ""
 echo "=========================================="
@@ -128,6 +140,7 @@ echo "CHECK 5 - Entropy:                   $CHECK_5_STATUS"
 echo "CHECK 6 - Art.5 (DEFAULT):           $CHECK_6A_STATUS"
 echo "CHECK 6 - Art.5 (-O):                $CHECK_6B_STATUS"
 echo "CHECK 6 - Art.5 (-OO):               $CHECK_6C_STATUS"
+echo "CHECK 7 - CR-004 Append-Only DB:     $CHECK_7_STATUS"
 echo ""
 
 if [ $OVERALL_STATUS -eq 0 ]; then

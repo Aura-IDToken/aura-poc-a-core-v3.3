@@ -21,6 +21,63 @@ CREATE TABLE IF NOT EXISTS audit_events (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'audit_events_certificate_raw_ari_present_chk'
+    ) THEN
+        ALTER TABLE audit_events
+            ADD CONSTRAINT audit_events_certificate_raw_ari_present_chk
+            CHECK (certificate ? 'RAW_ARI');
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'audit_events_certificate_raw_ari_integer_chk'
+    ) THEN
+        ALTER TABLE audit_events
+            ADD CONSTRAINT audit_events_certificate_raw_ari_integer_chk
+            CHECK (
+                jsonb_typeof(certificate -> 'RAW_ARI') = 'number'
+                AND (certificate ->> 'RAW_ARI') ~ '^[0-9]+$'
+                AND (certificate ->> 'RAW_ARI')::BIGINT BETWEEN 0 AND 100000
+            );
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'audit_events_poca_score_matches_raw_ari_chk'
+    ) THEN
+        ALTER TABLE audit_events
+            ADD CONSTRAINT audit_events_poca_score_matches_raw_ari_chk
+            CHECK (
+                poca_score = ROUND(
+                    (certificate ->> 'RAW_ARI')::NUMERIC / 100000,
+                    2
+                )
+            );
+    END IF;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION prevent_audit_events_mutation()
+RETURNS trigger AS $$
+BEGIN
+    RAISE EXCEPTION 'audit_events is append-only; % is not permitted', TG_OP
+        USING ERRCODE = '55000';
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS audit_events_append_only ON audit_events;
+CREATE TRIGGER audit_events_append_only
+BEFORE UPDATE OR DELETE ON audit_events
+FOR EACH ROW
+EXECUTE FUNCTION prevent_audit_events_mutation();
+
 -- Create indexes for efficient querying
 CREATE INDEX IF NOT EXISTS idx_audit_events_agent_id ON audit_events(agent_id);
 CREATE INDEX IF NOT EXISTS idx_audit_events_timestamp ON audit_events(timestamp DESC);
