@@ -13,7 +13,9 @@ Protocol Specification
 → Adversarial review  
 → Human approval
 
-## Governance Rules
+## Canonical Governance Rules
+
+The following rules are the canonical repository-level agent governance rules:
 
 1. Protocol specification has authority over implementation.
 2. Agents must not silently change protocol semantics.
@@ -28,6 +30,27 @@ Protocol Specification
 11. Claude's role is architectural/conformance audit.
 12. Copilot's role is implementation/testing after an approved conformance requirement exists.
 13. Human approval is required before merging protocol-affecting changes.
+
+## Authority Precedence (Highest → Lowest)
+
+1. Aura Constitutional Decree / Constitutional Authority
+2. Aura Protocol Specification
+3. Protocol Invariants
+4. Existing repository-level constitutional/Copilot directives
+5. Conformance Test Matrix / approved Conformance Requirements
+6. AGENTS.md / CLAUDE.md governance workflow
+7. Path-specific agent instructions
+8. Prompt/task instructions
+9. Existing implementation
+10. Agent assumptions
+
+Lower-level instructions MUST NOT override higher-level authority.
+
+If a conflict is detected:
+- do not silently reconcile it;
+- stop;
+- report the conflict;
+- request human/Protocol Custodian resolution.
 
 ## Operating Constraints
 
