@@ -105,7 +105,7 @@ def build_constitution_vector_provenance(constitution, commit_sha: str) -> dict:
     }
 
 
-def compute_vectors():
+def compute_vectors(constitution=None):
     """
     Compute all determinism vectors.
 
@@ -117,7 +117,8 @@ def compute_vectors():
       hmac_signature_hex    — HMAC-SHA256(key, signing_payload) for ETC 0
     """
     # ARI / constitution vector
-    constitution = resolve_constitution_vector()
+    if constitution is None:
+        constitution = resolve_constitution_vector()
     ari_vector_hash = hash_int32_array(constitution[:1000])
     constitution_vector_sha256 = hash_int32_array(constitution)
 
@@ -155,8 +156,8 @@ def compute_vectors():
 
 def generate_report(output_path: Path, provenance_output_path: Path | None = None) -> dict:
     """Generate the determinism report and write it to *output_path*."""
-    vectors = compute_vectors()
     constitution = resolve_constitution_vector()
+    vectors = compute_vectors(constitution)
     commit_sha = get_commit_sha()
     provenance = build_constitution_vector_provenance(constitution, commit_sha)
 
