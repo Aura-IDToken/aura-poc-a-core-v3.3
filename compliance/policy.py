@@ -23,7 +23,8 @@ class RegulatoryPolicy:
 
     @staticmethod
     def validate_target(target_type: str):
-        assert target_type == "MACHINE_ACCOUNT", "CRITICAL: Human scoring is strictly prohibited."
+        if target_type != "MACHINE_ACCOUNT":
+            raise ValueError("CRITICAL: Human scoring is strictly prohibited.")
 
     @staticmethod
     def emergency_halt(agent_id: str):

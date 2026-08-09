@@ -95,8 +95,8 @@ class TestARICalculation(unittest.TestCase):
         self.evaluator = PoCAEvaluator(self.constitution)
     
     def test_human_scoring_is_prohibited(self):
-        """Art. 5 EU AI Act: Ensure human scoring fails with assertion"""
-        with self.assertRaises(AssertionError) as context:
+        """Art. 5 EU AI Act: Ensure human scoring fails with explicit fail-closed exception"""
+        with self.assertRaises(ValueError) as context:
             RegulatoryPolicy.validate_target("HUMAN")
         
         self.assertIn("Human scoring is strictly prohibited", str(context.exception))
@@ -146,7 +146,7 @@ class TestARICalculation(unittest.TestCase):
         
         result = self.evaluator.evaluate(agent_id, vector, valid_schema)
         
-        # With invalid schema (SI=0), ARI = 0.7*SA - penalty
+        # With invalid schema (SI=0), RAW_ARI = 0.7*SA (no penalty at Layer 0)
         # Should be less than 100000
         self.assertLess(result["ari"], PoCAEvaluator.SCALING_FACTOR)
     

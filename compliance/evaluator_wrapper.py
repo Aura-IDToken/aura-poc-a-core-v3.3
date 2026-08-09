@@ -37,8 +37,9 @@ def evaluate_with_policy(
     This function represents the correct architectural pattern:
     1. Layer 2 performs policy checks (halt status)
     2. Layer 2 calculates policy-based penalties
-    3. Layer 0 performs pure measurement (ARI calculation)
-    4. Layer 2 returns the combined result
+    3. Layer 0 performs pure measurement (RAW_ARI = 0.3*SI + 0.7*SA)
+    4. Layer 2 applies penalty: adjusted_ARI = max(0, RAW_ARI - P)
+    5. Layer 2 returns the combined result
     
     Args:
         evaluator: PoCAEvaluator instance (Layer 0 measurement engine)
@@ -62,10 +63,16 @@ def evaluate_with_policy(
     # Step 3: Policy decision - Calculate penalty based on drift threshold
     penalty = RegulatoryPolicy.calculate_penalties(sa)
     
-    # Step 4: Layer 0 measurement - Pure calculation with injected penalty
-    result = evaluator.evaluate(agent_id, vector, valid_schema, penalty=penalty)
+    # Step 4: Layer 0 measurement - Pure RAW_ARI calculation (no penalty)
+    result = evaluator.evaluate(agent_id, vector, valid_schema)
     
-    return result
+    # Step 5: Layer 2 policy decision - Apply penalty to RAW_ARI
+    adjusted_ari = max(0, result["ari"] - penalty)
+    
+    return {
+        "ari": adjusted_ari,  # int32, scaled by 10^5 — after Layer 2 penalty
+        "drift": result["drift"],  # int32, scaled by 10^5
+    }
 
 
 # Alias for backward compatibility with existing code patterns
