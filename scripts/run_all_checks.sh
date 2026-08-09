@@ -83,6 +83,36 @@ else
     OVERALL_STATUS=1
 fi
 
+# Run CHECK 6 - Art.5 Runtime Proof (CR-001: DEFAULT / -O / -OO)
+echo ""
+echo "=========================================="
+echo "CHECK 6 — Art.5 Runtime Proof (CR-001)"
+echo "=========================================="
+echo ""
+echo "--- DEFAULT ---"
+if python "$SCRIPT_DIR/art5_conformance_proof.py"; then
+    CHECK_6A_STATUS="✅ PASS"
+else
+    CHECK_6A_STATUS="❌ FAIL"
+    OVERALL_STATUS=1
+fi
+echo ""
+echo "--- -O ---"
+if python -O "$SCRIPT_DIR/art5_conformance_proof.py"; then
+    CHECK_6B_STATUS="✅ PASS"
+else
+    CHECK_6B_STATUS="❌ FAIL"
+    OVERALL_STATUS=1
+fi
+echo ""
+echo "--- -OO ---"
+if python -OO "$SCRIPT_DIR/art5_conformance_proof.py"; then
+    CHECK_6C_STATUS="✅ PASS"
+else
+    CHECK_6C_STATUS="❌ FAIL"
+    OVERALL_STATUS=1
+fi
+
 # Summary
 echo ""
 echo "=========================================="
@@ -95,6 +125,9 @@ echo "CHECK 2 - Integer Only:              $CHECK_2_STATUS"
 echo "CHECK 3 - Layer Separation:          $CHECK_3_STATUS"
 echo "CHECK 4 - Audit Path:                $CHECK_4_STATUS"
 echo "CHECK 5 - Entropy:                   $CHECK_5_STATUS"
+echo "CHECK 6 - Art.5 (DEFAULT):           $CHECK_6A_STATUS"
+echo "CHECK 6 - Art.5 (-O):                $CHECK_6B_STATUS"
+echo "CHECK 6 - Art.5 (-OO):               $CHECK_6C_STATUS"
 echo ""
 
 if [ $OVERALL_STATUS -eq 0 ]; then
