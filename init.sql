@@ -55,9 +55,11 @@ BEGIN
         ALTER TABLE audit_events
             ADD CONSTRAINT audit_events_poca_score_matches_raw_ari_chk
             CHECK (
-                poca_score = ROUND(
-                    (certificate ->> 'RAW_ARI')::NUMERIC / 100000,
-                    2
+                -- Deterministic half-up cent rounding from integer RAW_ARI / 100000.
+                poca_score = (
+                    (
+                        ((certificate ->> 'RAW_ARI')::BIGINT + 500) / 1000
+                    )::NUMERIC / 100
                 )
             );
     END IF;
