@@ -31,10 +31,11 @@ cd "$REPO_ROOT"
 MODULE="core.test_ari_observability"
 
 # The harness contains 8 tests: 4 observation tests + 4 harness-integrity
-# controls (ADR-006 ER-5). This is a FLOOR, not a pin: it exists to make
-# zero-collection and silent subsetting fail closed. Authorized growth of the
-# harness raises this number; it must never silently fall below it.
-MIN_EXPECTED_TESTS=8
+# controls (ADR-006 ER-5). This is an EXACT PIN, not a floor: the executed count
+# must equal it. Zero-collection, silent subsetting AND undeclared growth all
+# fail closed. Any authorized change to the harness size is a deliberate,
+# separately-authorized change that updates this constant in the same change.
+EXPECTED_TESTS=8
 
 LOG="artifacts/rd-006-ari-observability.log"
 OBSERVATION="artifacts/rd-006-ari-observation.json"
@@ -55,7 +56,7 @@ echo ""
 echo "Status:            CHARACTERIZATION / IMPLEMENTATION-DERIVED"
 echo "normative_effect:  NONE"
 echo "Module:            $MODULE"
-echo "Minimum tests:     $MIN_EXPECTED_TESTS"
+echo "Expected tests:    $EXPECTED_TESTS (exact)"
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -92,12 +93,17 @@ if [ "$tee_exit_code" -ne 0 ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# GUARD 1 — non-zero collection.
+# GUARD 1 — exact collection count.
 #
 # `python3 -m unittest <module>` exits 0 and prints "Ran 0 tests ... OK" when a
 # module collects nothing. Without this guard, a harness whose test classes were
 # renamed, removed or de-registered would report CI success while observing
 # nothing. Verified empirically: zero-collection returns exit code 0.
+#
+# The comparison is EXACT EQUALITY. A floor (>=) would let undeclared growth
+# pass unsignalled, including net-positive substitution — an observation test
+# removed while trivial tests are added. Exact equality forces every change in
+# harness size through explicit authorization.
 # ---------------------------------------------------------------------------
 RAN_LINE="$(grep -E '^Ran [0-9]+ test' "$LOG" | tail -1 || true)"
 
@@ -110,14 +116,16 @@ fi
 
 RAN_COUNT="$(printf '%s' "$RAN_LINE" | sed -E 's/^Ran ([0-9]+) test.*/\1/')"
 
-if [ "$RAN_COUNT" -lt "$MIN_EXPECTED_TESTS" ]; then
+if [ "$RAN_COUNT" -ne "$EXPECTED_TESTS" ]; then
   echo ""
-  echo "❌ CHECK 10 FAILED — insufficient test collection."
+  echo "❌ CHECK 10 FAILED — unexpected test collection count."
   echo "   Collected: $RAN_COUNT"
-  echo "   Required:  >= $MIN_EXPECTED_TESTS"
+  echo "   Required:  == $EXPECTED_TESTS (exact)"
   echo ""
-  echo "Zero or partial collection MUST NOT be reported as success. The harness"
-  echo "is inert or has been subset."
+  echo "Zero, partial or grown collection MUST NOT be reported as success. The"
+  echo "harness is inert, has been subset, or has changed size undeclared."
+  echo "If the harness legitimately changed size, that is a deliberate,"
+  echo "separately-authorized change and EXPECTED_TESTS must be updated with it."
   exit 1
 fi
 
@@ -157,7 +165,7 @@ echo "=========================================="
 echo "✅ CHECK 10 PASSED — harness executed"
 echo "=========================================="
 echo ""
-echo "Tests executed:  $RAN_COUNT (minimum $MIN_EXPECTED_TESTS)"
+echo "Tests executed:  $RAN_COUNT (expected exactly $EXPECTED_TESTS)"
 echo "Evidence log:    $LOG"
 echo "Observation:     $OBSERVATION"
 echo ""
