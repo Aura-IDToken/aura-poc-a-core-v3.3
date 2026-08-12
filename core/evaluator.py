@@ -22,6 +22,22 @@ class PoCAEvaluator:
         self.weight_structural = 30000   # 0.3 * 10^5
         self.weight_semantic = 70000     # 0.7 * 10^5
 
+    def _validate_vector_dimension(self, vector: List[int]) -> None:
+        """Validate that input vector dimension matches constitution dimension.
+
+        Fail-closed guard for P0-1. Uses an explicit raise (not `assert`) so the
+        guard survives `python -O` / `-OO`, per AGENTS.md rule 4.
+
+        Raises:
+            ValueError: If dimensions do not match.
+        """
+        expected = len(self.constitution)
+        actual = len(vector)
+        if actual != expected:
+            raise ValueError(
+                f"Vector dimension mismatch: expected {expected}, got {actual}"
+            )
+
     def vector_similarity_int32(self, v1: List[int], v2: List[int]) -> int:
         """
         Calculate similarity between two pre-normalized int32 vectors.
@@ -62,7 +78,16 @@ class PoCAEvaluator:
             
         Returns:
             Dict with raw ARI score and drift (measurement only, no policy decisions)
+
+        Raises:
+            ValueError: If vector dimension does not match constitution dimension.
         """
+        # P0-1: Validate vector dimension before any computation.
+        # A dimension mismatch must never produce an ARI value: zip() in
+        # vector_similarity_int32() would otherwise silently truncate to the
+        # shorter operand and emit a plausible-looking score.
+        self._validate_vector_dimension(vector)
+
         # Structural integrity: 0 or 1 (scaled by 10^5 for consistency)
         si = self.SCALING_FACTOR if valid_schema else 0
         

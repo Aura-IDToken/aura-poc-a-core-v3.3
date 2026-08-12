@@ -149,6 +149,18 @@ else
     OVERALL_STATUS=1
 fi
 
+# Run CHECK 10 - P0-1 Vector Dimension Validation
+echo ""
+echo "=========================================="
+echo "CHECK 10 — P0-1 Dimension Validation"
+echo "=========================================="
+if bash "$CHECKS_DIR/check_10_p01_dimension_validation.sh"; then
+    CHECK_10_STATUS="✅ PASS"
+else
+    CHECK_10_STATUS="❌ FAIL"
+    OVERALL_STATUS=1
+fi
+
 # Summary
 echo ""
 echo "=========================================="
@@ -167,6 +179,7 @@ echo "CHECK 6 - Art.5 (-OO):               $CHECK_6C_STATUS"
 echo "CHECK 7 - CR-004 Append-Only DB:     $CHECK_7_STATUS"
 echo "CHECK 8 - CR-003 History-Indep:      $CHECK_8_STATUS"
 echo "CHECK 9 - CR-003 Layer Boundary:     $CHECK_9_STATUS"
+echo "CHECK 10 - P0-1 Dimension Validation: $CHECK_10_STATUS"
 echo ""
 
 if [ $OVERALL_STATUS -eq 0 ]; then

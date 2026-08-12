@@ -121,6 +121,20 @@ This will run all 5 checks in sequence and provide a summary.
 
 **Why it matters:** Krasinski Principle: T ∝ 1/S (Transparency inversely proportional to Entropy). Minimize entropy for maximum transparency.
 
+### CHECK 10 — P0-1 Vector Dimension Validation
+
+**Requirement:** An action vector whose dimension differs from the constitution vector MUST be rejected fail-closed, and MUST NOT produce an ARI value.
+
+**What it does:**
+- Executes `core/test_ari.py` (21 tests, including the 7-test P0-1 suite)
+- Re-proves the guard under `python -O` and `python -OO`
+
+**Pass criteria:** All tests pass and dimension mismatch is `REJECTED` under DEFAULT, `-O`, and `-OO`.
+
+**Why it matters:** `vector_similarity_int32()` computes its dot product with `zip()`, which silently truncates to the shorter operand. Before P0-1, a mismatched vector produced a plausible-looking score instead of an error, and an over-long vector could push RAW_ARI above `SCALING_FACTOR` (ARI > 1.0), breaching the documented `[0, 10^5]` range.
+
+**Note:** `core/test_ari.py` was previously only checked for *existence* by CHECK 4 and was never executed. CHECK 10 supplies the executable evidence required by AGENTS.md rule 9.
+
 ## CI Integration
 
 These checks should be integrated into your CI/CD pipeline:
