@@ -63,10 +63,8 @@ class TestVectorDimensionValidation(unittest.TestCase):
         """Dimension mismatch must never return a result dict with 'ari' key."""
         short_vector = [50000] * 5
         result = None
-        try:
+        with self.assertRaises(ValueError):
             result = self.evaluator.evaluate("test_never", short_vector, True)
-        except ValueError:
-            pass
         self.assertIsNone(result, "Mismatch must not produce any result")
 
     def test_dimension_validation_before_similarity(self):
