@@ -13,6 +13,51 @@
 
 ---
 
+## v3.3 Iron Core — 2026-08-12
+
+### RD-006 — CI/CD Scope Relative to the FROZEN Boundary (2026-08-12)
+
+**Type:** Governance / Documentation
+**Decision ID:** RD-006
+**Accepted by:** Kamil Krasiński — Human Architectural Authority / Protocol Custodian
+**Authorization:** Explicit acceptance recorded prior to formalization, under the bilateral
+decision protocol (evidence preparation → ChatGPT review → human acceptance → formalization).
+
+**Decision recorded:** CI/CD infrastructure is outside the FROZEN **semantic** boundary of
+the Aura Core. CI/CD MAY observe FROZEN Core behaviour, execute characterization and
+determinism tests, detect regressions, enforce already-established invariants, and generate
+evidence. CI/CD MUST NOT modify FROZEN semantic content, reinterpret normative semantics,
+approve semantic changes, or acquire or exercise governance authority.
+
+**Documentation added:**
+- `docs/ADR_006_CI_OUTSIDE_FROZEN_BOUNDARY.md` — the accepted decision, its scope,
+  invariants (INV-CI-1 … INV-CI-8), evidence requirements (ER-1 … ER-7), merge blockers
+  (MB-1 … MB-8), what it unlocks (U-1 … U-8), what remains blocked (B-1 … B-11),
+  alternatives not adopted, and the preserved evidence trail.
+- `CHANGELOG.md` — this entry.
+
+**Scope limits recorded in the ADR.** This decision does not define ARI, does not select
+ARI semantics, does not authorize any correction to `core/evaluator.py`, does not resolve
+NB-021 globally, does not resolve DR-002, does not amend SPEC-002, and does not authorize
+production-code remediation. It unlocks observation only.
+
+**No code changes. No CI changes. No new functionality. No constitutional constants
+modified. No protocol semantics selected.**
+
+Work authorized by ADR-006 (CI-based ARI observability, GB-2, GB-3, EC-6) has **not** been
+performed and remains subject to the ADR's evidence requirements and merge blockers.
+
+**Finding recorded during formalization (ADR-006 §1.1), not remediated.**
+`core/test_ari_observability.py` is currently non-executable: commit `110a845`
+("Potential fix for pull request finding...", authored by Copilot Autofix) deleted its
+`import unittest` while leaving `unittest.TestCase` in use. The module ran 8 passing tests
+at its introducing commit `036ddd8` and cannot be imported at HEAD. **No CI step invokes
+the module, so the breakage went undetected** — the RM-10 blind spot manifesting on the
+artifact built to close it. Repair is a test-only change under NB-021 CASE D, is **not**
+authorized by ADR-006, and is registered as blocking precondition **PRE-U1**.
+
+---
+
 ## v3.3 Iron Core — 2026-07-24
 
 ### CORE-007 — Release Closure (2026-07-24)
