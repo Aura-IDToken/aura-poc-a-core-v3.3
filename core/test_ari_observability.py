@@ -58,6 +58,7 @@ Status: CHARACTERIZATION HARNESS (RD-006)
 
 import json
 import platform
+import unittest
 from pathlib import Path
 from unittest import mock
 
