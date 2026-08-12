@@ -7,6 +7,9 @@
 **Authority:** Pending Chief Architect / Protocol Custodian approval
 **Finding status:** CONFIRMED — verified against source **and** by executable proof (§2.7)
 **Evidence basis:** `AuraIDToken/aura-guard-v1.3` @ commit `443f72e`
+**Independent re-verification:** 2026-08-12 — all file/line references and the
+§2.7 test-count arithmetic re-checked against a fresh read-only clone at
+`443f72e`; documentation-only corrections applied to §2.2, §8 and §9.
 
 ---
 
@@ -63,7 +66,7 @@ pub struct Violation {
 
 ### 2.2 Chain Hash Construction
 
-**File:** `src/chain.rs` — `compute_chain_hash` at lines 25–47
+**File:** `src/chain.rs` — `compute_chain_hash` at lines 25–49
 
 ```rust
 let canonical = [
@@ -326,13 +329,20 @@ assertions need inverting from `is_ok()` to `ChainBreak` once the fix lands.
 | D-6 | Should `schema` / `audit_id` / `request_id` also enter the chain? | No — related but separable |
 | D-7 | Should deduplication happen? | No — can default to "no dedup" |
 
+**Note on numbering.** The `D-n` identifiers above are local to this ADR. They do
+**not** correspond to the `D1`–`D8` identifiers in
+`review/2026-08-11_ENGINEERING_BASELINE/GUARD-G1_INTEGRITY_DESIGN_BRIEF.md` §12,
+which numbers the same decision surface differently (e.g. this ADR's D-5
+"replay compatibility" is the brief's D2/D6/D7, while the brief's D5 is the hash
+domain question). Cite the document alongside the identifier when approving.
+
 ---
 
 ## 9. References
 
 - `src/models.rs` — `Violation` (L32), `AuditEntry` (L50)
 - `src/chain.rs` — `compute_chain_hash` (L25), `recompute_for_entry` (L53), `verify_chain` (L71)
-- `src/engine.rs` — `evaluate` (L14), violation creation (L28)
+- `src/engine.rs` — `evaluate` (L14), first-match regex `pattern.find` (L28), violation creation `violations.push` (L50)
 - `src/log_writer.rs` — `append` (L88)
 - `docs/evidence/P0-1_EVIDENCE.md` — P0-1 closure (this repository)
 
