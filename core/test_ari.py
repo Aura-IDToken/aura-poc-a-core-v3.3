@@ -4,6 +4,7 @@
 Constitutional Override: Test files need cosine/float references for validation.
 """
 
+import os
 import unittest
 import math
 from core.evaluator import PoCAEvaluator
@@ -25,6 +26,120 @@ def normalize_to_int32(vector, scaling_factor=100000):
     # Scale to int32
     int_vector = [round(x * scaling_factor) for x in normalized]
     return int_vector
+
+
+class TestVectorDimensionValidation(unittest.TestCase):
+    """P0-1: Dimension mismatch must raise ValueError and never produce an ARI value."""
+
+    def setUp(self):
+        float_const = [0.5] * 10
+        self.constitution = normalize_to_int32(float_const)
+        self.evaluator = PoCAEvaluator(self.constitution)
+
+    def test_shorter_vector_raises_value_error(self):
+        """A vector shorter than constitution must raise ValueError."""
+        short_vector = [50000] * 5  # 5 dimensions, constitution has 10
+        with self.assertRaises(ValueError) as ctx:
+            self.evaluator.evaluate("test_short", short_vector, True)
+        self.assertIn("dimension mismatch", str(ctx.exception).lower())
+
+    def test_longer_vector_raises_value_error(self):
+        """A vector longer than constitution must raise ValueError."""
+        long_vector = [50000] * 15  # 15 dimensions, constitution has 10
+        with self.assertRaises(ValueError) as ctx:
+            self.evaluator.evaluate("test_long", long_vector, True)
+        self.assertIn("dimension mismatch", str(ctx.exception).lower())
+
+    def test_exact_dimension_succeeds(self):
+        """A vector with exactly matching dimension must succeed."""
+        correct_vector = normalize_to_int32([0.5] * 10)
+        result = self.evaluator.evaluate("test_exact", correct_vector, True)
+        self.assertIn("ari", result)
+        self.assertIn("drift", result)
+        self.assertIsInstance(result["ari"], int)
+        self.assertIsInstance(result["drift"], int)
+
+    def test_mismatch_never_produces_ari(self):
+        """Dimension mismatch must never return a result dict with 'ari' key."""
+        short_vector = [50000] * 5
+        result = None
+        try:
+            result = self.evaluator.evaluate("test_never", short_vector, True)
+        except ValueError:
+            pass
+        self.assertIsNone(result, "Mismatch must not produce any result")
+
+    def test_dimension_validation_before_similarity(self):
+        """Validation must occur before vector_similarity_int32() is called.
+
+        We monkeypatch vector_similarity_int32 on this instance to raise
+        a distinct exception. If evaluate() raises ValueError (from dimension
+        validation) and NOT the monkeypatched exception, we have proven
+        that validation happens before similarity computation.
+        """
+        short_vector = [50000] * 5
+
+        # Monkeypatch: if vector_similarity_int32 is reached, it will raise
+        # a RuntimeError with a very specific message.
+        original_method = self.evaluator.vector_similarity_int32
+
+        def _must_not_be_called(v1, v2):
+            raise RuntimeError(
+                "MONKEYPATCH_REACHED: vector_similarity_int32 was called "
+                "before dimension validation"
+            )
+        self.evaluator.vector_similarity_int32 = _must_not_be_called
+
+        try:
+            with self.assertRaises(ValueError) as ctx:
+                self.evaluator.evaluate("test_before", short_vector, True)
+            self.assertIn("dimension mismatch", str(ctx.exception).lower())
+        finally:
+            # Restore original method regardless of test outcome
+            self.evaluator.vector_similarity_int32 = original_method
+
+    def test_oversized_vector_would_breach_ari_upper_bound(self):
+        """P0-1 additional finding: mismatch could breach the ARI upper bound.
+
+        An over-long vector inflates the dot product, so RAW_ARI could exceed
+        SCALING_FACTOR (i.e. ARI > 1.0), violating the documented [0, 10^5]
+        range that `test_ari_bounds` asserts. The guard must prevent any such
+        value from being produced at all.
+        """
+        long_vector = [50000] * 15
+        with self.assertRaises(ValueError):
+            self.evaluator.evaluate("test_bound_breach", long_vector, True)
+
+    def test_guard_active_under_optimized_bytecode(self):
+        """Guard must not be compiled away by `python -O` (AGENTS.md rule 4).
+
+        Re-executes the guard in a subprocess with -O and -OO to prove the
+        rejection does not depend on `assert` remaining enabled.
+        """
+        import subprocess
+        import sys
+
+        program = (
+            "from core.evaluator import PoCAEvaluator\n"
+            "ev = PoCAEvaluator([31622] * 10)\n"
+            "try:\n"
+            "    ev.evaluate('opt', [50000] * 5, True)\n"
+            "except ValueError:\n"
+            "    print('REJECTED')\n"
+            "else:\n"
+            "    print('ACCEPTED')\n"
+        )
+
+        for flag in ("-O", "-OO"):
+            with self.subTest(flag=flag):
+                proc = subprocess.run(
+                    [sys.executable, flag, "-c", program],
+                    capture_output=True, text=True,
+                    cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                )
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+                self.assertIn("REJECTED", proc.stdout,
+                              f"Guard was bypassed under {flag}: {proc.stdout!r}")
 
 
 class TestLayerSeparation(unittest.TestCase):

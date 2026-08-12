@@ -60,6 +60,7 @@ jobs:
             artifacts/cr-003-statelessness-results.json
             artifacts/cr-003-layer-boundary.log
             artifacts/cr-003-layer-boundary.json
+            artifacts/p0-1-dimension-validation.log
           retention-days: 30
 
   wasm-compat:
