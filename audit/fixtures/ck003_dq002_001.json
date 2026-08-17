@@ -1,0 +1,14 @@
+{
+  "fixture_id": "CK003-DQ002-001",
+  "hash_algorithm": "SHA-256",
+  "leaf_domain": "0x00",
+  "node_domain": "0x01",
+  "tree_semantics": "RFC-6962",
+  "canonical_bytes_utf8_hex": "6167656e745f69643d413030317c6172693d39353030307c64726966743d353030307c74733d323032362d30312d30315430303a30303a30305a",
+  "leaf_input_hex": "006167656e745f69643d413030317c6172693d39353030307c64726966743d353030307c74733d323032362d30312d30315430303a30303a30305a",
+  "leaf_digest_hex": "ba2749fedbcff14c1409a22c721c8de2e0f9ebd9c4177cc8b3950142b3bfd123",
+  "node_left_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+  "node_right_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "node_input_hex": "010000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "node_digest_hex": "e2bd2dcef148b54e935fe552c7c83978103f85b2d970d55f482717bb3904b7ac"
+}
