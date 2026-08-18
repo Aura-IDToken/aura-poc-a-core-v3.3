@@ -1,0 +1,8 @@
+# CANONICAL-001 conformance dependency pin (RI-PY).
+#
+# Conformance-only. This file MUST NOT be installed into the production
+# runtime environment; the production hash/Merkle core has no RFC 8785
+# dependency and is not modified by CANONICAL-001 conformance work.
+#
+# Frozen protocol contract: RI-PY JCS engine == rfc8785 0.1.4.
+rfc8785==0.1.4
