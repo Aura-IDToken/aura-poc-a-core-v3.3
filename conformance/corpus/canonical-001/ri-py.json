@@ -1,0 +1,25 @@
+{
+  "canonical_bytes_hex": "7b226576656e745f74797065223a2241554449545f5245434f5244222c227061796c6f6164223a7b2276616c7565223a34327d2c2270726f746f636f6c5f76657273696f6e223a22312e30222c22736368656d615f76657273696f6e223a22312e30227d",
+  "canonical_bytes_len": 100,
+  "canonicalization": "RFC8785",
+  "commit": "49d0e4f67e90a7a47e9f067bfc42ab40ee59a56f",
+  "engine": "rfc8785",
+  "engine_version": "0.1.4",
+  "fixture": "CANONICAL-001",
+  "implementation": "RI-PY",
+  "leaf_domain": "0x00",
+  "leaf_sha256": "ce6b36733d97699230f37d80a14e14104c19d2e787526a6fc3aaae6b6648c039",
+  "provenance": {
+    "adapter_path": "conformance/canonical/jcs.py",
+    "adapter_sha256": "8f6c3b440221113721a82c6ff3ff61dcfbaccbcbe972ce7ae635d00444b8b5a4",
+    "execution_command": "python -m conformance.canonical.emit_ri_py_artifact",
+    "input_path": "conformance/corpus/canonical-001/input.json",
+    "input_sha256": "649bb748464ce78fe1a1d7104689d2dee736fb80777db6569592bc0d3d039261",
+    "platform": "Linux-6.18.5-fc-v20-x86_64-with-glibc2.39",
+    "python_implementation": "CPython",
+    "python_version": "3.11.15"
+  },
+  "repository": "Aura-IDToken/aura-poc-a-core-v3.3",
+  "sha256": "b6c3660ce6dee498b37443a92bf87c5efead6fe863fcf19197c0baeda139a4e6",
+  "worktree_clean": true
+}

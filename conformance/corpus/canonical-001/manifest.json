@@ -1,0 +1,53 @@
+{
+  "expected": {
+    "canonical_bytes_hex": "7b226576656e745f74797065223a2241554449545f5245434f5244222c227061796c6f6164223a7b2276616c7565223a34327d2c2270726f746f636f6c5f76657273696f6e223a22312e30222c22736368656d615f76657273696f6e223a22312e30227d",
+    "leaf_sha256": "ce6b36733d97699230f37d80a14e14104c19d2e787526a6fc3aaae6b6648c039",
+    "note": "Frozen reference values. SECONDARY cross-check only. Never used to produce, patch or backfill an execution artifact.",
+    "sha256": "b6c3660ce6dee498b37443a92bf87c5efead6fe863fcf19197c0baeda139a4e6"
+  },
+  "fixture": "CANONICAL-001",
+  "gate": {
+    "negative_controls": "conformance/canonical/negative_controls_canonical_001.py",
+    "primary": "RI-PY actual == RI-RS actual",
+    "runner": "conformance/canonical/test_cross_language_canonical_001.py",
+    "secondary": "RI-PY actual == expected and RI-RS actual == expected"
+  },
+  "input": {
+    "path": "input.json",
+    "sha256": "649bb748464ce78fe1a1d7104689d2dee736fb80777db6569592bc0d3d039261",
+    "value": {
+      "event_type": "AUDIT_RECORD",
+      "payload": {
+        "value": 42
+      },
+      "protocol_version": "1.0",
+      "schema_version": "1.0"
+    }
+  },
+  "protocol": {
+    "canonicalization": "RFC8785",
+    "digest": "SHA-256",
+    "leaf": "SHA-256(0x00 || canonical_bytes)",
+    "leaf_domain": "0x00"
+  },
+  "ri_py": {
+    "artifact": "ri-py.json",
+    "artifact_sha256": "6b5b5ccd54901181b9af45421d051ea5ea53096fbf632ab1e25a66705f2b856c",
+    "engine": "rfc8785",
+    "engine_version": "0.1.4",
+    "implementation": "RI-PY",
+    "source_commit": "49d0e4f67e90a7a47e9f067bfc42ab40ee59a56f",
+    "source_repository": "Aura-IDToken/aura-poc-a-core-v3.3",
+    "source_repository_path": "conformance/corpus/canonical-001/ri-py.json"
+  },
+  "ri_rs": {
+    "artifact": "ri-rs.json",
+    "artifact_sha256": "a6ebad019118a7806ae927c4802a60056cb9e0c90f3cb1ef2a5e0cf359af329c",
+    "engine": "serde_json_canonicalizer",
+    "engine_version": "0.3.2",
+    "implementation": "RI-RS",
+    "source_commit": "4e9e2284ccdac6d2f40e038e33b4eaeec847aaa2",
+    "source_repository": "Aura-IDToken/aura-guard-v1.3",
+    "source_repository_path": "conformance/corpus/canonical-001/ri-rs.json"
+  }
+}
