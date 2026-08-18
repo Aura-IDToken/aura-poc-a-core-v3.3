@@ -7,9 +7,9 @@ from __future__ import annotations
 
 from typing import Any
 
-import jcs
+import rfc8785
 
 
 def canonical_bytes(value: Any) -> bytes:
     """Return RFC 8785 JCS UTF-8 bytes for a JSON-compatible value."""
-    return jcs.canonicalize(value)
+    return rfc8785.dumps(value)
