@@ -1,6 +1,6 @@
 # RI-PY CANONICAL-001 Conformance
 
-Status: BLOCKED_PENDING_JCS_BOUNDARY
+Status: PASS (RI-PY execution evidence recorded — see `RI-PY-EXECUTION-EVIDENCE.md`)
 
 This test MUST execute the exact CANONICAL-001 object from aura-specification.
 
@@ -15,3 +15,19 @@ Expected independent oracle:
 - leaf = ce6b36733d97699230f37d80a14e14104c19d2e787526a6fc3aaae6b6648c039
 
 A PASS requires equality of all three values. If the Core has no RFC 8785 JCS boundary, the result MUST remain BLOCKED.
+
+## JCS boundary
+
+The RFC 8785 boundary is `conformance/canonical/jcs.py`, which delegates
+directly to the approved engine `rfc8785==0.1.4` (`rfc8785.dumps`). The adapter
+performs no canonicalisation of its own. The engine pin is recorded in
+`conformance/requirements-conformance.txt` and is CONFORMANCE-ONLY: it must not
+be introduced into `core/` or `audit/`.
+
+## Executable evidence
+
+- `conformance/canonical/test_canonical_001.py` — CANONICAL-001 (3 equalities).
+- `conformance/canonical/test_jcs_behavior.py` — JCS-B01…B06 behaviour suite.
+
+Both are driven forward from the JSON-compatible object through the engine to
+actual bytes; expected constants are never fed into the engine.

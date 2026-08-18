@@ -1,0 +1,24 @@
+# RI-PY conformance-only dependencies.
+#
+# SCOPE: conformance/ ONLY.
+#
+# This file MUST NOT be installed into, or referenced by, the production Core
+# runtime (core/, audit/). It exists solely so that the RFC 8785 JCS
+# conformance suite (JCS-B01..B06, CANONICAL-001) is reproducible.
+#
+# The pin is exact. Do not float, do not upgrade opportunistically. Any change
+# to this version invalidates the frozen RI-RS <-> RI-PY cross-language
+# equality evidence and requires Protocol Custodian authorisation.
+#
+# Provenance (PyPI, verified 2026-08-18):
+#   rfc8785 0.1.4 - Apache-2.0 - Trail of Bits <opensource@trailofbits.com>
+#   sha256(rfc8785-0.1.4-py3-none-any.whl) =
+#     520d690b448ecf0703691c76e1a34a24ddcd4fc5bc41d589cb7c58ec651bcd48
+#   sha256(rfc8785-0.1.4.tar.gz) =
+#     e545841329fe0eee4f6a3b44e7034343100c12b4ec566dc06ca9735681deb4da
+#   Runtime dependencies: none.
+
+rfc8785==0.1.4
+
+# Test runner for the conformance suite.
+pytest
