@@ -1,0 +1,109 @@
+{
+  "discrimination": {
+    "canonical_bytes_len": 655,
+    "differs_from_canonical": true,
+    "naive_serializer": "json.dumps(value, sort_keys=True, separators=(\",\", \":\"))",
+    "naive_sorted_json_bytes_hex": "7b2261727261795f6f72646572223a5b332c312c322c7b2278223a322c2279223a317d2c2263222c2261222c2262225d2c226576656e745f74797065223a2241554449545f5245434f5244222c226e6573746564223a7b22616c706861223a7b226d223a6e756c6c2c225c7566666666223a747275652c225c75643830305c7564633030223a66616c73657d2c227a65627261223a7b22696e6e65725f61223a5b392c382c375d2c22696e6e65725f7a223a317d7d2c226e756d62657273223a7b226578706f6e656e745f626f756e64617279223a31652d30362c226c617267655f6578706f6e656e74223a31652b32312c226e656761746976655f6672616374696f6e223a2d312e352c226e656761746976655f7a65726f223a2d302e302c226f6e655f706f696e745f7a65726f223a312e302c22706c61696e5f696e7465676572223a34322c22736d616c6c5f6578706f6e656e74223a31652d30377d2c2270726f746f636f6c5f76657273696f6e223a22312e30222c22736368656d615f76657273696f6e223a22312e30222c22737472696e6773223a7b2265736361706573223a2271756f74655c22206261636b736c6173685c5c206e65776c696e655c6e207461625c74206374726c5c753030303120736f6c696475732f20656e64222c22756e69636f6465223a22656163757465205c7530306539206575726f205c753230616320656d6f6a69205c75643833645c756465303020626d70205c7566623030227d2c227a223a226b65795f61736369695f7a222c225c7530306539223a226b65795f755f30306539222c225c7532306163223a226b65795f755f32306163222c225c7566623030223a226b65795f755f66623030222c225c7566666666223a226b65795f755f66666666222c225c75643830305c7564633030223a226b65795f755f3130303030222c225c75643833645c7564653030223a226b65795f755f3166363030227d",
+    "naive_sorted_json_len": 716,
+    "naive_sorted_json_sha256": "2c92cc1d8ebb548843e78a6c338207063220b4aacf23cd42c391130839f341e8",
+    "note": "NEGATIVE reference. Ordinary sorted-JSON serialization of the same input. Recorded to prove that RFC 8785 and sorted JSON diverge on this fixture. Never compared as canonical bytes."
+  },
+  "expected": {
+    "canonical_bytes_hex": "7b2261727261795f6f72646572223a5b332c312c322c7b2278223a322c2279223a317d2c2263222c2261222c2262225d2c226576656e745f74797065223a2241554449545f5245434f5244222c226e6573746564223a7b22616c706861223a7b226d223a6e756c6c2c22f0908080223a66616c73652c22efbfbf223a747275657d2c227a65627261223a7b22696e6e65725f61223a5b392c382c375d2c22696e6e65725f7a223a317d7d2c226e756d62657273223a7b226578706f6e656e745f626f756e64617279223a302e3030303030312c226c617267655f6578706f6e656e74223a31652b32312c226e656761746976655f6672616374696f6e223a2d312e352c226e656761746976655f7a65726f223a302c226f6e655f706f696e745f7a65726f223a312c22706c61696e5f696e7465676572223a34322c22736d616c6c5f6578706f6e656e74223a31652d377d2c2270726f746f636f6c5f76657273696f6e223a22312e30222c22736368656d615f76657273696f6e223a22312e30222c22737472696e6773223a7b2265736361706573223a2271756f74655c22206261636b736c6173685c5c206e65776c696e655c6e207461625c74206374726c5c753030303120736f6c696475732f20656e64222c22756e69636f6465223a2265616375746520c3a9206575726f20e282ac20656d6f6a6920f09f988020626d7020efac80227d2c227a223a226b65795f61736369695f7a222c22c3a9223a226b65795f755f30306539222c22e282ac223a226b65795f755f32306163222c22f0908080223a226b65795f755f3130303030222c22f09f9880223a226b65795f755f3166363030222c22efac80223a226b65795f755f66623030222c22efbfbf223a226b65795f755f66666666227d",
+    "canonical_bytes_len": 655,
+    "leaf_sha256": "20fd6065aa4a21233119ad361835e43e64932e7805568947b4715a07c95b9368",
+    "note": "Frozen reference values, established by independent RI-PY and RI-RS execution agreeing byte-for-byte. SECONDARY cross-check only. Never used to produce, patch or backfill an artifact.",
+    "sha256": "cdceb08100d88c81adc5a7e4f0462328071711808bc990458c0fa6b2c87d0952"
+  },
+  "fixture": "CANONICAL-002",
+  "gate": {
+    "discrimination": "canonical bytes != sorted-JSON bytes",
+    "negative_controls": "conformance/canonical/negative_controls_canonical_002.py",
+    "primary": "RI-PY actual == RI-RS actual",
+    "runner": "conformance/canonical/test_cross_language_canonical_002.py",
+    "secondary": "RI-PY actual == expected and RI-RS actual == expected"
+  },
+  "input": {
+    "path": "input.json",
+    "sha256": "aee31642d0186c17daabdc910da64183567a3aa655348cc41195e4f2f7956588",
+    "value": {
+      "array_order": [
+        3,
+        1,
+        2,
+        {
+          "x": 2,
+          "y": 1
+        },
+        "c",
+        "a",
+        "b"
+      ],
+      "event_type": "AUDIT_RECORD",
+      "nested": {
+        "alpha": {
+          "m": null,
+          "\uffff": true,
+          "\ud800\udc00": false
+        },
+        "zebra": {
+          "inner_a": [
+            9,
+            8,
+            7
+          ],
+          "inner_z": 1
+        }
+      },
+      "numbers": {
+        "exponent_boundary": 1e-06,
+        "large_exponent": 1e+21,
+        "negative_fraction": -1.5,
+        "negative_zero": -0.0,
+        "one_point_zero": 1.0,
+        "plain_integer": 42,
+        "small_exponent": 1e-07
+      },
+      "protocol_version": "1.0",
+      "schema_version": "1.0",
+      "strings": {
+        "escapes": "quote\" backslash\\ newline\n tab\t ctrl\u0001 solidus/ end",
+        "unicode": "eacute \u00e9 euro \u20ac emoji \ud83d\ude00 bmp \ufb00"
+      },
+      "z": "key_ascii_z",
+      "\u00e9": "key_u_00e9",
+      "\u20ac": "key_u_20ac",
+      "\ufb00": "key_u_fb00",
+      "\uffff": "key_u_ffff",
+      "\ud800\udc00": "key_u_10000",
+      "\ud83d\ude00": "key_u_1f600"
+    }
+  },
+  "protocol": {
+    "canonicalization": "RFC8785",
+    "digest": "SHA-256",
+    "leaf": "SHA-256(0x00 || canonical_bytes)",
+    "leaf_domain": "0x00"
+  },
+  "purpose": "JCS-discriminating cross-language fixture. CANONICAL-001 is JCS-degenerate; CANONICAL-002 exercises UTF-16 code-unit member ordering, raw UTF-8 output, ECMAScript number form, negative-zero normalisation, exponent form, recursive canonicalisation, array order preservation and minimal escaping.",
+  "ri_py": {
+    "artifact": "ri-py.json",
+    "artifact_sha256": "7c82d626cdd01c15ec727be5103f10e05284fa9e490ed10246c317067c2a91ec",
+    "engine": "rfc8785",
+    "engine_version": "0.1.4",
+    "implementation": "RI-PY",
+    "source_commit": "7bcc600f649a35f76cee5752ce597ac2b71b6d62",
+    "source_repository": "Aura-IDToken/aura-poc-a-core-v3.3",
+    "source_repository_path": "conformance/corpus/canonical-002/ri-py.json"
+  },
+  "ri_rs": {
+    "artifact": "ri-rs.json",
+    "artifact_sha256": "96c7dad9bfa02f6e03b7712d4ae7882bd5e5ac0b83f73491cfec38cc57115322",
+    "engine": "serde_json_canonicalizer",
+    "engine_version": "0.3.2",
+    "implementation": "RI-RS",
+    "source_commit": "bd4a2fa6b4d11dcfb270b4a4f98b2f359ab32609",
+    "source_repository": "Aura-IDToken/aura-guard-v1.3",
+    "source_repository_path": "conformance/corpus/canonical-002/ri-rs.json"
+  }
+}
