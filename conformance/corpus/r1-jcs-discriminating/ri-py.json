@@ -1,0 +1,32 @@
+{
+  "canonical_bytes_hex": "7b2261223a312c22f09f9880223a31652d372c22efbcba223a307d",
+  "canonical_bytes_len": 27,
+  "canonicalization": "RFC8785",
+  "commit": "3e8e0e326a1cfec71e001f4901fc1ee5b7c28c4e",
+  "discrimination": {
+    "conventional_bytes_hex": "7b2261223a312e302c22efbcba223a2d302e302c22f09f9880223a31652d30377d",
+    "conventional_bytes_len": 33,
+    "conventional_serializer": "json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False)",
+    "differs_from_jcs": true,
+    "note": "Evidence only. The conventional serialization is never hashed, never becomes a protocol value, and never replaces RFC 8785."
+  },
+  "engine": "rfc8785",
+  "engine_version": "0.1.4",
+  "fixture": "R1-JCS-DISCRIMINATING",
+  "implementation": "RI-PY",
+  "leaf_domain": "0x00",
+  "leaf_sha256": "fb988d990e39fa4f2f35f9158aaa9bac88aad84add3aaf47fb27426eb450656d",
+  "provenance": {
+    "adapter_path": "conformance/canonical/jcs.py",
+    "adapter_sha256": "8f6c3b440221113721a82c6ff3ff61dcfbaccbcbe972ce7ae635d00444b8b5a4",
+    "execution_command": "python -m conformance.canonical.emit_ri_py_r1_artifact",
+    "input_path": "conformance/corpus/r1-jcs-discriminating/input.json",
+    "input_sha256": "64b737306d2421092cd9f28a5deb525437100c788ab7c39891aaf6b61cd472ca",
+    "platform": "Linux-6.18.44-fc-v21-x86_64-with-glibc2.39",
+    "python_implementation": "CPython",
+    "python_version": "3.11.15"
+  },
+  "repository": "Aura-IDToken/aura-poc-a-core-v3.3",
+  "sha256": "a8c01577f4cc4ef73b258cbe66da0103b009fdd88be480c0b811ff2c1ad0946c",
+  "worktree_clean": false
+}

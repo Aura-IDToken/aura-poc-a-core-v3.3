@@ -1,0 +1,77 @@
+{
+  "discrimination": {
+    "claim": "RFC 8785 output differs from a conventional sorted-key JSON serializer on this input.",
+    "not_discriminating_here": [
+      "nested object ordering",
+      "string escaping",
+      "raw UTF-8 emission",
+      "empty object / array"
+    ],
+    "properties": [
+      {
+        "detail": "U+1F600 (supplementary, UTF-16 D83D DE00) sorts before U+FF3A (BMP) by code unit, and after it by code point.",
+        "id": "D1",
+        "property": "UTF-16 code-unit key ordering (RFC 8785 §3.2.3)"
+      },
+      {
+        "detail": "1.0 -> 1, -0.0 -> 0, 1e-7 -> 1e-7.",
+        "id": "D2",
+        "property": "ECMAScript Number::toString (RFC 8785 §3.2.2.3)"
+      }
+    ]
+  },
+  "fixture": "R1-JCS-DISCRIMINATING",
+  "gate": {
+    "cross_language_runner": "conformance/canonical/test_cross_language_r1.py",
+    "discrimination": "RFC 8785 actual != conventional serializer actual",
+    "negative_controls": "conformance/canonical/negative_controls_r1.py",
+    "primary": "RI-PY actual == RI-RS actual",
+    "ri_py_runner": "conformance/canonical/test_r1_jcs_discriminating.py",
+    "ri_rs_runner": "conformance/canonical/r1_jcs_discriminating.rs (Aura-IDToken/aura-guard-v1.3)"
+  },
+  "input": {
+    "path": "input.json",
+    "sha256": "64b737306d2421092cd9f28a5deb525437100c788ab7c39891aaf6b61cd472ca",
+    "value": {
+      "a": 1.0,
+      "Ｚ": -0.0,
+      "😀": 1e-07
+    }
+  },
+  "protocol": {
+    "canonicalization": "RFC8785",
+    "digest": "SHA-256",
+    "leaf": "SHA-256(0x00 || canonical_bytes)",
+    "leaf_domain": "0x00"
+  },
+  "reference": {
+    "canonical_bytes_hex": "7b2261223a312c22f09f9880223a31652d372c22efbcba223a307d",
+    "canonical_bytes_len": 27,
+    "canonical_bytes_utf8": "{\"a\":1,\"😀\":1e-7,\"Ｚ\":0}",
+    "leaf_sha256": "fb988d990e39fa4f2f35f9158aaa9bac88aad84add3aaf47fb27426eb450656d",
+    "note": "Recorded CONSENSUS of two independent executions (rfc8785 0.1.4 and serde_json_canonicalizer 0.3.2), not an external oracle. Regression anchor only. Never used to produce, patch or backfill an artifact.",
+    "sha256": "a8c01577f4cc4ef73b258cbe66da0103b009fdd88be480c0b811ff2c1ad0946c"
+  },
+  "ri_py": {
+    "artifact": "ri-py.json",
+    "artifact_sha256": "dbc466d41685a0e4dfe041c283803966b673901bdee9cdc11e83d3468b0764c2",
+    "conventional_serializer": "json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False)",
+    "engine": "rfc8785",
+    "engine_version": "0.1.4",
+    "implementation": "RI-PY",
+    "source_commit": "3e8e0e326a1cfec71e001f4901fc1ee5b7c28c4e",
+    "source_repository": "Aura-IDToken/aura-poc-a-core-v3.3",
+    "source_repository_path": "conformance/corpus/r1-jcs-discriminating/ri-py.json"
+  },
+  "ri_rs": {
+    "artifact": "ri-rs.json",
+    "artifact_sha256": "03662ba0cbee29bd99fc539f37a876cc5c5e3aa54088c9e9dc5c4592bdc16515",
+    "conventional_serializer": "serde_json::to_vec (BTreeMap key order, serde_json float formatting)",
+    "engine": "serde_json_canonicalizer",
+    "engine_version": "0.3.2",
+    "implementation": "RI-RS",
+    "source_commit": "55015da9d53962049872122f7e6da1c5017f3d75",
+    "source_repository": "Aura-IDToken/aura-guard-v1.3",
+    "source_repository_path": "conformance/corpus/r1-jcs-discriminating/ri-rs.json"
+  }
+}
