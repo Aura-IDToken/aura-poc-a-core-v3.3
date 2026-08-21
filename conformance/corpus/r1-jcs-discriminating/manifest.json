@@ -54,12 +54,12 @@
   },
   "ri_py": {
     "artifact": "ri-py.json",
-    "artifact_sha256": "dbc466d41685a0e4dfe041c283803966b673901bdee9cdc11e83d3468b0764c2",
+    "artifact_sha256": "5253514952fa053cb65a26f690f060d20442d12239706b13c3f9d9d99e0e4c84",
     "conventional_serializer": "json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False)",
     "engine": "rfc8785",
     "engine_version": "0.1.4",
     "implementation": "RI-PY",
-    "source_commit": "3e8e0e326a1cfec71e001f4901fc1ee5b7c28c4e",
+    "source_commit": "192c314454756fd4126be2c303c4cd1a950989e1",
     "source_repository": "Aura-IDToken/aura-poc-a-core-v3.3",
     "source_repository_path": "conformance/corpus/r1-jcs-discriminating/ri-py.json"
   },

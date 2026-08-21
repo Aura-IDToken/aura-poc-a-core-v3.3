@@ -2,7 +2,7 @@
   "canonical_bytes_hex": "7b2261223a312c22f09f9880223a31652d372c22efbcba223a307d",
   "canonical_bytes_len": 27,
   "canonicalization": "RFC8785",
-  "commit": "3e8e0e326a1cfec71e001f4901fc1ee5b7c28c4e",
+  "commit": "192c314454756fd4126be2c303c4cd1a950989e1",
   "discrimination": {
     "conventional_bytes_hex": "7b2261223a312e302c22efbcba223a2d302e302c22f09f9880223a31652d30377d",
     "conventional_bytes_len": 33,
@@ -28,5 +28,5 @@
   },
   "repository": "Aura-IDToken/aura-poc-a-core-v3.3",
   "sha256": "a8c01577f4cc4ef73b258cbe66da0103b009fdd88be480c0b811ff2c1ad0946c",
-  "worktree_clean": false
+  "worktree_clean": true
 }
