@@ -1,4 +1,14 @@
-# AURA PROTOCOL — IRON CORE v3.3
+# AURA Iron Core v3.3 — reference implementation
+
+> **Repository role:** deterministic computational core and engineering reference implementation.
+
+This repository contains implementation code, supporting documentation, and tests for the Iron Core v3.3 line. Technical claims must be read against the exact source revision, declared build/toolchain, test inputs, execution environment, and results available for inspection.
+
+The implementation may demonstrate specified behavior for tested cases; it does not independently define or ratify protocol semantics. Labels such as **FROZEN** or **CANONICAL** are repository-level declarations, not substitutes for a valid authority chain, normative contract, or independently scoped conformance evidence.
+
+For reproducibility claims, publish the tested commit, commands, fixtures, environment, and bounded result. Do not generalize a passing local test to untested architectures or all protocol requirements.
+
+> **Scope boundary:** this repository is an implementation/reference layer, not the source of constitutional authority or protocol ratification.
 
 ## ⚠️ CONSTITUTIONAL GOVERNANCE
 
